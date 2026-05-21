@@ -4,24 +4,44 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Register — IMS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../css/styles.css" />
 </head>
-<body>
+<body class="auth-page">
 
-  <div class="box">
-    <h2>Create your account 👋</h2>
-    <p>It only takes a minute to get started.</p>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
 
-    <input type="text" id="name" placeholder="Full name" />
-    <input type="email" id="email" placeholder="Email address" />
-    <input type="password" id="password" placeholder="Password (min. 8 characters)" />
-    <button onclick="register()">Create my account</button>
+  <div class="auth-container">
 
-    <div class="msg" id="msg"></div>
-    <p>Already have an account? <a href="login.html">Sign in here</a></p>
+    <div class="auth-brand">
+      <div class="auth-brand-icon">IMS</div>
+      <div>
+        <h2 class="auth-brand-name">Organization X</h2>
+        <p class="auth-brand-sub">Management System</p>
+      </div>
+    </div>
+
+    <div class="auth-card">
+      <div class="auth-card-top-rule"></div>
+
+      <h2 class="auth-heading">Create your account</h2>
+      
+      <input type="text"  id="name"     placeholder="Full name" />
+      <input type="email" id="email"    placeholder="Email address" />
+      <input type="password" id="password" placeholder="Password (min. 8 characters)" />
+
+      <button onclick="register()">Create my account</button>
+
+      <div class="msg" id="msg"></div>
+
+      <p class="auth-footer">Already have an account? <a href="login.html">Sign in here</a></p>
+    </div>
+
   </div>
 
   <script src="../js/register.js"></script>
-
 </body>
 </html>

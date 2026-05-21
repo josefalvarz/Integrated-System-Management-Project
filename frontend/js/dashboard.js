@@ -3,45 +3,289 @@ const loggedInUser = JSON.parse(sessionStorage.getItem('loggedInUser'));
 if (!loggedInUser) {
   window.location.href = 'login.html';
 } else {
+  initializeDashboard();
+}
+
+function initializeDashboard() {
   const name = loggedInUser.name || loggedInUser.email || 'User';
   const role = loggedInUser.role || 'member';
 
-  document.getElementById('welcomeMessage').innerHTML = `Welcome, <em>${name}</em>`;
-  document.getElementById('userName').textContent = name;
-  document.getElementById('userRole').textContent = role === 'admin' ? 'Administrator' : 'Member';
+  const welcomeMessage = document.getElementById('welcomeMessage');
+  const userName = document.getElementById('userName');
+  const userRole = document.getElementById('userRole');
+  const userInitials = document.getElementById('userInitials');
+  const sessionChip = document.getElementById('sessionChip');
+
+  if (welcomeMessage) {
+    welcomeMessage.innerHTML = `Welcome, <em>${name}</em>`;
+  }
+
+  if (userName) {
+    userName.textContent = name;
+  }
+
+  if (userRole) {
+    userRole.textContent = role === 'admin' ? 'Administrator' : 'Member';
+  }
 
   const initials = name
     .split(' ')
-    .map(w => w.charAt(0))
+    .map(word => word.charAt(0))
     .join('')
     .substring(0, 2)
     .toUpperCase();
-  document.getElementById('userInitials').textContent = initials || 'U';
+
+  if (userInitials) {
+    userInitials.textContent = initials || 'U';
+  }
 
   if (role !== 'admin') {
-    document.querySelectorAll('.admin-only').forEach(el => {
-      el.style.display = 'none';
+    document.querySelectorAll('.admin-only').forEach(element => {
+      element.style.display = 'none';
     });
   }
 
   const sessionStart = new Date();
+
   setInterval(() => {
+    if (!sessionChip) return;
+
     const diff = Math.floor((Date.now() - sessionStart) / 60000);
-    document.getElementById('sessionChip').textContent =
+
+    sessionChip.textContent =
       diff === 0 ? 'Session Active' : `Active ${diff}m`;
   }, 30000);
 }
 
+/* PAGE SWITCHING */
+
+function showDashboardPage() {
+  const dashboardPage = document.getElementById('dashboardPage');
+  const memberManagementPage = document.getElementById('memberManagementPage');
+
+  if (memberManagementPage) {
+    memberManagementPage.classList.add('hidden');
+  }
+
+  if (dashboardPage) {
+    dashboardPage.classList.remove('hidden');
+  }
+
+  setActiveNavLink('Dashboard');
+}
+
+function showMemberManagementPage() {
+  if (!loggedInUser || loggedInUser.role !== 'admin') {
+    alert('Admin access required.');
+    return;
+  }
+
+  const dashboardPage = document.getElementById('dashboardPage');
+  const memberManagementPage = document.getElementById('memberManagementPage');
+
+  if (dashboardPage) {
+    dashboardPage.classList.add('hidden');
+  }
+
+  if (memberManagementPage) {
+    memberManagementPage.classList.remove('hidden');
+  }
+
+  setActiveNavLink('Member Management');
+  loadMembers();
+}
+
+function setActiveNavLink(label) {
+  document.querySelectorAll('.ims-nav-link').forEach(link => {
+    link.classList.remove('active');
+
+    if (link.textContent.trim() === label) {
+      link.classList.add('active');
+    }
+  });
+}
+
+/* MEMBER MANAGEMENT */
+
+function formatStatus(isActive) {
+  return Number(isActive) === 1 ? 'Active' : 'Deactivated';
+}
+
+function showRoleMessage(message, type = 'success') {
+  const roleMessage = document.getElementById('roleMessage');
+
+  if (!roleMessage) return;
+
+  roleMessage.textContent = message;
+  roleMessage.className = `role-message ${type}`;
+
+  setTimeout(() => {
+    roleMessage.className = 'role-message hidden';
+  }, 2500);
+}
+
+async function loadMembers() {
+  const membersTableBody = document.getElementById('membersTableBody');
+
+  if (!membersTableBody) return;
+
+  try {
+    const response = await fetch('/api/users');
+    const data = await response.json();
+
+    if (!response.ok) {
+      showRoleMessage(data.error || 'Could not load members.', 'error');
+      return;
+    }
+
+    renderMembers(data.users);
+  } catch (error) {
+    console.error('Load members error:', error);
+    showRoleMessage('Unable to load members.', 'error');
+  }
+}
+
+function renderMembers(users) {
+  const membersTableBody = document.getElementById('membersTableBody');
+
+  if (!membersTableBody) return;
+
+  membersTableBody.innerHTML = '';
+
+  users.forEach(user => {
+    const row = document.createElement('tr');
+
+    row.innerHTML = `
+      <td>${user.name}</td>
+      <td>${user.email}</td>
+      <td>
+        <select class="role-select" data-user-id="${user.id}">
+          <option value="member" ${user.role === 'member' ? 'selected' : ''}>Member</option>
+          <option value="admin" ${user.role === 'admin' ? 'selected' : ''}>Admin</option>
+        </select>
+      </td>
+      <td>
+        <span class="status-pill ${Number(user.is_active) === 1 ? 'active' : 'inactive'}">
+          ${formatStatus(user.is_active)}
+        </span>
+      </td>
+      <td>
+        <button
+          class="table-action-btn"
+          data-user-id="${user.id}"
+          data-status="${Number(user.is_active) === 1 ? 0 : 1}"
+        >
+          ${Number(user.is_active) === 1 ? 'Deactivate' : 'Activate'}
+        </button>
+      </td>
+    `;
+
+    membersTableBody.appendChild(row);
+  });
+
+  document.querySelectorAll('.role-select').forEach(select => {
+    select.addEventListener('change', updateUserRole);
+  });
+
+  document.querySelectorAll('.table-action-btn').forEach(button => {
+    button.addEventListener('click', updateUserStatus);
+  });
+}
+
+async function updateUserRole(event) {
+  const userId = event.target.dataset.userId;
+  const newRole = event.target.value;
+
+  try {
+    const response = await fetch(`/api/users/${userId}/role`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        role: newRole
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      showRoleMessage(data.error || 'Could not update role.', 'error');
+      await loadMembers();
+      return;
+    }
+
+    showRoleMessage(data.message || 'Role updated.');
+
+    if (Number(loggedInUser.id) === Number(userId)) {
+      loggedInUser.role = newRole;
+      sessionStorage.setItem('loggedInUser', JSON.stringify(loggedInUser));
+
+      if (newRole !== 'admin') {
+        showRoleMessage('Your role changed. Admin access removed.', 'error');
+
+        setTimeout(() => {
+          window.location.reload();
+        }, 1200);
+      }
+    }
+  } catch (error) {
+    console.error('Update role error:', error);
+    showRoleMessage('Unable to update role.', 'error');
+    await loadMembers();
+  }
+}
+
+async function updateUserStatus(event) {
+  const userId = event.target.dataset.userId;
+  const newStatus = Number(event.target.dataset.status);
+
+  try {
+    const response = await fetch(`/api/users/${userId}/status`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        is_active: newStatus
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      showRoleMessage(data.error || 'Could not update status.', 'error');
+      return;
+    }
+
+    showRoleMessage(data.message || 'Status updated.');
+    await loadMembers();
+  } catch (error) {
+    console.error('Update status error:', error);
+    showRoleMessage('Unable to update status.', 'error');
+  }
+}
+
+/* LOGOUT */
+
 async function logout() {
   const msg = document.getElementById('msg');
+
   try {
-    await fetch('/auth/logout', { method: 'POST' });
+    await fetch('/api/auth/logout', {
+      method: 'POST'
+    });
+
     sessionStorage.removeItem('loggedInUser');
+
     if (msg) {
       msg.className = 'msg success';
       msg.textContent = 'Signed out successfully. Redirecting…';
     }
-    setTimeout(() => { window.location.href = 'login.html'; }, 800);
+
+    setTimeout(() => {
+      window.location.href = 'login.html';
+    }, 800);
   } catch {
     sessionStorage.removeItem('loggedInUser');
     window.location.href = 'login.html';
