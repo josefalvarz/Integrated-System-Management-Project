@@ -30,9 +30,9 @@
       <div class="ims-nav-section">
         <p class="ims-section-title">Workspace</p>
         <nav class="ims-nav">
-          <a href="dashboard.html" class="ims-nav-link active">Dashboard</a>
+          <a href="#" class="ims-nav-link active" onclick="showDashboardPage()">Dashboard</a>
           <a href="#" class="ims-nav-link">Profile</a>
-          <a href="#" class="ims-nav-link admin-only">Member Management</a>
+          <a href="#" class="ims-nav-link admin-only" onclick="showMemberManagementPage()">Member Management</a>
           <a href="#" class="ims-nav-link admin-only">Data Import</a>
           <a href="#" class="ims-nav-link">Documents</a>
           <a href="#" class="ims-nav-link">E-Voting</a>
@@ -68,35 +68,65 @@
     <!-- MAIN CONTENT -->
     <main class="ims-main ims-main-simple">
 
-      <div class="ims-welcome-card">
-        <p class="ims-breadcrumb">
-          <span>Org X</span>
-          <span class="ims-sep">／</span>
-          <span>Dashboard</span>
-        </p>
+      <!-- DASHBOARD PAGE -->
+      <section id="dashboardPage" class="ims-page">
+        <div class="ims-welcome-card">
+          <p class="ims-breadcrumb">
+            <span>Org X</span>
+            <span class="ims-sep">／</span>
+            <span>Dashboard</span>
+          </p>
 
-        <h1 class="ims-welcome-heading" id="welcomeMessage">Welcome</h1>
+          <h1 class="ims-welcome-heading" id="welcomeMessage">Welcome</h1>
 
-        <div class="ims-divider"></div>
+          <div class="ims-divider"></div>
 
-        <p class="ims-welcome-body">
-          You are logged in to the Integrated Management System.
-          Use the sidebar to navigate through the available features and modules.
-        </p>
+          <p class="ims-welcome-body">
+            You are logged in to the Integrated Management System.
+            Use the sidebar to navigate through the available features and modules.
+          </p>
 
-        <div class="ims-chips">
-          <div class="ims-chip">
-            <span class="ims-dot"></span>
-            System Online
+          <div class="ims-chips">
+            <div class="ims-chip">
+              <span class="ims-dot"></span>
+              System Online
+            </div>
+            <div class="ims-chip">
+              <span class="ims-dot gold"></span>
+              <span id="sessionChip">Session Active</span>
+            </div>
           </div>
-          <div class="ims-chip">
-            <span class="ims-dot gold"></span>
-            <span id="sessionChip">Session Active</span>
-          </div>
+
+          <p class="msg" id="msg"></p>
+        </div>
+      </section>
+
+      <!-- MEMBER MANAGEMENT PAGE -->
+      <section id="memberManagementPage" class="ims-page hidden">
+        <div class="member-page-header">
+          <h1>Member Management</h1>
         </div>
 
-        <p class="msg" id="msg"></p>
-      </div>
+        <div id="roleMessage" class="role-message hidden"></div>
+
+        <div class="members-card">
+          <table class="members-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+
+            <tbody id="membersTableBody">
+              <!-- Members load here from dashboard.js -->
+            </tbody>
+          </table>
+        </div>
+      </section>
 
     </main>
 
