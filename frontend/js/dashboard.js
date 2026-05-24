@@ -49,12 +49,16 @@ function initializeDashboard() {
 
   setInterval(() => {
     if (!sessionChip) return;
-
     const diff = Math.floor((Date.now() - sessionStart) / 60000);
-
-    sessionChip.textContent =
-      diff === 0 ? 'Session Active' : `Active ${diff}m`;
+    sessionChip.textContent = diff === 0 ? 'Session Active' : `Active ${diff}m`;
   }, 30000);
+
+  // Auto-open page from URL param (e.g. ?page=members)
+  const urlParams = new URLSearchParams(window.location.search);
+  const page = urlParams.get('page');
+  if (page === 'members') {
+    showMemberManagementPage();
+  }
 }
 
 /* PAGE SWITCHING */
@@ -98,7 +102,6 @@ function showMemberManagementPage() {
 function setActiveNavLink(label) {
   document.querySelectorAll('.ims-nav-link').forEach(link => {
     link.classList.remove('active');
-
     if (link.textContent.trim() === label) {
       link.classList.add('active');
     }
@@ -199,12 +202,8 @@ async function updateUserRole(event) {
   try {
     const response = await fetch(`/api/users/${userId}/role`, {
       method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        role: newRole
-      })
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ role: newRole })
     });
 
     const data = await response.json();
@@ -223,10 +222,7 @@ async function updateUserRole(event) {
 
       if (newRole !== 'admin') {
         showRoleMessage('Your role changed. Admin access removed.', 'error');
-
-        setTimeout(() => {
-          window.location.reload();
-        }, 1200);
+        setTimeout(() => { window.location.reload(); }, 1200);
       }
     }
   } catch (error) {
@@ -243,12 +239,8 @@ async function updateUserStatus(event) {
   try {
     const response = await fetch(`/api/users/${userId}/status`, {
       method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        is_active: newStatus
-      })
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ is_active: newStatus })
     });
 
     const data = await response.json();
@@ -272,9 +264,7 @@ async function logout() {
   const msg = document.getElementById('msg');
 
   try {
-    await fetch('/api/auth/logout', {
-      method: 'POST'
-    });
+    await fetch('/api/auth/logout', { method: 'POST' });
 
     sessionStorage.removeItem('loggedInUser');
 
@@ -283,9 +273,7 @@ async function logout() {
       msg.textContent = 'Signed out successfully. Redirecting…';
     }
 
-    setTimeout(() => {
-      window.location.href = 'login.html';
-    }, 800);
+    setTimeout(() => { window.location.href = 'login.html'; }, 800);
   } catch {
     sessionStorage.removeItem('loggedInUser');
     window.location.href = 'login.html';
