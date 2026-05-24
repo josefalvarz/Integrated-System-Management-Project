@@ -6,6 +6,7 @@ require('./db');
 
 const authRoutes = require('./routes/auth');
 const usersRoutes = require('./routes/users');
+const dataMigrationRoutes = require('./routes/dataMigration');
 
 const app = express();
 const PORT = 5500;
@@ -28,6 +29,7 @@ app.use(express.static(path.join(__dirname, '../frontend')));
 
 app.use('/api/auth', authRoutes);
 app.use('/api/users', usersRoutes);
+app.use('/api/data-migration', dataMigrationRoutes);
 
 app.get('/me', (req, res) => {
   if (!req.session.user) {
