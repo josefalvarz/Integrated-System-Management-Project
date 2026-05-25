@@ -5,6 +5,7 @@ const path    = require('path');
 require('./db');
 
 const authRoutes = require('./routes/auth');
+const profileRoutes = require('./routes/profile');
 const app  = express();
 const PORT = 5500;
 
@@ -19,6 +20,7 @@ app.use(session({
 
 app.use(express.static(path.join(__dirname, '../frontend')));
 app.use('/auth', authRoutes);
+app.use('/profile', profileRoutes);
 
 app.get('/me', (req, res) => {
   if (!req.session.user) return res.status(401).json({ error: 'Not logged in.' });
