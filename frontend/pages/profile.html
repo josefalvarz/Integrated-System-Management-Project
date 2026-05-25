@@ -13,29 +13,60 @@
     </div>
 
     <div class="profile-card">
-        <div class="profile-info">
-            <div class="info-row">
-                <span class="info-label">Full Name</span>
-                <span class="info-value" id="viewName">—</span>
+
+        <!-- S6 — View Profile -->
+        <div id="viewSection">
+            <div class="profile-info">
+                <div class="info-row">
+                    <span class="info-label">Full Name</span>
+                    <span class="info-value" id="viewName">—</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Email</span>
+                    <span class="info-value" id="viewEmail">—</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Phone</span>
+                    <span class="info-value" id="viewPhone">—</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Address</span>
+                    <span class="info-value" id="viewAddress">—</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Role</span>
+                    <span class="info-value" id="viewRole">—</span>
+                </div>
             </div>
-            <div class="info-row">
-                <span class="info-label">Email</span>
-                <span class="info-value" id="viewEmail">—</span>
-            </div>
-            <div class="info-row">
-                <span class="info-label">Phone</span>
-                <span class="info-value" id="viewPhone">—</span>
-            </div>
-            <div class="info-row">
-                <span class="info-label">Address</span>
-                <span class="info-value" id="viewAddress">—</span>
-            </div>
-            <div class="info-row">
-                <span class="info-label">Role</span>
-                <span class="info-value" id="viewRole">—</span>
-            </div>
+            <button id="editBtn">Edit Profile</button>
         </div>
+
+        <!-- S7 — Edit Profile -->
+        <div id="editSection" style="display:none">
+            <div class="profile-info">
+                <div class="info-row">
+                    <span class="info-label">Full Name</span>
+                    <input type="text" id="editName" placeholder="Full Name">
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Email</span>
+                    <span class="info-value" id="editEmail">—</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Phone</span>
+                    <input type="text" id="editPhone" placeholder="Phone Number">
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Address</span>
+                    <input type="text" id="editAddress" placeholder="Address">
+                </div>
+            </div>
+            <button id="saveBtn">Save Changes</button>
+            <button id="cancelBtn">Cancel</button>
+        </div>
+
         <p id="message"></p>
+
     </div>
 
     <script src="/js/profile.js"></script>
