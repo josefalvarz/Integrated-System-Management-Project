@@ -1854,3 +1854,25 @@ body.auth-page::before {
   .profile-title { font-size: 34px; }
   .profile-card  { padding: 28px 24px; }
 }
+/* ============================================
+   LOGOUT PAGE
+   ============================================ */
+
+.auth-card .auth-heading {
+  font-size: 36px;
+}
+
+.auth-card button {
+  margin-bottom: 8px;
+}
+
+.auth-footer a {
+  color: var(--text-muted);
+  font-size: 13px;
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.auth-footer a:hover {
+  color: var(--gold);
+}

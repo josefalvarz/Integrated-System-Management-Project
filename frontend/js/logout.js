@@ -1,18 +1,20 @@
 async function logout() {
   const msg = document.getElementById('msg');
 
-  const res = await fetch('/auth/logout', { method: 'POST' });
+  try {
+    const res = await fetch('/api/auth/logout', { method: 'POST' });
 
-  if (res.ok) {
-  sessionStorage.removeItem('loggedInUser');
+    sessionStorage.removeItem('loggedInUser');
 
-  msg.className = 'msg success';
-  msg.textContent = 'Logged out successfully. Redirecting...';
+    msg.style.color = '#4ade9a';
+    msg.textContent = 'Signed out successfully. Redirecting...';
 
-  setTimeout(() => {
-    window.location.href = './pages/login.html';
-  }, 1000);
-} else {
-    msg.textContent = 'Something went wrong. Please try again.';
+    setTimeout(() => {
+      window.location.href = 'login.html';
+    }, 1000);
+
+  } catch {
+    sessionStorage.removeItem('loggedInUser');
+    window.location.href = 'login.html';
   }
 }

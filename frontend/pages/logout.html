@@ -4,21 +4,41 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Logout — IMS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../css/styles.css" />
 </head>
-<body>
+<body class="auth-page">
 
-  <div class="box">
-    <h2>See you later! 👋</h2>
-    <p>Are you sure you want to log out?</p>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
 
-    <button onclick="logout()">Yes, log me out</button>
-    <div class="msg" id="msg"></div>
+  <div class="auth-container">
 
-    <p><a href="pages/login.html">No, take me back</a></p>
+    <div class="auth-brand">
+      <div class="auth-brand-icon">IMS</div>
+      <div>
+        <h2 class="auth-brand-name">Organization X</h2>
+        <p class="auth-brand-sub">Management System</p>
+      </div>
+    </div>
+
+    <div class="auth-card">
+      <div class="auth-card-top-rule"></div>
+
+      <h2 class="auth-heading">See you later</h2>
+      <p class="auth-sub">Are you sure you want to sign out?</p>
+
+      <button onclick="logout()">Yes, sign me out</button>
+
+      <div class="msg" id="msg"></div>
+
+      <p class="auth-footer"><a href="login.html">No, take me back</a></p>
+    </div>
+
   </div>
 
   <script src="../js/logout.js"></script>
-
 </body>
 </html>
