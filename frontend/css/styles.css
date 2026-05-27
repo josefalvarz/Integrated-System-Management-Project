@@ -1610,3 +1610,87 @@ body.auth-page::before {
   .dm-pipeline-steps { grid-template-columns: 1fr 1fr; }
   .dm-title          { font-size: 26px; }
 }
+
+/* ============================================
+   S66 / S9 - RECORD INCOME TRANSACTIONS
+   ============================================ */
+
+.income-page {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 48px 36px;
+}
+
+.income-header {
+  margin-bottom: 28px;
+}
+
+.income-header h1 {
+  font-family: var(--font-serif);
+  font-size: 42px;
+  font-weight: 400;
+  color: var(--text);
+  margin: 0 0 8px;
+}
+
+.income-header p {
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.income-card {
+  background: rgba(22, 29, 46, 0.85);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 24px 28px;
+  margin-bottom: 24px;
+  backdrop-filter: blur(24px);
+}
+
+.income-card h2 {
+  font-family: var(--font-serif);
+  color: var(--text);
+  margin-bottom: 18px;
+}
+
+.income-form {
+  display: grid;
+  gap: 12px;
+}
+
+.income-form label {
+  color: var(--gold-light);
+  font-size: 14px;
+}
+
+.income-form input,
+.income-form select,
+.income-form textarea {
+  width: 100%;
+  padding: 12px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  font-family: var(--font-sans);
+}
+
+.income-form textarea {
+  min-height: 90px;
+  resize: vertical;
+}
+
+.income-form button {
+  background: linear-gradient(135deg, var(--gold), #b8912f);
+  color: var(--navy);
+  border: none;
+  border-radius: 10px;
+  padding: 13px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.income-form button:hover {
+  opacity: 0.9;
+}
