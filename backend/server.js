@@ -7,6 +7,7 @@ require('./db');
 const authRoutes = require('./routes/auth');
 const usersRoutes = require('./routes/users');
 const dataMigrationRoutes = require('./routes/dataMigration');
+const profileRoutes = require('./routes/profile');
 
 const app = express();
 const PORT = 5500;
@@ -30,6 +31,7 @@ app.use(express.static(path.join(__dirname, '../frontend')));
 app.use('/api/auth', authRoutes);
 app.use('/api/users', usersRoutes);
 app.use('/api/data-migration', dataMigrationRoutes);
+app.use('/api/profile', profileRoutes);
 
 app.get('/me', (req, res) => {
   if (!req.session.user) {
@@ -37,7 +39,6 @@ app.get('/me', (req, res) => {
       error: 'Not logged in.'
     });
   }
-
   return res.status(200).json({
     user: req.session.user
   });
