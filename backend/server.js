@@ -33,6 +33,14 @@ app.use('/api/users', usersRoutes);
 app.use('/api/data-migration', dataMigrationRoutes);
 app.use('/api/profile', profileRoutes);
 
+app.use('/api/auth', authRoutes);
+app.use('/api/users', usersRoutes);
+app.use('/api/data-migration', dataMigrationRoutes);
+app.use('/api/profile', profileRoutes);
+
+const importRoutes = require('./routes/import');
+app.use('/api/import', importRoutes);
+
 app.get('/me', (req, res) => {
   if (!req.session.user) {
     return res.status(401).json({

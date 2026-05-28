@@ -279,3 +279,13 @@ async function logout() {
     window.location.href = 'login.html';
   }
 }
+const searchToggle = document.getElementById("searchToggle");
+const searchInput = document.getElementById("searchInput");
+
+if (searchToggle && searchInput) {
+  searchToggle.addEventListener("click", () => {
+    searchInput.classList.add("active");
+    searchToggle.classList.add("hidden");
+    searchInput.focus();
+  });
+}
