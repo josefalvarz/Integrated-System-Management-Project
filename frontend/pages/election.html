@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Voting — IMS</title>
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+
+    <div class="page-header">
+        <h1>Election Management</h1>
+    </div>
+
+    <!-- S20 — Create Election Form (Admin only) -->
+    <div id="createSection" class="profile-card" style="display:none">
+        <h2>Create New Election</h2>
+        <div class="profile-info">
+            <div class="info-row">
+                <span class="info-label">Title</span>
+                <input type="text" id="electionTitle" placeholder="Election title" required>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Description</span>
+                <input type="text" id="electionDesc" placeholder="Description (optional)">
+            </div>
+            <div class="info-row">
+                <span class="info-label">Start Date</span>
+                <input type="date" id="electionStart" required>
+            </div>
+            <div class="info-row">
+                <span class="info-label">End Date</span>
+                <input type="date" id="electionEnd" required>
+            </div>
+        </div>
+        <button id="createElectionBtn">Create Election</button>
+        <p id="createMessage"></p>
+    </div>
+
+    <!-- Election List -->
+    <div class="profile-card">
+        <h2>Elections</h2>
+        <div id="electionList">Loading...</div>
+    </div>
+
+    <!-- S21 — Election Detail with Candidates -->
+    <div id="detailSection" class="profile-card" style="display:none">
+        <button id="backBtn">← Back to Elections</button>
+        <h2 id="detailTitle"></h2>
+        <p id="detailDesc"></p>
+        <p id="detailDates"></p>
+        <p id="detailStatus"></p>
+
+        <h3>Candidates</h3>
+        <div id="candidateList"></div>
+
+        <!-- S21 — Add Candidate (Admin only) -->
+        <div id="addCandidateSection" style="display:none">
+            <input type="text" id="candidateName" placeholder="Candidate name">
+            <button id="addCandidateBtn">Add Candidate</button>
+            <p id="candidateMessage"></p>
+        </div>
+    </div>
+
+    <script src="/js/election.js"></script>
+</body>
+</html>
