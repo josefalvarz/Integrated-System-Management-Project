@@ -4,11 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Record Income - Organization X</title>
-
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
-
   <link rel="stylesheet" href="../css/styles.css" />
 </head>
 
@@ -20,7 +18,6 @@
 
     <!-- SIDEBAR -->
     <aside class="ims-sidebar">
-
       <div class="ims-brand">
         <div class="ims-brand-icon">IMS</div>
         <div class="ims-brand-text">
@@ -64,13 +61,12 @@
       </div>
 
       <button class="ims-logout-btn" onclick="window.location.href='logout.html'">Sign Out</button>
-
     </aside>
 
     <!-- MAIN -->
-    <main class="ims-main profile-main">
+    <main class="ims-main finance-main">
 
-      <header class="profile-header">
+      <header class="finance-header">
         <p class="profile-breadcrumb">
           <span>Org X</span>
           <span class="ims-sep">／</span>
@@ -78,85 +74,73 @@
           <span class="ims-sep">／</span>
           <span>Record Income</span>
         </p>
-
         <h1 class="profile-title">Record <em>Income</em></h1>
       </header>
 
       <div id="incomeMessage" class="role-message hidden"></div>
 
-      <!-- INCOME FORM CARD -->
-      <div class="profile-card">
-        <div class="profile-top-rule"></div>
+      <!-- TWO COLUMN LAYOUT -->
+      <div class="finance-grid">
 
-        <p class="profile-edit-title">Income transaction details</p>
+        <!-- LEFT: FORM CARD -->
+        <div class="profile-card finance-form-card">
+          <div class="profile-top-rule"></div>
+          <p class="profile-edit-title">Income transaction details</p>
 
-        <form id="incomeForm" class="profile-form">
+          <form id="incomeForm" class="profile-form">
+            <div class="profile-field">
+              <span class="profile-label">Amount</span>
+              <input type="number" id="incomeAmount" class="profile-input"
+                placeholder="Enter amount" min="0.01" step="0.01" />
+            </div>
 
-          <div class="profile-field">
-            <span class="profile-label">Amount</span>
-            <input
-              type="number"
-              id="incomeAmount"
-              class="profile-input"
-              placeholder="Enter amount"
-              min="0.01"
-              step="0.01"
-            />
+            <div class="profile-field">
+              <span class="profile-label">Date</span>
+              <input type="date" id="incomeDate" class="profile-input" />
+            </div>
+
+            <div class="profile-field">
+              <span class="profile-label">Category</span>
+              <select id="incomeCategory" class="profile-input">
+                <option value="">Select category</option>
+                <option value="Membership Fee">Membership Fee</option>
+                <option value="Donation">Donation</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+
+            <div class="profile-field">
+              <span class="profile-label">Description</span>
+              <textarea id="incomeDescription" class="profile-input"
+                placeholder="Enter description" rows="3"></textarea>
+            </div>
+
+            <button type="submit" class="profile-btn">Save Income Transaction</button>
+          </form>
+        </div>
+
+        <!-- RIGHT: TABLE CARD -->
+        <div class="profile-card finance-table-card">
+          <div class="profile-top-rule"></div>
+          <p class="profile-edit-title">Income Records List</p>
+
+          <div class="finance-table-scroll">
+            <table class="members-table">
+              <thead>
+                <tr>
+                  <th>Amount</th>
+                  <th>Date</th>
+                  <th>Category</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody id="incomeTableBody">
+                <!-- Loaded by income.js -->
+              </tbody>
+            </table>
           </div>
+        </div>
 
-          <div class="profile-field">
-            <span class="profile-label">Date</span>
-            <input
-              type="date"
-              id="incomeDate"
-              class="profile-input"
-            />
-          </div>
-
-          <div class="profile-field">
-            <span class="profile-label">Category</span>
-            <select id="incomeCategory" class="profile-input">
-              <option value="">Select category</option>
-              <option value="Membership Fee">Membership Fee</option>
-              <option value="Donation">Donation</option>
-              <option value="Other">Other</option>
-            </select>
-          </div>
-
-          <div class="profile-field">
-            <span class="profile-label">Description</span>
-            <textarea
-              id="incomeDescription"
-              class="profile-input"
-              placeholder="Enter description"
-              rows="4"
-            ></textarea>
-          </div>
-
-          <button type="submit" class="profile-btn">Save Income Transaction</button>
-        </form>
-      </div>
-
-      <!-- INCOME TABLE CARD -->
-      <div class="profile-card">
-        <div class="profile-top-rule"></div>
-
-        <p class="profile-edit-title">Income Records List</p>
-
-        <table class="members-table">
-          <thead>
-            <tr>
-              <th>Amount</th>
-              <th>Date</th>
-              <th>Category</th>
-              <th>Description</th>
-            </tr>
-          </thead>
-
-          <tbody id="incomeTableBody">
-            <!-- Income records load here from income.js -->
-          </tbody>
-        </table>
       </div>
 
     </main>
