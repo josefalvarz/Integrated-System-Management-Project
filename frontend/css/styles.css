@@ -1610,6 +1610,90 @@ body.auth-page::before {
   .dm-pipeline-steps { grid-template-columns: 1fr 1fr; }
   .dm-title          { font-size: 26px; }
 }
+
+/* ============================================
+   S66 / S9 - RECORD INCOME TRANSACTIONS
+   ============================================ */
+
+.income-page {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 48px 36px;
+}
+
+.income-header {
+  margin-bottom: 28px;
+}
+
+.income-header h1 {
+  font-family: var(--font-serif);
+  font-size: 42px;
+  font-weight: 400;
+  color: var(--text);
+  margin: 0 0 8px;
+}
+
+.income-header p {
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.income-card {
+  background: rgba(22, 29, 46, 0.85);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 24px 28px;
+  margin-bottom: 24px;
+  backdrop-filter: blur(24px);
+}
+
+.income-card h2 {
+  font-family: var(--font-serif);
+  color: var(--text);
+  margin-bottom: 18px;
+}
+
+.income-form {
+  display: grid;
+  gap: 12px;
+}
+
+.income-form label {
+  color: var(--gold-light);
+  font-size: 14px;
+}
+
+.income-form input,
+.income-form select,
+.income-form textarea {
+  width: 100%;
+  padding: 12px;
+
+/* ============================================
+   LOGOUT PAGE
+   ============================================ */
+
+.auth-card .auth-heading {
+  font-size: 36px;
+}
+
+.auth-card button {
+  margin-bottom: 8px;
+}
+
+.auth-footer a {
+  color: var(--text-muted);
+  font-size: 13px;
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.auth-footer a:hover {
+  color: var(--gold);
+}
+}
+
 /* ============================================
    PROFILE PAGE
    ============================================ */
@@ -1625,6 +1709,8 @@ body.auth-page::before {
   align-items: unset !important;
   justify-content: unset !important;
   box-sizing: border-box;
+  position: relative;
+  z-index: 1;
 }
 
 .profile-header {
@@ -1644,7 +1730,7 @@ body.auth-page::before {
 
 .profile-title {
   font-family: var(--font-serif);
-  font-size: 48px;
+  font-size: clamp(2.8rem, 4vw, 4rem);
   font-weight: 400;
   color: var(--text);
   margin: 0;
@@ -1659,7 +1745,7 @@ body.auth-page::before {
 
 /* Card */
 .profile-card {
-  background: rgba(22,29,46,0.85);
+  background: var(--navy-glass);
   border: 1px solid var(--border);
   border-radius: 20px;
   padding: 40px 44px;
@@ -1667,6 +1753,7 @@ body.auth-page::before {
   max-width: 680px;
   position: relative;
   overflow: hidden;
+  margin-bottom: 24px;
 }
 
 .profile-top-rule {
@@ -1675,6 +1762,7 @@ body.auth-page::before {
   height: 1px;
   background: linear-gradient(90deg, transparent, var(--gold), transparent);
   opacity: 0.4;
+  width: auto;
 }
 
 /* Avatar row */
@@ -1761,7 +1849,7 @@ body.auth-page::before {
 /* Edit form */
 .profile-edit-title {
   font-family: var(--font-serif);
-  font-size: 20px;
+  font-size: 1.3rem;
   color: var(--text-muted);
   margin: 0 0 24px;
   font-weight: 400;
@@ -1790,11 +1878,17 @@ body.auth-page::before {
   margin-top: 6px;
 }
 
-.profile-input::placeholder { color: var(--text-faint); }
+.profile-input::placeholder {
+  color: var(--text-faint);
+}
 
 .profile-input:focus {
   border-color: rgba(212,175,97,0.4);
   background: rgba(212,175,97,0.04);
+}
+
+.profile-input[type="date"] {
+  color-scheme: dark;
 }
 
 /* Buttons */
@@ -1850,29 +1944,414 @@ body.auth-page::before {
 
 /* Responsive */
 @media (max-width: 900px) {
-  .profile-main { padding: 28px 20px; height: auto; }
-  .profile-title { font-size: 34px; }
-  .profile-card  { padding: 28px 24px; }
+  .profile-main {
+    margin-left: 0;
+    width: 100%;
+    height: auto;
+    padding: 28px 20px;
+  }
+  .profile-title  { font-size: 34px; }
+  .profile-card   { padding: 28px 24px; max-width: 100%; }
+  .profile-btn-row { flex-direction: column; }
 }
+
 /* ============================================
-   LOGOUT PAGE
+   FINANCE PAGE
    ============================================ */
 
-.auth-card .auth-heading {
-  font-size: 36px;
+.finance-main {
+  margin-left: 260px;
+  width: calc(100% - 260px);
+  min-height: 100vh;
+  height: 100vh;
+  overflow-y: auto;
+  padding: 40px 48px;
+  display: block !important;
+  align-items: unset !important;
+  justify-content: unset !important;
+  box-sizing: border-box;
+  position: relative;
+  z-index: 1;
 }
 
-.auth-card button {
-  margin-bottom: 8px;
+.finance-header {
+  margin-bottom: 28px;
 }
 
-.auth-footer a {
+/* Two-column grid: form left, table right */
+.finance-grid {
+  display: grid;
+  grid-template-columns: 380px 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+/* Form card — fixed width, compact */
+.finance-form-card {
+  background: var(--navy-glass) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 20px !important;
+  padding: 28px 32px !important;
+  backdrop-filter: blur(24px) !important;
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+/* Table card — fills remaining space */
+.finance-table-card {
+  background: var(--navy-glass) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 20px !important;
+  padding: 28px 32px !important;
+  backdrop-filter: blur(24px) !important;
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+/* Scrollable table area inside the card */
+.finance-table-scroll {
+  max-height: calc(100vh - 280px);
+  overflow-y: auto;
+}
+
+/* Gold top rule on finance cards */
+.finance-form-card .profile-top-rule,
+.finance-table-card .profile-top-rule {
+  position: absolute;
+  top: 0; left: 32px; right: 32px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  opacity: 0.4;
+  width: auto;
+}
+
+/* Card title */
+.finance-form-card .profile-edit-title,
+.finance-table-card .profile-edit-title {
+  font-family: var(--font-serif);
+  font-size: 1.2rem;
+  font-weight: 400;
   color: var(--text-muted);
-  font-size: 13px;
-  text-decoration: none;
-  transition: color 0.15s ease;
+  margin: 0 0 20px;
 }
 
-.auth-footer a:hover {
-  color: var(--gold);
+/* Form fields */
+#incomeForm {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 14px !important;
+  margin: 0 !important;
+}
+
+#incomeForm .profile-field { gap: 5px !important; }
+
+#incomeForm .profile-label {
+  font-size: 10px !important;
+  letter-spacing: 0.12em !important;
+  text-transform: uppercase !important;
+  color: var(--text-faint) !important;
+  font-weight: 500 !important;
+}
+
+#incomeForm input,
+#incomeForm select,
+#incomeForm textarea {
+  width: 100% !important;
+  padding: 10px 13px !important;
+  border-radius: 9px !important;
+  border: 1px solid var(--border) !important;
+  background: rgba(255,255,255,0.04) !important;
+  color: var(--text) !important;
+  font-family: var(--font-sans) !important;
+  font-size: 13px !important;
+  box-sizing: border-box !important;
+  outline: none !important;
+  transition: border-color 0.18s ease, background 0.18s ease !important;
+}
+
+#incomeForm input:focus,
+#incomeForm select:focus,
+#incomeForm textarea:focus {
+  border-color: rgba(212,175,97,0.4) !important;
+  background: rgba(212,175,97,0.04) !important;
+}
+
+#incomeForm input::placeholder,
+#incomeForm textarea::placeholder {
+  color: var(--text-faint) !important;
+}
+
+#incomeForm input[type="date"] { color-scheme: dark !important; }
+
+#incomeForm select option {
+  background: var(--navy-mid) !important;
+  color: var(--text) !important;
+}
+
+#incomeDescription {
+  min-height: 72px !important;
+  max-height: 90px !important;
+  resize: vertical !important;
+}
+
+#incomeForm button,
+#incomeForm .profile-btn {
+  width: 100% !important;
+  margin-top: 4px !important;
+  padding: 11px 14px !important;
+  border: none !important;
+  border-radius: 9px !important;
+  background: linear-gradient(135deg, var(--gold) 0%, #b8912f 100%) !important;
+  color: var(--navy) !important;
+  font-family: var(--font-sans) !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.04em !important;
+  cursor: pointer !important;
+  box-shadow: 0 4px 16px rgba(212,175,97,0.2) !important;
+  transition: opacity 0.18s ease, transform 0.12s ease !important;
+}
+
+#incomeForm button:hover { opacity: 0.9 !important; transform: translateY(-1px) !important; }
+#incomeForm button:active { transform: translateY(0) !important; }
+
+/* Table */
+.finance-table-card .members-table {
+  width: 100% !important;
+  border-collapse: collapse !important;
+}
+
+.finance-table-card .members-table th {
+  padding: 10px 12px !important;
+  color: var(--text-faint) !important;
+  font-size: 10px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.1em !important;
+  text-transform: uppercase !important;
+  text-align: left !important;
+  border-bottom: 1px solid var(--border) !important;
+}
+
+.finance-table-card .members-table td {
+  padding: 12px 12px !important;
+  color: var(--text-muted) !important;
+  font-size: 13px !important;
+  text-align: left !important;
+  border-bottom: 1px solid var(--border) !important;
+  word-break: break-word !important;
+}
+
+.finance-table-card .members-table tr:last-child td {
+  border-bottom: none !important;
+}
+
+/* Responsive */
+@media (max-width: 1100px) {
+  .finance-grid { grid-template-columns: 1fr; }
+  .finance-table-scroll { max-height: none; }
+}
+
+@media (max-width: 900px) {
+  .finance-main {
+    margin-left: 0;
+    width: 100%;
+    height: auto;
+    padding: 24px 20px;
+  }
+}
+
+/* ============================================
+   S12 - MEMBER SEARCH INSIDE MEMBER MANAGEMENT
+   ============================================ */
+
+.member-management-search {
+  margin-bottom: 24px;
+}
+
+.member-management-search input {
+  width: 100%;
+  padding: 16px 18px;
+  border: 1px solid #cfd8e6;
+  border-radius: 16px;
+  background: #ffffff;
+  color: #0f172a;
+  font-size: 17px;
+  font-family: "DM Sans", sans-serif;
+  outline: none;
+  margin: 0;
+}
+
+.member-management-search input::placeholder {
+  color: #94a3b8;
+}
+
+.member-management-search input:focus {
+  border-color: #94a3b8;
+  box-shadow: 0 0 0 4px rgba(148, 163, 184, 0.15);
+}
+
+.member-search-message {
+  display: block;
+  color: #991b1b;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 14px;
+  padding: 12px 18px;
+  margin-bottom: 20px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.member-search-message.hidden {
+  display: none !important;
+}
+
+/* ============================================
+   S12 FIX - MEMBER MANAGEMENT SEARCH + 100% ZOOM
+   ============================================ */
+
+/* Make dashboard content start from the top instead of being vertically centered */
+.ims-main.ims-main-simple {
+  align-items: flex-start !important;
+  overflow-y: auto !important;
+  height: 100vh !important;
+  padding-top: 28px !important;
+  padding-bottom: 28px !important;
+}
+
+/* Keep the normal dashboard welcome card centered */
+#dashboardPage {
+  min-height: calc(100vh - 56px);
+  display: flex;
+  align-items: center;
+}
+
+/* Make Member Management fit better on 100% zoom */
+#memberManagementPage {
+  width: 100% !important;
+  max-width: 1200px !important;
+  margin: 0 auto !important;
+  padding: 18px 28px 32px !important;
+}
+
+#memberManagementPage .member-page-header {
+  margin-bottom: 18px !important;
+}
+
+#memberManagementPage .member-page-header h1 {
+  font-size: 42px !important;
+  line-height: 1.1 !important;
+  margin: 0 !important;
+}
+
+#memberManagementPage .members-card {
+  padding: 24px 32px !important;
+  border-radius: 22px !important;
+}
+
+/* Search input matching Member Management style */
+.member-management-search {
+  margin-bottom: 24px !important;
+}
+
+.member-management-search input {
+  width: 100% !important;
+  padding: 15px 18px !important;
+  border: 1px solid #cfd8e6 !important;
+  border-radius: 16px !important;
+  background: #ffffff !important;
+  color: #0f172a !important;
+  font-size: 17px !important;
+  font-family: "DM Sans", sans-serif !important;
+  outline: none !important;
+  margin: 0 !important;
+  box-sizing: border-box !important;
+}
+
+.member-management-search input::placeholder {
+  color: #94a3b8 !important;
+}
+
+.member-management-search input:focus {
+  border-color: #94a3b8 !important;
+  box-shadow: 0 0 0 4px rgba(148, 163, 184, 0.15) !important;
+}
+
+/* Compact table spacing so it fits better */
+#memberManagementPage .members-table {
+  width: 100% !important;
+  min-width: 760px !important;
+}
+
+#memberManagementPage .members-table th {
+  padding: 12px 10px !important;
+  font-size: 16px !important;
+}
+
+#memberManagementPage .members-table td {
+  padding: 12px 10px !important;
+  font-size: 16px !important;
+}
+
+/* Prevent email column from becoming too huge */
+#memberManagementPage .members-table th:nth-child(2),
+#memberManagementPage .members-table td:nth-child(2) {
+  width: 28% !important;
+}
+
+/* Keep name readable */
+#memberManagementPage .members-table th:nth-child(1),
+#memberManagementPage .members-table td:nth-child(1) {
+  width: 18% !important;
+}
+
+/* Make role select smaller */
+#memberManagementPage .role-select {
+  width: 140px !important;
+  padding: 9px 12px !important;
+  font-size: 15px !important;
+}
+
+/* Make status and action buttons more compact */
+#memberManagementPage .status-pill {
+  min-width: 86px !important;
+  padding: 7px 12px !important;
+  font-size: 14px !important;
+}
+
+#memberManagementPage .table-action-btn {
+  padding: 9px 16px !important;
+  font-size: 15px !important;
+}
+
+/* No results message */
+.member-search-message {
+  display: block;
+  color: #991b1b;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 14px;
+  padding: 12px 18px;
+  margin-bottom: 20px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.member-search-message.hidden {
+  display: none !important;
+}
+
+@media (max-width: 900px) {
+  .ims-main.ims-main-simple {
+    height: auto !important;
+    overflow-y: visible !important;
+  }
+
+  #memberManagementPage {
+    padding: 24px 20px !important;
+  }
+
+  #memberManagementPage .members-card {
+    overflow-x: auto !important;
+  }
 }
