@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>E-Voting — IMS</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="../css/styles.css" />
+</head>
+
+<body class="dashboard-page">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+
+  <div class="ims-dashboard">
+
+    <!-- SIDEBAR -->
+    <aside class="ims-sidebar">
+      <div class="ims-brand">
+        <div class="ims-brand-icon">IMS</div>
+        <div class="ims-brand-text">
+          <h2>Organization X</h2>
+          <p>Management System</p>
+        </div>
+      </div>
+
+      <div class="ims-nav-section">
+        <p class="ims-section-title">Workspace</p>
+        <nav class="ims-nav">
+          <a href="./dashboard.html" class="ims-nav-link">Dashboard</a>
+          <a href="./profile.html" class="ims-nav-link">Profile</a>
+          <a href="./dashboard.html?page=members" class="ims-nav-link admin-only">Member Management</a>
+          <a href="./data-migration.html" class="ims-nav-link admin-only">Data Import</a>
+          <a href="#" class="ims-nav-link">Documents</a>
+          <a href="./election.html" class="ims-nav-link active">E-Voting</a>
+          <a href="#" class="ims-nav-link">WhatsApp Analytics</a>
+          <a href="#" class="ims-nav-link">Smart Notifications</a>
+          <a href="#" class="ims-nav-link">Meetings</a>
+          <a href="./income.html" class="ims-nav-link admin-only">Finance</a>
+        </nav>
+      </div>
+
+      <div class="ims-nav-section admin-only">
+        <p class="ims-section-title">System</p>
+        <nav class="ims-nav">
+          <a href="#" class="ims-nav-link">Settings</a>
+          <a href="#" class="ims-nav-link">Audit Logs</a>
+        </nav>
+      </div>
+
+      <div class="ims-sidebar-spacer"></div>
+
+      <div class="ims-user-panel">
+        <div class="ims-avatar" id="userInitials">U</div>
+        <div class="ims-user-info">
+          <strong id="userName">User</strong>
+          <span id="userRole">Member</span>
+        </div>
+      </div>
+
+      <button class="ims-logout-btn" onclick="window.location.href='logout.html'">Sign Out</button>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="ims-main election-main">
+
+      <header class="election-header">
+        <p class="profile-breadcrumb">
+          <span>Org X</span>
+          <span class="ims-sep">／</span>
+          <span>E-Voting</span>
+        </p>
+
+        <h1 class="profile-title">Election <em>Management</em></h1>
+
+        <p class="election-subtitle">
+          Create election ballots, manage candidates, and review voting options.
+        </p>
+      </header>
+
+      <div class="election-grid">
+
+        <!-- S20 — Create Election Form -->
+        <section id="createSection" class="profile-card election-form-card" style="display:none">
+          <div class="profile-top-rule"></div>
+
+          <h2>Create New Election</h2>
+
+          <div class="profile-form">
+            <div class="profile-field">
+              <span class="profile-label">Title</span>
+              <input type="text" id="electionTitle" class="profile-input" placeholder="Election title" required>
+            </div>
+
+            <div class="profile-field">
+              <span class="profile-label">Description</span>
+              <input type="text" id="electionDesc" class="profile-input" placeholder="Description optional">
+            </div>
+
+            <div class="profile-field">
+              <span class="profile-label">Start Date</span>
+              <input type="date" id="electionStart" class="profile-input" required>
+            </div>
+
+            <div class="profile-field">
+              <span class="profile-label">End Date</span>
+              <input type="date" id="electionEnd" class="profile-input" required>
+            </div>
+          </div>
+
+          <button id="createElectionBtn" class="profile-btn">Create Election</button>
+          <p id="createMessage" class="profile-message"></p>
+        </section>
+
+        <!-- Election List -->
+        <section class="profile-card election-list-card">
+          <div class="profile-top-rule"></div>
+
+          <h2>Elections</h2>
+          <div id="electionList" class="election-list">Loading...</div>
+        </section>
+
+      </div>
+
+      <!-- S21 — Election Detail with Candidates -->
+      <section id="detailSection" class="profile-card election-detail-card" style="display:none">
+        <div class="profile-top-rule"></div>
+
+        <button id="backBtn" class="profile-btn-ghost">← Back to Elections</button>
+
+        <h2 id="detailTitle"></h2>
+        <p id="detailDesc"></p>
+        <p id="detailDates"></p>
+        <p id="detailStatus"></p>
+
+        <div class="profile-divider"></div>
+
+        <h3>Candidates</h3>
+        <div id="candidateList" class="candidate-list"></div>
+
+        <!-- S21 — Add Candidate -->
+        <div id="addCandidateSection" class="add-candidate-section" style="display:none">
+          <input type="text" id="candidateName" class="profile-input" placeholder="Candidate name">
+          <button id="addCandidateBtn" class="profile-btn">Add Candidate</button>
+          <p id="candidateMessage" class="profile-message"></p>
+        </div>
+      </section>
+
+    </main>
+
+  </div>
+
+  <script src="../js/election.js"></script>
+
+<script>
+  const loggedInUser = JSON.parse(sessionStorage.getItem("loggedInUser"));
+
+  if (loggedInUser) {
+    const name = loggedInUser.name || loggedInUser.email || "User";
+    const role = loggedInUser.role || "member";
+
+    const userNameElement = document.getElementById("userName");
+    const userRoleElement = document.getElementById("userRole");
+    const userInitialsElement = document.getElementById("userInitials");
+
+    if (userNameElement) {
+      userNameElement.textContent = name;
+    }
+
+    if (userRoleElement) {
+      userRoleElement.textContent = role.charAt(0).toUpperCase() + role.slice(1);
+    }
+
+    if (userInitialsElement) {
+      userInitialsElement.textContent = name.charAt(0).toUpperCase();
+    }
+  }
+</script>
+
+</body>
+</html>

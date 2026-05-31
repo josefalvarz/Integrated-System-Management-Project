@@ -11,6 +11,7 @@ const db = new sqlite3.Database(DB_PATH, (err) => {
   }
 });
 
+// Users table
 db.run(`
   CREATE TABLE IF NOT EXISTS users (
     id          INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -26,7 +27,6 @@ db.run(`
 `);
 
 // S8 — Role-Based Access
-// This safely adds the role column if the users table already existed before S8.
 db.all("PRAGMA table_info(users)", (err, columns) => {
   if (err) {
     console.error("Error checking users table:", err.message);
@@ -50,7 +50,6 @@ db.all("PRAGMA table_info(users)", (err, columns) => {
 });
 
 // S10 — List & Deactivate
-// This safely adds the is_active column if the users table already existed before S10.
 db.all("PRAGMA table_info(users)", (err, columns) => {
   if (err) {
     console.error("Error checking users table:", err.message);
@@ -72,5 +71,28 @@ db.all("PRAGMA table_info(users)", (err, columns) => {
     );
   }
 });
+
+// S20 — Create Election Ballot
+db.run(`
+  CREATE TABLE IF NOT EXISTS elections (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    title       TEXT    NOT NULL,
+    description TEXT,
+    start_date  TEXT    NOT NULL,
+    end_date    TEXT    NOT NULL,
+    status      TEXT    NOT NULL DEFAULT 'Draft',
+    created_at  TEXT    NOT NULL DEFAULT (datetime('now'))
+  )
+`);
+
+// S21 — Add Candidates
+db.run(`
+  CREATE TABLE IF NOT EXISTS candidates (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    election_id INTEGER NOT NULL,
+    name        TEXT    NOT NULL,
+    FOREIGN KEY (election_id) REFERENCES elections(id)
+  )
+`);
 
 module.exports = db;
