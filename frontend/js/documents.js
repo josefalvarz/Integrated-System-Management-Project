@@ -1,0 +1,338 @@
+const loggedInUser = JSON.parse(sessionStorage.getItem('loggedInUser'));
+
+if (!loggedInUser) {
+  window.location.href = 'login.html';
+}
+
+const documentsKey = 'organizationDocuments';
+
+const adminUploadSection = document.getElementById('adminUploadSection');
+const documentForm = document.getElementById('documentForm');
+const documentTitle = document.getElementById('documentTitle');
+const documentDescription = document.getElementById('documentDescription');
+const documentCategory = document.getElementById('documentCategory');
+const documentFile = document.getElementById('documentFile');
+const documentMessage = document.getElementById('documentMessage');
+const documentsTableBody = document.getElementById('documentsTableBody');
+const emptyDocumentsMessage = document.getElementById('emptyDocumentsMessage');
+const documentSearch = document.getElementById('documentSearch');
+
+initializeDocumentPage();
+
+function initializeDocumentPage() {
+  loadUserInfo();
+  applyRoleAccess();
+  setupEvents();
+  renderDocuments();
+}
+
+function loadUserInfo() {
+  const name = loggedInUser.name || loggedInUser.email || 'User';
+  const role = loggedInUser.role || 'member';
+
+  const userName = document.getElementById('userName');
+  const userRole = document.getElementById('userRole');
+  const userInitials = document.getElementById('userInitials');
+
+  if (userName) {
+    userName.textContent = name;
+  }
+
+  if (userRole) {
+    userRole.textContent = role === 'admin' ? 'Administrator' : 'Member';
+  }
+
+  const initials = name
+    .split(' ')
+    .map(word => word.charAt(0))
+    .join('')
+    .substring(0, 2)
+    .toUpperCase();
+
+  if (userInitials) {
+    userInitials.textContent = initials || 'U';
+  }
+}
+
+function isAdmin() {
+  return loggedInUser && loggedInUser.role === 'admin';
+}
+
+function applyRoleAccess() {
+  if (!isAdmin()) {
+    document.querySelectorAll('.admin-only').forEach(element => {
+      element.style.display = 'none';
+    });
+
+    if (adminUploadSection) {
+      adminUploadSection.style.display = 'none';
+    }
+  }
+}
+
+function setupEvents() {
+  if (documentForm) {
+    documentForm.addEventListener('submit', handleDocumentUpload);
+  }
+
+  if (documentSearch) {
+    documentSearch.addEventListener('input', function () {
+      renderDocuments(documentSearch.value);
+    });
+  }
+
+  const logoutBtn = document.getElementById('logoutBtn');
+
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', logout);
+  }
+}
+
+function getDocuments() {
+  const storedDocuments = localStorage.getItem(documentsKey);
+
+  if (!storedDocuments) {
+    return [];
+  }
+
+  return JSON.parse(storedDocuments);
+}
+
+function saveDocuments(documents) {
+  localStorage.setItem(documentsKey, JSON.stringify(documents));
+}
+
+function generateDocumentId() {
+  return 'doc-' + Date.now();
+}
+
+function formatDate(dateText) {
+  const date = new Date(dateText);
+
+  return date.toLocaleDateString('en-GB', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric'
+  });
+}
+
+function showMessage(message, type) {
+  if (!documentMessage) return;
+
+  documentMessage.textContent = message;
+  documentMessage.className = 'documents-message ' + type;
+
+  setTimeout(function () {
+    documentMessage.textContent = '';
+    documentMessage.className = 'documents-message';
+  }, 3000);
+}
+
+function convertFileToBase64(file) {
+  return new Promise(function (resolve, reject) {
+    const reader = new FileReader();
+
+    reader.onload = function () {
+      resolve(reader.result);
+    };
+
+    reader.onerror = function () {
+      reject('Could not read file.');
+    };
+
+    reader.readAsDataURL(file);
+  });
+}
+
+async function handleDocumentUpload(event) {
+  event.preventDefault();
+
+  if (!isAdmin()) {
+    showMessage('Only administrators can upload documents.', 'error');
+    return;
+  }
+
+  const selectedFile = documentFile.files[0];
+
+  if (!selectedFile) {
+    showMessage('Please select a file.', 'error');
+    return;
+  }
+
+  const maxFileSize = 2 * 1024 * 1024;
+
+  if (selectedFile.size > maxFileSize) {
+    showMessage('File is too large. Please upload a file smaller than 2MB for this frontend demo.', 'error');
+    return;
+  }
+
+  try {
+    const fileData = await convertFileToBase64(selectedFile);
+
+    const documents = getDocuments();
+
+    const newDocument = {
+      id: generateDocumentId(),
+      title: documentTitle.value.trim(),
+      description: documentDescription.value.trim(),
+      category: documentCategory.value,
+      fileName: selectedFile.name,
+      fileType: selectedFile.type || 'application/octet-stream',
+      fileSize: selectedFile.size,
+      fileData: fileData,
+      uploadedBy: loggedInUser.name || loggedInUser.email || 'Admin',
+      uploadedAt: new Date().toISOString()
+    };
+
+    documents.push(newDocument);
+    saveDocuments(documents);
+
+    documentForm.reset();
+    showMessage('Document uploaded successfully.', 'success');
+    renderDocuments();
+  } catch (error) {
+    showMessage('Could not upload document.', 'error');
+  }
+}
+
+function renderDocuments(filterText = '') {
+  const documents = getDocuments();
+
+  documentsTableBody.innerHTML = '';
+
+  const searchValue = filterText.toLowerCase().trim();
+
+  const filteredDocuments = documents.filter(function (documentItem) {
+    const title = documentItem.title.toLowerCase();
+    const description = documentItem.description.toLowerCase();
+    const category = documentItem.category.toLowerCase();
+    const fileName = documentItem.fileName.toLowerCase();
+
+    return (
+      title.includes(searchValue) ||
+      description.includes(searchValue) ||
+      category.includes(searchValue) ||
+      fileName.includes(searchValue)
+    );
+  });
+
+  if (filteredDocuments.length === 0) {
+    emptyDocumentsMessage.style.display = 'block';
+    return;
+  }
+
+  emptyDocumentsMessage.style.display = 'none';
+
+  filteredDocuments.forEach(function (documentItem) {
+    const row = document.createElement('tr');
+
+    row.innerHTML = `
+      <td>${documentItem.title}</td>
+      <td>${documentItem.description}</td>
+      <td>${documentItem.category}</td>
+      <td>${documentItem.fileName}</td>
+      <td>${documentItem.uploadedBy}</td>
+      <td>${formatDate(documentItem.uploadedAt)}</td>
+      <td>
+        <button class="table-action-btn document-action-btn" onclick="viewDocument('${documentItem.id}')">
+          View
+        </button>
+
+        <button class="table-action-btn document-action-btn" onclick="downloadDocument('${documentItem.id}')">
+          Download
+        </button>
+
+        ${
+          isAdmin()
+            ? `<button class="table-action-btn document-action-btn document-danger-btn" onclick="deleteDocument('${documentItem.id}')">
+                Delete
+              </button>`
+            : ''
+        }
+      </td>
+    `;
+
+    documentsTableBody.appendChild(row);
+  });
+}
+
+function viewDocument(documentId) {
+  const documents = getDocuments();
+
+  const selectedDocument = documents.find(function (documentItem) {
+    return documentItem.id === documentId;
+  });
+
+  if (!selectedDocument) {
+    alert('Document not found.');
+    return;
+  }
+
+  if (!selectedDocument.fileData) {
+    alert('This document was uploaded with the old simulation version. Please delete it and upload it again.');
+    return;
+  }
+
+  const newTab = window.open();
+
+  if (!newTab) {
+    alert('Please allow pop-ups to view the document.');
+    return;
+  }
+
+  newTab.document.write(`
+    <iframe 
+      src="${selectedDocument.fileData}" 
+      style="width:100%; height:100vh; border:none;"
+    ></iframe>
+  `);
+}
+
+function downloadDocument(documentId) {
+  const documents = getDocuments();
+
+  const selectedDocument = documents.find(function (documentItem) {
+    return documentItem.id === documentId;
+  });
+
+  if (!selectedDocument) {
+    alert('Document not found.');
+    return;
+  }
+
+  if (!selectedDocument.fileData) {
+    alert('This document was uploaded with the old simulation version. Please delete it and upload it again.');
+    return;
+  }
+
+  const downloadLink = document.createElement('a');
+  downloadLink.href = selectedDocument.fileData;
+  downloadLink.download = selectedDocument.fileName;
+  downloadLink.click();
+}
+
+function deleteDocument(documentId) {
+  if (!isAdmin()) {
+    alert('Only administrators can delete documents.');
+    return;
+  }
+
+  const confirmDelete = confirm('Are you sure you want to delete this document?');
+
+  if (!confirmDelete) {
+    return;
+  }
+
+  const documents = getDocuments();
+
+  const updatedDocuments = documents.filter(function (documentItem) {
+    return documentItem.id !== documentId;
+  });
+
+  saveDocuments(updatedDocuments);
+  renderDocuments(documentSearch.value);
+}
+
+function logout() {
+  window.location.href = 'logout.html';
+}
