@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Documents - Organization X</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/styles.css" />
+</head>
+
+<body class="dashboard-page">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+
+  <div class="ims-dashboard">
+
+    <aside class="ims-sidebar">
+      <div class="ims-brand">
+        <div class="ims-brand-icon">IMS</div>
+        <div class="ims-brand-text">
+          <h2>Organization X</h2>
+          <p>Management System</p>
+        </div>
+      </div>
+
+      <div class="ims-nav-section">
+        <p class="ims-section-title">Workspace</p>
+        <nav class="ims-nav">
+          <a href="./dashboard.html" class="ims-nav-link">Dashboard</a>
+          <a href="./profile.html" class="ims-nav-link">Profile</a>
+          <a href="./dashboard.html?page=members" class="ims-nav-link admin-only">Member Management</a>
+          <a href="./data-migration.html" class="ims-nav-link admin-only">Data Import</a>
+          <a href="./documents.html" class="ims-nav-link active">Documents</a>
+          <a href="./election.html" class="ims-nav-link">E-Voting</a>
+          <a href="#" class="ims-nav-link">WhatsApp Analytics</a>
+          <a href="#" class="ims-nav-link">Smart Notifications</a>
+          <a href="#" class="ims-nav-link">Meetings</a>
+          <a href="./income.html" class="ims-nav-link admin-only">Finance</a>
+        </nav>
+      </div>
+
+      <div class="ims-nav-section admin-only">
+        <p class="ims-section-title">System</p>
+        <nav class="ims-nav">
+          <a href="#" class="ims-nav-link">Settings</a>
+          <a href="#" class="ims-nav-link">Audit Logs</a>
+        </nav>
+      </div>
+
+      <div class="ims-sidebar-spacer"></div>
+
+      <div class="ims-user-panel">
+        <div class="ims-avatar" id="userInitials">U</div>
+        <div class="ims-user-info">
+          <strong id="userName">User</strong>
+          <span id="userRole">Member</span>
+        </div>
+      </div>
+
+      <button class="ims-logout-btn" id="logoutBtn">Sign Out</button>
+    </aside>
+
+    <main class="documents-main">
+      <header class="documents-header">
+        <p class="profile-breadcrumb">
+          <span>Org X</span>
+          <span class="ims-sep">／</span>
+          <span>Documents</span>
+        </p>
+
+        <h1 class="profile-title">Document <em>Management</em></h1>
+
+        <p class="documents-subtitle">
+          Upload, categorize, search, view, and download organizational documents.
+        </p>
+      </header>
+
+      <section id="adminUploadSection" class="documents-card">
+        <div class="profile-top-rule"></div>
+
+        <h2>Upload Document</h2>
+        <p class="documents-card-subtitle">
+          Only administrators can upload documents.
+        </p>
+
+        <form id="documentForm" class="documents-form">
+          <div class="profile-field">
+            <label class="profile-label" for="documentTitle">Document Title</label>
+            <input
+              type="text"
+              id="documentTitle"
+              placeholder="Example: March Meeting Minutes"
+              required
+            />
+          </div>
+
+          <div class="profile-field">
+            <label class="profile-label" for="documentDescription">Description</label>
+            <textarea
+              id="documentDescription"
+              placeholder="Briefly describe the document"
+              required
+            ></textarea>
+          </div>
+
+          <div class="profile-field">
+            <label class="profile-label" for="documentCategory">Category</label>
+            <select id="documentCategory" required>
+              <option value="">Select category</option>
+              <option value="Meeting Minutes">Meeting Minutes</option>
+              <option value="Announcements">Announcements</option>
+              <option value="Administrative Notices">Administrative Notices</option>
+              <option value="Reports">Reports</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+
+          <div class="profile-field">
+            <label class="profile-label" for="documentFile">File</label>
+            <input
+              type="file"
+              id="documentFile"
+              accept=".pdf,.doc,.docx,.txt,.png,.jpg,.jpeg"
+              required
+            />
+          </div>
+
+          <button type="submit" class="profile-btn">Upload Document</button>
+        </form>
+
+        <p id="documentMessage" class="documents-message"></p>
+      </section>
+
+      <section class="documents-card">
+        <div class="profile-top-rule"></div>
+
+        <div class="documents-list-header">
+          <div>
+            <h2>Available Documents</h2>
+            <p class="documents-card-subtitle">
+              Members and administrators can view uploaded documents.
+            </p>
+          </div>
+
+          <input
+            type="text"
+            id="documentSearch"
+            class="documents-search"
+            placeholder="Search by title, description, category, or file name..."
+          />
+        </div>
+
+        <div class="documents-table-scroll">
+          <table class="members-table documents-table">
+            <thead>
+              <tr>
+                <th>Title</th>
+                <th>Description</th>
+                <th>Category</th>
+                <th>File</th>
+                <th>Uploaded By</th>
+                <th>Date</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+
+            <tbody id="documentsTableBody">
+              <!-- Documents load here -->
+            </tbody>
+          </table>
+        </div>
+
+        <p id="emptyDocumentsMessage" class="documents-empty-message">
+          No documents uploaded yet.
+        </p>
+      </section>
+    </main>
+
+  </div>
+
+  <script src="../js/documents.js"></script>
+</body>
+</html>

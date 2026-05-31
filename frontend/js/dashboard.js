@@ -324,24 +324,6 @@ async function updateUserStatus(event) {
 
 /* LOGOUT */
 
-async function logout() {
-  const msg = document.getElementById('msg');
-
-  try {
-    await fetch('/api/auth/logout', { method: 'POST' });
-
-    sessionStorage.removeItem('loggedInUser');
-
-    if (msg) {
-      msg.className = 'msg success';
-      msg.textContent = 'Signed out successfully. Redirecting…';
-    }
-
-    setTimeout(() => {
-      window.location.href = 'login.html';
-    }, 800);
-  } catch {
-    sessionStorage.removeItem('loggedInUser');
-    window.location.href = 'login.html';
-  }
+function logout() {
+  window.location.href = 'logout.html';
 }

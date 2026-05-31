@@ -39,8 +39,7 @@ if (loggedInUser) {
 
 if (logoutBtn) {
   logoutBtn.addEventListener("click", function () {
-    sessionStorage.removeItem("loggedInUser");
-    window.location.href = "login.html";
+    window.location.href = "logout.html";
   });
 }
 

@@ -2586,3 +2586,243 @@ body.auth-page::before {
     padding: 26px 24px !important;
   }
 }
+
+/* ============================================
+   S16 / S17 - DOCUMENT MANAGEMENT SYSTEM
+   ============================================ */
+
+.documents-main {
+  margin-left: 260px;
+  width: calc(100% - 260px);
+  min-height: 100vh;
+  height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 40px 48px;
+  display: block !important;
+  align-items: unset !important;
+  justify-content: unset !important;
+  box-sizing: border-box;
+  position: relative;
+  z-index: 1;
+}
+
+.documents-header {
+  margin-bottom: 28px;
+}
+
+.documents-subtitle {
+  font-size: 14px;
+  color: var(--text-muted);
+  font-weight: 300;
+  margin: 10px 0 0;
+  max-width: 620px;
+  line-height: 1.6;
+}
+
+.documents-card {
+  background: var(--navy-glass) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 20px !important;
+  padding: 28px 32px !important;
+  backdrop-filter: blur(24px) !important;
+  position: relative !important;
+  overflow: hidden !important;
+  margin-bottom: 24px;
+}
+
+.documents-card h2 {
+  font-family: var(--font-serif);
+  font-size: 1.6rem;
+  font-weight: 400;
+  color: var(--text);
+  margin: 0 0 8px;
+}
+
+.documents-card-subtitle {
+  color: var(--text-muted);
+  font-size: 14px;
+  margin: 0 0 20px;
+  line-height: 1.5;
+}
+
+.documents-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+
+.documents-form .profile-field:nth-child(2) {
+  grid-row: span 2;
+}
+
+.documents-form input,
+.documents-form select,
+.documents-form textarea,
+.documents-search {
+  width: 100%;
+  padding: 11px 14px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 300;
+  outline: none;
+  transition: border-color 0.18s ease, background 0.18s ease;
+  box-sizing: border-box;
+}
+
+.documents-form input::placeholder,
+.documents-form textarea::placeholder,
+.documents-search::placeholder {
+  color: var(--text-faint);
+}
+
+.documents-form input:focus,
+.documents-form select:focus,
+.documents-form textarea:focus,
+.documents-search:focus {
+  border-color: rgba(212,175,97,0.4);
+  background: rgba(212,175,97,0.04);
+}
+
+.documents-form select option {
+  background: var(--navy-mid);
+  color: var(--text);
+}
+
+.documents-form textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+.documents-form button {
+  grid-column: 1 / -1;
+  width: 220px;
+}
+
+.documents-message {
+  margin-top: 16px;
+  font-size: 13px;
+  font-weight: 500;
+  min-height: 18px;
+}
+
+.documents-message.success {
+  color: var(--success);
+}
+
+.documents-message.error {
+  color: #f87171;
+}
+
+.documents-list-header {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 20px;
+  align-items: start;
+  margin-bottom: 20px;
+}
+
+.documents-table-scroll {
+  max-height: calc(100vh - 440px);
+  overflow-y: auto;
+  overflow-x: auto;
+}
+
+.documents-table {
+  width: 100% !important;
+  min-width: 980px !important;
+  border-collapse: collapse !important;
+}
+
+.documents-table th {
+  padding: 10px 12px !important;
+  color: var(--text-faint) !important;
+  font-size: 10px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.1em !important;
+  text-transform: uppercase !important;
+  text-align: left !important;
+  border-bottom: 1px solid var(--border) !important;
+}
+
+.documents-table td {
+  padding: 12px 12px !important;
+  color: var(--text-muted) !important;
+  font-size: 13px !important;
+  text-align: left !important;
+  border-bottom: 1px solid var(--border) !important;
+  word-break: break-word !important;
+  vertical-align: top;
+}
+
+.documents-table tr:last-child td {
+  border-bottom: none !important;
+}
+
+.document-action-btn {
+  width: auto !important;
+  margin: 0 6px 6px 0 !important;
+  padding: 8px 12px !important;
+  font-size: 12px !important;
+  border-radius: 10px !important;
+}
+
+.document-danger-btn {
+  color: #991b1b !important;
+  background: #fef2f2 !important;
+  border-color: #fecaca !important;
+}
+
+.document-danger-btn:hover {
+  background: #fee2e2 !important;
+}
+
+.documents-empty-message {
+  display: none;
+  color: var(--text-muted);
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-top: 14px;
+  font-size: 14px;
+}
+
+@media (max-width: 1100px) {
+  .documents-form {
+    grid-template-columns: 1fr;
+  }
+
+  .documents-form .profile-field:nth-child(2) {
+    grid-row: auto;
+  }
+
+  .documents-list-header {
+    grid-template-columns: 1fr;
+  }
+
+  .documents-form button {
+    width: 100%;
+  }
+
+  .documents-table-scroll {
+    max-height: none;
+  }
+}
+
+@media (max-width: 900px) {
+  .documents-main {
+    margin-left: 0;
+    width: 100%;
+    height: auto;
+    padding: 24px 20px;
+  }
+
+  .documents-card {
+    padding: 26px 24px !important;
+  }
+}
