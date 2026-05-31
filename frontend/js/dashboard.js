@@ -1,5 +1,7 @@
 const loggedInUser = JSON.parse(sessionStorage.getItem('loggedInUser'));
 
+let allMembers = [];
+
 if (!loggedInUser) {
   window.location.href = 'login.html';
 } else {
@@ -53,12 +55,14 @@ function initializeDashboard() {
     sessionChip.textContent = diff === 0 ? 'Session Active' : `Active ${diff}m`;
   }, 30000);
 
-  // Auto-open page from URL param (e.g. ?page=members)
   const urlParams = new URLSearchParams(window.location.search);
   const page = urlParams.get('page');
+
   if (page === 'members') {
     showMemberManagementPage();
   }
+
+  setupMemberSearchInput();
 }
 
 /* PAGE SWITCHING */
@@ -102,6 +106,7 @@ function showMemberManagementPage() {
 function setActiveNavLink(label) {
   document.querySelectorAll('.ims-nav-link').forEach(link => {
     link.classList.remove('active');
+
     if (link.textContent.trim() === label) {
       link.classList.add('active');
     }
@@ -141,7 +146,10 @@ async function loadMembers() {
       return;
     }
 
-    renderMembers(data.users);
+    allMembers = data.users || [];
+
+    renderMembers(allMembers);
+    applyMemberSearch();
   } catch (error) {
     console.error('Load members error:', error);
     showRoleMessage('Unable to load members.', 'error');
@@ -150,17 +158,31 @@ async function loadMembers() {
 
 function renderMembers(users) {
   const membersTableBody = document.getElementById('membersTableBody');
+  const memberSearchMessage = document.getElementById('memberSearchMessage');
 
   if (!membersTableBody) return;
 
   membersTableBody.innerHTML = '';
 
+  if (!users || users.length === 0) {
+    if (memberSearchMessage) {
+      memberSearchMessage.classList.remove('hidden');
+      memberSearchMessage.textContent = 'No members found.';
+    }
+    return;
+  }
+
+  if (memberSearchMessage) {
+    memberSearchMessage.classList.add('hidden');
+    memberSearchMessage.textContent = '';
+  }
+
   users.forEach(user => {
     const row = document.createElement('tr');
 
     row.innerHTML = `
-      <td>${user.name}</td>
-      <td>${user.email}</td>
+      <td>${user.name || 'N/A'}</td>
+      <td>${user.email || 'N/A'}</td>
       <td>
         <select class="role-select" data-user-id="${user.id}">
           <option value="member" ${user.role === 'member' ? 'selected' : ''}>Member</option>
@@ -186,6 +208,10 @@ function renderMembers(users) {
     membersTableBody.appendChild(row);
   });
 
+  attachMemberActionEvents();
+}
+
+function attachMemberActionEvents() {
   document.querySelectorAll('.role-select').forEach(select => {
     select.addEventListener('change', updateUserRole);
   });
@@ -194,6 +220,40 @@ function renderMembers(users) {
     button.addEventListener('click', updateUserStatus);
   });
 }
+
+/* MEMBER SEARCH INSIDE MEMBER MANAGEMENT */
+
+function setupMemberSearchInput() {
+  const memberSearchInput = document.getElementById('memberSearchInput');
+
+  if (!memberSearchInput) return;
+
+  memberSearchInput.addEventListener('input', applyMemberSearch);
+}
+
+function applyMemberSearch() {
+  const memberSearchInput = document.getElementById('memberSearchInput');
+
+  if (!memberSearchInput) return;
+
+  const searchValue = memberSearchInput.value.toLowerCase().trim();
+
+  const filteredMembers = allMembers.filter(user => {
+    const name = (user.name || '').toLowerCase();
+    const email = (user.email || '').toLowerCase();
+    const role = (user.role || '').toLowerCase();
+
+    return (
+      name.includes(searchValue) ||
+      email.includes(searchValue) ||
+      role.includes(searchValue)
+    );
+  });
+
+  renderMembers(filteredMembers);
+}
+
+/* USER ACTIONS */
 
 async function updateUserRole(event) {
   const userId = event.target.dataset.userId;
@@ -222,9 +282,13 @@ async function updateUserRole(event) {
 
       if (newRole !== 'admin') {
         showRoleMessage('Your role changed. Admin access removed.', 'error');
-        setTimeout(() => { window.location.reload(); }, 1200);
+        setTimeout(() => {
+          window.location.reload();
+        }, 1200);
       }
     }
+
+    await loadMembers();
   } catch (error) {
     console.error('Update role error:', error);
     showRoleMessage('Unable to update role.', 'error');
@@ -273,7 +337,9 @@ async function logout() {
       msg.textContent = 'Signed out successfully. Redirecting…';
     }
 
-    setTimeout(() => { window.location.href = 'login.html'; }, 800);
+    setTimeout(() => {
+      window.location.href = 'login.html';
+    }, 800);
   } catch {
     sessionStorage.removeItem('loggedInUser');
     window.location.href = 'login.html';

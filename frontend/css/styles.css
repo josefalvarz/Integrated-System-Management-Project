@@ -2159,3 +2159,199 @@ body.auth-page::before {
     padding: 24px 20px;
   }
 }
+
+/* ============================================
+   S12 - MEMBER SEARCH INSIDE MEMBER MANAGEMENT
+   ============================================ */
+
+.member-management-search {
+  margin-bottom: 24px;
+}
+
+.member-management-search input {
+  width: 100%;
+  padding: 16px 18px;
+  border: 1px solid #cfd8e6;
+  border-radius: 16px;
+  background: #ffffff;
+  color: #0f172a;
+  font-size: 17px;
+  font-family: "DM Sans", sans-serif;
+  outline: none;
+  margin: 0;
+}
+
+.member-management-search input::placeholder {
+  color: #94a3b8;
+}
+
+.member-management-search input:focus {
+  border-color: #94a3b8;
+  box-shadow: 0 0 0 4px rgba(148, 163, 184, 0.15);
+}
+
+.member-search-message {
+  display: block;
+  color: #991b1b;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 14px;
+  padding: 12px 18px;
+  margin-bottom: 20px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.member-search-message.hidden {
+  display: none !important;
+}
+
+/* ============================================
+   S12 FIX - MEMBER MANAGEMENT SEARCH + 100% ZOOM
+   ============================================ */
+
+/* Make dashboard content start from the top instead of being vertically centered */
+.ims-main.ims-main-simple {
+  align-items: flex-start !important;
+  overflow-y: auto !important;
+  height: 100vh !important;
+  padding-top: 28px !important;
+  padding-bottom: 28px !important;
+}
+
+/* Keep the normal dashboard welcome card centered */
+#dashboardPage {
+  min-height: calc(100vh - 56px);
+  display: flex;
+  align-items: center;
+}
+
+/* Make Member Management fit better on 100% zoom */
+#memberManagementPage {
+  width: 100% !important;
+  max-width: 1200px !important;
+  margin: 0 auto !important;
+  padding: 18px 28px 32px !important;
+}
+
+#memberManagementPage .member-page-header {
+  margin-bottom: 18px !important;
+}
+
+#memberManagementPage .member-page-header h1 {
+  font-size: 42px !important;
+  line-height: 1.1 !important;
+  margin: 0 !important;
+}
+
+#memberManagementPage .members-card {
+  padding: 24px 32px !important;
+  border-radius: 22px !important;
+}
+
+/* Search input matching Member Management style */
+.member-management-search {
+  margin-bottom: 24px !important;
+}
+
+.member-management-search input {
+  width: 100% !important;
+  padding: 15px 18px !important;
+  border: 1px solid #cfd8e6 !important;
+  border-radius: 16px !important;
+  background: #ffffff !important;
+  color: #0f172a !important;
+  font-size: 17px !important;
+  font-family: "DM Sans", sans-serif !important;
+  outline: none !important;
+  margin: 0 !important;
+  box-sizing: border-box !important;
+}
+
+.member-management-search input::placeholder {
+  color: #94a3b8 !important;
+}
+
+.member-management-search input:focus {
+  border-color: #94a3b8 !important;
+  box-shadow: 0 0 0 4px rgba(148, 163, 184, 0.15) !important;
+}
+
+/* Compact table spacing so it fits better */
+#memberManagementPage .members-table {
+  width: 100% !important;
+  min-width: 760px !important;
+}
+
+#memberManagementPage .members-table th {
+  padding: 12px 10px !important;
+  font-size: 16px !important;
+}
+
+#memberManagementPage .members-table td {
+  padding: 12px 10px !important;
+  font-size: 16px !important;
+}
+
+/* Prevent email column from becoming too huge */
+#memberManagementPage .members-table th:nth-child(2),
+#memberManagementPage .members-table td:nth-child(2) {
+  width: 28% !important;
+}
+
+/* Keep name readable */
+#memberManagementPage .members-table th:nth-child(1),
+#memberManagementPage .members-table td:nth-child(1) {
+  width: 18% !important;
+}
+
+/* Make role select smaller */
+#memberManagementPage .role-select {
+  width: 140px !important;
+  padding: 9px 12px !important;
+  font-size: 15px !important;
+}
+
+/* Make status and action buttons more compact */
+#memberManagementPage .status-pill {
+  min-width: 86px !important;
+  padding: 7px 12px !important;
+  font-size: 14px !important;
+}
+
+#memberManagementPage .table-action-btn {
+  padding: 9px 16px !important;
+  font-size: 15px !important;
+}
+
+/* No results message */
+.member-search-message {
+  display: block;
+  color: #991b1b;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 14px;
+  padding: 12px 18px;
+  margin-bottom: 20px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.member-search-message.hidden {
+  display: none !important;
+}
+
+@media (max-width: 900px) {
+  .ims-main.ims-main-simple {
+    height: auto !important;
+    overflow-y: visible !important;
+  }
+
+  #memberManagementPage {
+    padding: 24px 20px !important;
+  }
+
+  #memberManagementPage .members-card {
+    overflow-x: auto !important;
+  }
+}
