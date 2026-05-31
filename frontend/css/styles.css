@@ -2355,3 +2355,234 @@ body.auth-page::before {
     overflow-x: auto !important;
   }
 }
+/* ============================================
+   S20 / S21 - E-VOTING MODULE
+   ============================================ */
+
+.election-main {
+  margin-left: 260px;
+  width: calc(100% - 260px);
+  min-height: 100vh;
+  height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 40px 48px;
+  display: block !important;
+  align-items: unset !important;
+  justify-content: unset !important;
+  box-sizing: border-box;
+  position: relative;
+  z-index: 1;
+}
+
+.election-header {
+  margin-bottom: 28px;
+}
+
+.election-subtitle {
+  font-size: 14px;
+  color: var(--text-muted);
+  font-weight: 300;
+  margin: 10px 0 0;
+  max-width: 560px;
+  line-height: 1.6;
+}
+
+.election-grid {
+  display: grid;
+  grid-template-columns: 380px 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+.election-form-card,
+.election-list-card,
+.election-detail-card {
+  background: var(--navy-glass) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 20px !important;
+  padding: 28px 32px !important;
+  backdrop-filter: blur(24px) !important;
+  position: relative !important;
+  overflow: hidden !important;
+  max-width: none !important;
+}
+
+.election-form-card h2,
+.election-list-card h2,
+.election-detail-card h2 {
+  font-family: var(--font-serif);
+  font-size: 1.6rem;
+  font-weight: 400;
+  color: var(--text);
+  margin: 0 0 20px;
+}
+
+.election-detail-card {
+  margin-top: 20px;
+}
+
+.election-main input,
+.election-main select,
+.election-main textarea {
+  width: 100%;
+  padding: 11px 14px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 300;
+  outline: none;
+  transition: border-color 0.18s ease, background 0.18s ease;
+  box-sizing: border-box;
+}
+
+.election-main input::placeholder {
+  color: var(--text-faint);
+}
+
+.election-main input:focus,
+.election-main select:focus,
+.election-main textarea:focus {
+  border-color: rgba(212,175,97,0.4);
+  background: rgba(212,175,97,0.04);
+}
+
+.election-main input[type="date"] {
+  color-scheme: dark;
+}
+
+.election-main .profile-btn {
+  width: 100%;
+  margin-top: 4px;
+}
+
+.election-main .profile-btn-ghost {
+  width: auto;
+  margin-bottom: 22px;
+}
+
+.election-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  color: var(--text-muted);
+}
+
+.election-list > div,
+.election-list .election-item {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 16px 18px;
+  color: var(--text-muted);
+  transition: border-color 0.18s ease, background 0.18s ease;
+}
+
+.election-list > div:hover,
+.election-list .election-item:hover {
+  border-color: var(--border-hover);
+  background: rgba(212,175,97,0.04);
+}
+
+.election-list h3,
+.election-list strong {
+  color: var(--text);
+  font-family: var(--font-serif);
+  font-weight: 500;
+}
+
+.election-list p {
+  color: var(--text-muted);
+  margin: 6px 0;
+  line-height: 1.5;
+}
+
+.election-detail-card p {
+  color: var(--text-muted);
+  font-size: 14px;
+  line-height: 1.6;
+  margin: 8px 0;
+}
+
+.election-detail-card h3 {
+  font-family: var(--font-serif);
+  color: var(--text);
+  font-size: 1.3rem;
+  font-weight: 400;
+  margin: 0 0 14px;
+}
+
+.candidate-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.candidate-list > div,
+.candidate-list p,
+.candidate-list li {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px 14px;
+  color: var(--text-muted);
+  list-style: none;
+}
+
+.add-candidate-section {
+  margin-top: 20px;
+  display: grid;
+  grid-template-columns: 1fr 180px;
+  gap: 12px;
+  align-items: start;
+}
+
+.add-candidate-section .profile-btn {
+  margin-top: 0;
+}
+
+#createMessage,
+#candidateMessage {
+  margin-top: 14px;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+#createMessage.success,
+#candidateMessage.success {
+  color: var(--success);
+}
+
+#createMessage.error,
+#candidateMessage.error {
+  color: #f87171;
+}
+
+@media (max-width: 1100px) {
+  .election-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .add-candidate-section {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 900px) {
+  .election-main {
+    margin-left: 0;
+    width: 100%;
+    height: auto;
+    padding: 24px 20px;
+  }
+
+  .election-form-card,
+  .election-list-card,
+  .election-detail-card {
+    padding: 26px 24px !important;
+  }
+}
