@@ -27,7 +27,7 @@ const storage = multer.diskStorage({
 const upload = multer({
   storage: storage,
   limits: {
-    fileSize: 10 * 1024 * 1024, // 10 MB
+    fileSize: 10 * 1024 * 1024,
   },
   fileFilter: function (req, file, cb) {
     const allowedExtensions = [".csv", ".xlsx", ".xls"];
@@ -201,14 +201,90 @@ function deleteUploadedFile(req) {
   }
 }
 
+async function buildPreview(rawRows) {
+  await createImportedMembersTable();
+
+  const preview = {
+    totalRows: rawRows.length,
+    validRows: 0,
+    invalidRows: 0,
+    duplicateRows: 0,
+    validRecords: [],
+    invalidRecords: [],
+  };
+
+  const emailsInsideFile = new Set();
+
+  for (let index = 0; index < rawRows.length; index++) {
+    const rowNumber = index + 2;
+    const cleanedRow = normalizeRow(rawRows[index]);
+    const validationErrors = validateRow(cleanedRow);
+
+    if (validationErrors.length > 0) {
+      preview.invalidRows++;
+
+      preview.invalidRecords.push({
+        row: rowNumber,
+        name: cleanedRow.name || "N/A",
+        email: cleanedRow.email || "N/A",
+        errors: validationErrors,
+      });
+
+      continue;
+    }
+
+    if (emailsInsideFile.has(cleanedRow.email)) {
+      preview.duplicateRows++;
+
+      preview.invalidRecords.push({
+        row: rowNumber,
+        name: cleanedRow.name,
+        email: cleanedRow.email,
+        errors: ["Duplicate email inside uploaded file"],
+      });
+
+      continue;
+    }
+
+    emailsInsideFile.add(cleanedRow.email);
+
+    const existingMember = await getQuery(
+      "SELECT id FROM imported_members WHERE email = ?",
+      [cleanedRow.email]
+    );
+
+    if (existingMember) {
+      preview.duplicateRows++;
+
+      preview.invalidRecords.push({
+        row: rowNumber,
+        name: cleanedRow.name,
+        email: cleanedRow.email,
+        errors: ["Duplicate email already exists in database"],
+      });
+
+      continue;
+    }
+
+    preview.validRows++;
+
+    preview.validRecords.push({
+      name: cleanedRow.name,
+      email: cleanedRow.email,
+      phone: cleanedRow.phone,
+      joined: cleanedRow.joined,
+    });
+  }
+
+  return preview;
+}
+
 router.post(
-  "/import",
+  "/preview",
   requireAdmin,
   upload.single("memberFile"),
   async function (req, res) {
     try {
-      await createImportedMembersTable();
-
       if (!req.file) {
         return res.status(400).json({
           success: false,
@@ -221,8 +297,47 @@ router.post(
         req.file.originalname
       );
 
+      const preview = await buildPreview(rawRows);
+
+      deleteUploadedFile(req);
+
+      return res.status(200).json({
+        success: true,
+        message: "Preview generated successfully.",
+        preview: preview,
+      });
+    } catch (error) {
+      console.error("Data migration preview error:", error);
+
+      deleteUploadedFile(req);
+
+      return res.status(500).json({
+        success: false,
+        message: "Preview failed.",
+        error: error.message,
+      });
+    }
+  }
+);
+
+router.post(
+  "/confirm-import",
+  requireAdmin,
+  async function (req, res) {
+    try {
+      await createImportedMembersTable();
+
+      const validRecords = req.body.validRecords;
+
+      if (!Array.isArray(validRecords) || validRecords.length === 0) {
+        return res.status(400).json({
+          success: false,
+          message: "No valid records were provided for import.",
+        });
+      }
+
       const summary = {
-        totalRows: rawRows.length,
+        totalRows: validRecords.length,
         importedRows: 0,
         invalidRows: 0,
         duplicateRows: 0,
@@ -230,11 +345,17 @@ router.post(
         importedRecords: [],
       };
 
-      const emailsInsideFile = new Set();
+      const emailsInsideRequest = new Set();
 
-      for (let index = 0; index < rawRows.length; index++) {
-        const rowNumber = index + 2;
-        const cleanedRow = normalizeRow(rawRows[index]);
+      for (let index = 0; index < validRecords.length; index++) {
+        const rowNumber = index + 1;
+        const cleanedRow = {
+          name: cleanText(validRecords[index].name),
+          email: cleanEmail(validRecords[index].email),
+          phone: cleanText(validRecords[index].phone),
+          joined: cleanText(validRecords[index].joined),
+        };
+
         const validationErrors = validateRow(cleanedRow);
 
         if (validationErrors.length > 0) {
@@ -250,20 +371,20 @@ router.post(
           continue;
         }
 
-        if (emailsInsideFile.has(cleanedRow.email)) {
+        if (emailsInsideRequest.has(cleanedRow.email)) {
           summary.duplicateRows++;
 
           summary.failedRows.push({
             row: rowNumber,
             name: cleanedRow.name,
             email: cleanedRow.email,
-            errors: ["Duplicate email inside uploaded file"],
+            errors: ["Duplicate email inside confirmed records"],
           });
 
           continue;
         }
 
-        emailsInsideFile.add(cleanedRow.email);
+        emailsInsideRequest.add(cleanedRow.email);
 
         const existingMember = await getQuery(
           "SELECT id FROM imported_members WHERE email = ?",
@@ -303,6 +424,76 @@ router.post(
           email: cleanedRow.email,
           phone: cleanedRow.phone,
           joined: cleanedRow.joined,
+        });
+      }
+
+      return res.status(200).json({
+        success: true,
+        message: "Import confirmed successfully.",
+        summary: summary,
+      });
+    } catch (error) {
+      console.error("Confirm import error:", error);
+
+      return res.status(500).json({
+        success: false,
+        message: "Import failed.",
+        error: error.message,
+      });
+    }
+  }
+);
+
+/*
+  Legacy route preserved.
+  This keeps the previous import endpoint available in case another part
+  of the project still depends on it.
+*/
+router.post(
+  "/import",
+  requireAdmin,
+  upload.single("memberFile"),
+  async function (req, res) {
+    try {
+      if (!req.file) {
+        return res.status(400).json({
+          success: false,
+          message: "No file uploaded.",
+        });
+      }
+
+      const rawRows = await parseUploadedFile(
+        req.file.path,
+        req.file.originalname
+      );
+
+      const preview = await buildPreview(rawRows);
+
+      const summary = {
+        totalRows: preview.totalRows,
+        importedRows: 0,
+        invalidRows: preview.invalidRows,
+        duplicateRows: preview.duplicateRows,
+        failedRows: preview.invalidRecords,
+        importedRecords: [],
+      };
+
+      for (const record of preview.validRecords) {
+        await runQuery(
+          `
+          INSERT INTO imported_members (name, email, phone, joined)
+          VALUES (?, ?, ?, ?)
+          `,
+          [record.name, record.email, record.phone, record.joined]
+        );
+
+        summary.importedRows++;
+
+        summary.importedRecords.push({
+          name: record.name,
+          email: record.email,
+          phone: record.phone,
+          joined: record.joined,
         });
       }
 
