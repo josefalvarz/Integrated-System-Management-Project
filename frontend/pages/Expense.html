@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Finance - Organization X</title>
+  <title>Record Expense - Organization X</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
@@ -38,7 +38,8 @@
           <a href="#" class="ims-nav-link">WhatsApp Analytics</a>
           <a href="#" class="ims-nav-link">Smart Notifications</a>
           <a href="#" class="ims-nav-link">Meetings</a>
-          <a href="./income.html" class="ims-nav-link active admin-only">Finance</a>
+          <a href="./income.html" class="ims-nav-link admin-only">Record Income</a>
+          <a href="./Expense.html" class="ims-nav-link active admin-only">Record Expense</a>
         </nav>
       </div>
 
@@ -72,73 +73,17 @@
           <span class="ims-sep">／</span>
           <span>Finance</span>
           <span class="ims-sep">／</span>
-          <span>Summary</span>
+          <span>Record Expense</span>
         </p>
-        <h1 class="profile-title">Financial <em>Management</em></h1>
+        <h1 class="profile-title">Record <em>expense</em></h1>
       </header>
 
-      <div id="financeMessage" class="role-message hidden"></div>
+      <div id="expenseMessage" class="role-message hidden"></div>
 
-      <!-- FINANCIAL SUMMARY -->
-      <section class="finance-summary-grid">
-        <div class="finance-summary-card">
-          <span>Total Income</span>
-          <strong id="totalIncomeDisplay">€0.00</strong>
-        </div>
+      <!-- TWO COLUMN LAYOUT -->
+      <div class="finance-grid">
 
-        <div class="finance-summary-card">
-          <span>Total Expenses</span>
-          <strong id="totalExpensesDisplay">€0.00</strong>
-        </div>
-
-        <div class="finance-summary-card" id="balanceCard">
-          <span>Current Balance</span>
-          <strong id="balanceDisplay">€0.00</strong>
-          <small id="balanceWarning" class="hidden">Warning: Negative balance</small>
-        </div>
-      </section>
-
-      <!-- FORMS -->
-      <div class="finance-forms-grid">
-
-        <!-- INCOME FORM -->
-        <div class="profile-card finance-form-card">
-          <div class="profile-top-rule"></div>
-          <p class="profile-edit-title">Income transaction details</p>
-
-          <form id="incomeForm" class="profile-form">
-            <div class="profile-field">
-              <span class="profile-label">Amount</span>
-              <input type="number" id="incomeAmount" class="profile-input"
-                placeholder="Enter income amount" min="0.01" step="0.01" />
-            </div>
-
-            <div class="profile-field">
-              <span class="profile-label">Date</span>
-              <input type="date" id="incomeDate" class="profile-input" />
-            </div>
-
-            <div class="profile-field">
-              <span class="profile-label">Category</span>
-              <select id="incomeCategory" class="profile-input">
-                <option value="">Select category</option>
-                <option value="Membership Fee">Membership Fee</option>
-                <option value="Donation">Donation</option>
-                <option value="Other">Other</option>
-              </select>
-            </div>
-
-            <div class="profile-field">
-              <span class="profile-label">Description</span>
-              <textarea id="incomeDescription" class="profile-input"
-                placeholder="Enter income description" rows="3"></textarea>
-            </div>
-
-            <button type="submit" class="profile-btn">Save Income Transaction</button>
-          </form>
-        </div>
-
-        <!-- EXPENSE FORM -->
+        <!-- LEFT: FORM CARD -->
         <div class="profile-card finance-form-card">
           <div class="profile-top-rule"></div>
           <p class="profile-edit-title">Expense transaction details</p>
@@ -147,7 +92,7 @@
             <div class="profile-field">
               <span class="profile-label">Amount</span>
               <input type="number" id="expenseAmount" class="profile-input"
-                placeholder="Enter expense amount" min="0.01" step="0.01" />
+                placeholder="Enter amount" min="0.01" step="0.01" />
             </div>
 
             <div class="profile-field">
@@ -159,10 +104,8 @@
               <span class="profile-label">Category</span>
               <select id="expenseCategory" class="profile-input">
                 <option value="">Select category</option>
-                <option value="Rent">Rent</option>
-                <option value="Utilities">Utilities</option>
-                <option value="Supplies">Supplies</option>
-                <option value="Event Cost">Event Cost</option>
+                <option value="Membership Fee">Membership Fee</option>
+                <option value="Donation">Donation</option>
                 <option value="Other">Other</option>
               </select>
             </div>
@@ -170,42 +113,41 @@
             <div class="profile-field">
               <span class="profile-label">Description</span>
               <textarea id="expenseDescription" class="profile-input"
-                placeholder="Enter expense description" rows="3"></textarea>
+                placeholder="Enter description" rows="3"></textarea>
             </div>
 
             <button type="submit" class="profile-btn">Save Expense Transaction</button>
           </form>
         </div>
 
-      </div>
+        <!-- RIGHT: TABLE CARD -->
+        <div class="profile-card finance-table-card">
+          <div class="profile-top-rule"></div>
+          <p class="profile-edit-title">Expense Records List</p>
 
-      <!-- COMBINED FINANCIAL RECORDS LIST -->
-      <div class="profile-card finance-table-card finance-full-table-card">
-        <div class="profile-top-rule"></div>
-        <p class="profile-edit-title">Financial Records List</p>
-
-        <div class="finance-table-scroll">
-          <table class="members-table">
-            <thead>
-              <tr>
-                <th>Type</th>
-                <th>Amount</th>
-                <th>Date</th>
-                <th>Category</th>
-                <th>Description</th>
-              </tr>
-            </thead>
-            <tbody id="financialRecordsTableBody">
-              <!-- Loaded by income.js -->
-            </tbody>
-          </table>
+          <div class="finance-table-scroll">
+            <table class="members-table">
+              <thead>
+                <tr>
+                  <th>Amount</th>
+                  <th>Date</th>
+                  <th>Category</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody id="expenseTableBody">
+                <!-- Loaded by expense.js -->
+              </tbody>
+            </table>
+          </div>
         </div>
+
       </div>
 
     </main>
 
   </div>
 
-  <script src="../js/income.js"></script>
+  <script src="../js/expense.js"></script>
 </body>
 </html>
