@@ -29,6 +29,17 @@ const sidebarUserRole = document.getElementById("sidebarUserRole");
 const userInitials = document.getElementById("userInitials");
 const logoutBtn = document.getElementById("logoutBtn");
 
+const previewSection = document.getElementById("previewSection");
+const validPreviewTableBody = document.getElementById("validPreviewTableBody");
+const invalidPreviewTableBody = document.getElementById("invalidPreviewTableBody");
+const validPreviewNote = document.getElementById("validPreviewNote");
+const invalidPreviewNote = document.getElementById("invalidPreviewNote");
+const confirmImportBtn = document.getElementById("confirmImportBtn");
+const cancelImportBtn = document.getElementById("cancelImportBtn");
+
+let previewValidRecords = [];
+let previewInvalidRecords = [];
+
 if (loggedInUser) {
   const displayName = loggedInUser.name || loggedInUser.email || "Admin";
 
@@ -46,6 +57,7 @@ if (logoutBtn) {
 memberFileInput.addEventListener("change", function () {
   if (memberFileInput.files.length > 0) {
     selectedFileName.textContent = memberFileInput.files[0].name;
+    resetPreviewOnly();
   } else {
     selectedFileName.textContent = "No file selected";
   }
@@ -64,10 +76,11 @@ importForm.addEventListener("submit", async function (event) {
 
   formData.append("memberFile", file);
 
-  setLoadingState(true);
+  setLoadingState(true, "Previewing...");
+  setProgress(35);
 
   try {
-    const response = await fetch("/api/data-migration/import", {
+    const response = await fetch("/api/data-migration/preview", {
       method: "POST",
       headers: {
         "x-user-role": loggedInUser.role,
@@ -78,35 +91,129 @@ importForm.addEventListener("submit", async function (event) {
     const data = await response.json();
 
     if (!response.ok || !data.success) {
+      throw new Error(data.message || "Preview failed.");
+    }
+
+    previewValidRecords = data.preview.validRecords || [];
+    previewInvalidRecords = data.preview.invalidRecords || [];
+
+    updatePreview(data.preview);
+    setProgress(70);
+
+    summaryBox.innerHTML = `
+      <div class="preview-message">
+        Preview generated successfully. Please review the records before confirming the import.
+      </div>
+    `;
+  } catch (error) {
+    alert(error.message);
+    setProgress(0);
+  } finally {
+    setLoadingState(false, "Preview member data");
+  }
+});
+
+confirmImportBtn.addEventListener("click", async function () {
+  if (!previewValidRecords || previewValidRecords.length === 0) {
+    alert("There are no valid records to import.");
+    return;
+  }
+
+  const confirmImport = confirm(
+    `Are you sure you want to import ${previewValidRecords.length} valid record(s)?`
+  );
+
+  if (!confirmImport) {
+    return;
+  }
+
+  confirmImportBtn.disabled = true;
+  cancelImportBtn.disabled = true;
+  confirmImportBtn.textContent = "Importing...";
+  setProgress(90);
+
+  try {
+    const response = await fetch("/api/data-migration/confirm-import", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-user-role": loggedInUser.role,
+      },
+      body: JSON.stringify({
+        validRecords: previewValidRecords,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok || !data.success) {
       throw new Error(data.message || "Import failed.");
     }
 
     updateSummary(data.summary);
     setProgress(100);
+
+    previewSection.classList.add("hidden");
+    previewValidRecords = [];
+    previewInvalidRecords = [];
+
+    alert("Import confirmed successfully.");
   } catch (error) {
     alert(error.message);
-    setProgress(0);
+    setProgress(70);
   } finally {
-    setLoadingState(false);
+    confirmImportBtn.disabled = false;
+    cancelImportBtn.disabled = false;
+    confirmImportBtn.textContent = "Confirm Import";
   }
 });
 
-function setLoadingState(isLoading) {
+cancelImportBtn.addEventListener("click", function () {
+  const cancelPreview = confirm(
+    "Are you sure you want to cancel this import? No records will be saved."
+  );
+
+  if (!cancelPreview) {
+    return;
+  }
+
+  resetAllImportState();
+
+  summaryBox.innerHTML = `
+    Upload a CSV or Excel file to preview the import results.
+  `;
+
+  alert("Import cancelled. No records were saved.");
+});
+
+function setLoadingState(isLoading, buttonText) {
   const button = importForm.querySelector("button");
 
   if (isLoading) {
     button.disabled = true;
-    button.textContent = "Importing...";
-    setProgress(35);
+    button.textContent = buttonText || "Processing...";
   } else {
     button.disabled = false;
-    button.textContent = "Import member data";
+    button.textContent = buttonText || "Preview member data";
   }
 }
 
 function setProgress(percent) {
   progressFill.style.width = `${percent}%`;
   pipelineStatus.textContent = `${percent}%`;
+}
+
+function updatePreview(preview) {
+  totalRowsElement.textContent = preview.totalRows;
+  importedRowsElement.textContent = preview.validRows;
+  invalidRowsElement.textContent = preview.invalidRows;
+  duplicateRowsElement.textContent = preview.duplicateRows;
+
+  renderIssues(preview.invalidRecords);
+  renderValidPreview(preview.validRecords);
+  renderInvalidPreview(preview.invalidRecords);
+
+  previewSection.classList.remove("hidden");
 }
 
 function updateSummary(summary) {
@@ -124,7 +231,7 @@ function renderIssues(failedRows) {
 
   if (!failedRows || failedRows.length === 0) {
     issueList.innerHTML = `
-      <p class="empty-message">No issues detected. All rows were valid.</p>
+      <p class="dm-empty-message">No issues detected. All rows were valid.</p>
     `;
     return;
   }
@@ -143,6 +250,76 @@ function renderIssues(failedRows) {
 
     issueList.appendChild(issueItem);
   });
+}
+
+function renderValidPreview(validRecords) {
+  validPreviewTableBody.innerHTML = "";
+
+  if (!validRecords || validRecords.length === 0) {
+    validPreviewTableBody.innerHTML = `
+      <tr>
+        <td colspan="4">No valid records found.</td>
+      </tr>
+    `;
+    validPreviewNote.textContent = "";
+    return;
+  }
+
+  const rowsHtml = validRecords
+    .slice(0, 20)
+    .map(function (record) {
+      return `
+        <tr>
+          <td>${escapeHtml(record.name)}</td>
+          <td>${escapeHtml(record.email)}</td>
+          <td>${escapeHtml(record.phone || "-")}</td>
+          <td>${escapeHtml(record.joined || "-")}</td>
+        </tr>
+      `;
+    })
+    .join("");
+
+  validPreviewTableBody.innerHTML = rowsHtml;
+
+  validPreviewNote.textContent =
+    validRecords.length > 20
+      ? `Showing first 20 valid records only. Total valid records: ${validRecords.length}.`
+      : `Total valid records: ${validRecords.length}.`;
+}
+
+function renderInvalidPreview(invalidRecords) {
+  invalidPreviewTableBody.innerHTML = "";
+
+  if (!invalidRecords || invalidRecords.length === 0) {
+    invalidPreviewTableBody.innerHTML = `
+      <tr>
+        <td colspan="4">No invalid or duplicate records found.</td>
+      </tr>
+    `;
+    invalidPreviewNote.textContent = "";
+    return;
+  }
+
+  const rowsHtml = invalidRecords
+    .slice(0, 20)
+    .map(function (record) {
+      return `
+        <tr>
+          <td>${escapeHtml(record.row)}</td>
+          <td>${escapeHtml(record.name || "N/A")}</td>
+          <td>${escapeHtml(record.email || "N/A")}</td>
+          <td>${record.errors.map(escapeHtml).join(", ")}</td>
+        </tr>
+      `;
+    })
+    .join("");
+
+  invalidPreviewTableBody.innerHTML = rowsHtml;
+
+  invalidPreviewNote.textContent =
+    invalidRecords.length > 20
+      ? `Showing first 20 invalid or duplicate records only. Total issues: ${invalidRecords.length}.`
+      : `Total issues: ${invalidRecords.length}.`;
 }
 
 function renderImportedRecords(importedRecords, summary) {
@@ -196,6 +373,42 @@ function renderImportedRecords(importedRecords, summary) {
         : ""
     }
   `;
+}
+
+function resetPreviewOnly() {
+  previewValidRecords = [];
+  previewInvalidRecords = [];
+
+  previewSection.classList.add("hidden");
+  validPreviewTableBody.innerHTML = "";
+  invalidPreviewTableBody.innerHTML = "";
+  validPreviewNote.textContent = "";
+  invalidPreviewNote.textContent = "";
+}
+
+function resetAllImportState() {
+  previewValidRecords = [];
+  previewInvalidRecords = [];
+
+  memberFileInput.value = "";
+  selectedFileName.textContent = "No file selected";
+
+  totalRowsElement.textContent = "0";
+  importedRowsElement.textContent = "0";
+  invalidRowsElement.textContent = "0";
+  duplicateRowsElement.textContent = "0";
+
+  issueList.innerHTML = `
+    <p class="dm-empty-message">No issues detected yet.</p>
+  `;
+
+  previewSection.classList.add("hidden");
+  validPreviewTableBody.innerHTML = "";
+  invalidPreviewTableBody.innerHTML = "";
+  validPreviewNote.textContent = "";
+  invalidPreviewNote.textContent = "";
+
+  setProgress(0);
 }
 
 function escapeHtml(value) {

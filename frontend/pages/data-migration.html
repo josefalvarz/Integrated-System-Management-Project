@@ -83,7 +83,7 @@
           <h2 id="totalRows">0</h2>
         </div>
         <div class="dm-stat-card">
-          <p>Imported</p>
+          <p>Ready to import</p>
           <h2 id="importedRows">0</h2>
         </div>
         <div class="dm-stat-card">
@@ -112,7 +112,7 @@
               <span id="selectedFileName">No file selected</span>
             </label>
             <input type="file" id="memberFile" name="memberFile" accept=".csv,.xlsx,.xls" hidden />
-            <button type="submit" class="dm-primary-btn">Import member data</button>
+            <button type="submit" class="dm-primary-btn">Preview member data</button>
           </form>
 
           <div class="dm-pipeline">
@@ -126,7 +126,7 @@
             <div class="dm-pipeline-steps">
               <span>Upload</span>
               <span>Validation</span>
-              <span>Duplicates</span>
+              <span>Preview</span>
               <span>Database</span>
             </div>
           </div>
@@ -135,7 +135,7 @@
         <!-- Failed rows card -->
         <div class="dm-card">
           <h2>Failed rows</h2>
-          <p>Invalid or duplicate rows will appear here.</p>
+          <p>Invalid or duplicate rows will appear here before importing.</p>
           <div id="issueList" class="dm-issue-list">
             <p class="dm-empty-message">No issues detected yet.</p>
           </div>
@@ -143,12 +143,64 @@
 
       </section>
 
+      <!-- PREVIEW SECTION -->
+      <section id="previewSection" class="dm-card dm-preview-card hidden">
+        <h2>Import preview</h2>
+        <p>Review the cleaned records before saving them into the system database.</p>
+
+        <div class="dm-preview-actions">
+          <button id="confirmImportBtn" type="button" class="dm-primary-btn">
+            Confirm Import
+          </button>
+
+          <button id="cancelImportBtn" type="button" class="dm-secondary-btn">
+            Cancel Import
+          </button>
+        </div>
+
+        <div class="dm-preview-table-wrapper">
+          <h3>Valid records ready to import</h3>
+          <div class="dm-table-scroll">
+            <table class="import-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Phone</th>
+                  <th>Joined</th>
+                </tr>
+              </thead>
+              <tbody id="validPreviewTableBody"></tbody>
+            </table>
+          </div>
+          <p id="validPreviewNote" class="table-note"></p>
+        </div>
+
+        <div class="dm-preview-table-wrapper">
+          <h3>Invalid or duplicate records</h3>
+          <div class="dm-table-scroll">
+            <table class="import-table invalid-preview-table">
+              <thead>
+                <tr>
+                  <th>Row</th>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Issue</th>
+                </tr>
+              </thead>
+              <tbody id="invalidPreviewTableBody"></tbody>
+            </table>
+          </div>
+          <p id="invalidPreviewNote" class="table-note"></p>
+        </div>
+      </section>
+
       <!-- SUMMARY -->
       <section class="dm-card dm-summary-card">
         <h2>Import summary</h2>
-        <p>Successfully imported records will appear here after upload.</p>
+        <p>Successfully imported records will appear here after confirmation.</p>
         <div id="summaryBox" class="dm-summary-box">
-          Upload a CSV or Excel file to see the import results.
+          Upload a CSV or Excel file to preview the import results.
         </div>
       </section>
 
