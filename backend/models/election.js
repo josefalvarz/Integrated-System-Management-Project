@@ -66,6 +66,18 @@ const Election = {
         else resolve();
       });
     });
+  },
+  updateStatus(id, status) {
+    return new Promise((resolve, reject) => {
+      db.run(
+        'UPDATE elections SET status = ? WHERE id = ?',
+        [status, id],
+        function (err) {
+          if (err) reject(err);
+          else resolve({ changes: this.changes });
+        }
+      );
+    });
   }
 };
 

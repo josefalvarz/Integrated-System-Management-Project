@@ -17,6 +17,8 @@ window.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("createElectionBtn").addEventListener("click", createElection);
   document.getElementById("addCandidateBtn").addEventListener("click", addCandidate);
   document.getElementById("backBtn").addEventListener("click", goBackToElections);
+  document.getElementById("openElectionBtn").addEventListener("click", openElection);
+
 });
 
 // Check if current user is admin
@@ -171,7 +173,17 @@ async function viewElection(id) {
       `${election.start_date} → ${election.end_date}`;
     document.getElementById("detailStatus").textContent =
       `Status: ${election.status}`;
+    const openElectionBtn = document.getElementById("openElectionBtn");
+    const openElectionMessage = document.getElementById("openElectionMessage");
 
+    if (openElectionMessage) {
+      openElectionMessage.textContent = "";
+    }
+
+    if (openElectionBtn) {
+      openElectionBtn.style.display =
+        isAdmin() && election.status === "Draft" ? "inline-block" : "none";
+    }
     loadCandidates(election.candidates);
 
     document.getElementById("electionList").parentElement.style.display = "none";
@@ -301,7 +313,41 @@ function goBackToElections() {
 
   currentElectionId = null;
 }
+// S22 — Open election
+async function openElection() {
+  const msg = document.getElementById("openElectionMessage");
 
+  try {
+    const res = await fetch(`/api/elections/${currentElectionId}/open`, {
+      method: "PATCH"
+    });
+
+    const data = await res.json();
+
+    if (res.ok) {
+      showMessage(
+        msg,
+        data.message || "Election opened successfully.",
+        "success"
+      );
+
+      viewElection(currentElectionId);
+      loadElections();
+    } else {
+      showMessage(
+        msg,
+        data.error || "Error opening election.",
+        "error"
+      );
+    }
+  } catch {
+    showMessage(
+      msg,
+      "Server error. Please try again.",
+      "error"
+    );
+  }
+}
 // Show message
 function showMessage(el, text, type) {
   el.textContent = text;
