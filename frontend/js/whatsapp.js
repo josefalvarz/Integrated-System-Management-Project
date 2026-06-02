@@ -23,13 +23,10 @@ function initializeWhatsApp() {
   document.getElementById('userRole').textContent = role === 'admin' ? 'Administrator' : 'Member';
   document.getElementById('userInitials').textContent = initials || 'U';
 
-  // Hide admin-only sidebar elements if not admin
   if (role !== 'admin') {
     document.querySelectorAll('.admin-only').forEach(el => {
       el.style.display = 'none';
     });
-
-    // Block access to upload section
     document.getElementById('uploadSection').innerHTML =
       "<p style='color:red;'>Access denied. Admins only.</p>";
   }
@@ -40,7 +37,6 @@ function uploadChat() {
   const fileInput = document.getElementById('chatFileInput');
   const uploadMessage = document.getElementById('uploadMessage');
 
-  // Validate: file selected
   if (!fileInput.files || fileInput.files.length === 0) {
     uploadMessage.style.color = 'red';
     uploadMessage.textContent = 'Please select a file before uploading.';
@@ -49,25 +45,27 @@ function uploadChat() {
 
   const file = fileInput.files[0];
 
-  // Validate: file type must be .txt
   if (!file.name.endsWith('.txt')) {
     uploadMessage.style.color = 'red';
     uploadMessage.textContent = 'Invalid file type. Please upload a .txt file.';
     return;
   }
 
-  // Read file content
   const reader = new FileReader();
 
   reader.onload = function (e) {
     const chatContent = e.target.result;
 
-    // Store raw chat content
     sessionStorage.setItem('whatsappChatData', chatContent);
 
-    // Parse messages - S28
+    // S28 - Parse messages
     const messages = parseWhatsAppChat(chatContent);
     displayParseResult(messages);
+
+    // S29 - Analyze frequency
+    if (messages.length > 0) {
+      displayFrequency(messages);
+    }
   };
 
   reader.onerror = function () {
@@ -84,18 +82,13 @@ function parseWhatsAppChat(chatContent) {
   const lines = chatContent.split('\n');
   const messages = [];
 
-  // Regex to match WhatsApp export format
-  // Example: 12/01/2024, 10:30 - John: Hello!
   const messageRegex = /^(\d{1,2}\/\d{1,2}\/\d{2,4}),\s(\d{1,2}:\d{2}(?:\s?[AP]M)?)\s-\s([^:]+):\s(.+)$/;
 
   lines.forEach(line => {
     line = line.trim();
-
-    // Skip empty lines
     if (!line) return;
 
     const match = line.match(messageRegex);
-
     if (match) {
       messages.push({
         date: match[1],
@@ -118,11 +111,52 @@ function displayParseResult(messages) {
     return;
   }
 
-  // Store parsed messages in sessionStorage
   sessionStorage.setItem('whatsappParsedMessages', JSON.stringify(messages));
 
   uploadMessage.style.color = 'green';
   uploadMessage.textContent = `Chat uploaded successfully! Total messages parsed: ${messages.length}`;
+}
+
+// S29 - Analyze Message Frequency
+
+function analyzeFrequency(messages) {
+  const frequencyMap = {};
+
+  messages.forEach(msg => {
+    const date = msg.date;
+    if (!frequencyMap[date]) {
+      frequencyMap[date] = 0;
+    }
+    frequencyMap[date]++;
+  });
+
+  return frequencyMap;
+}
+
+function displayFrequency(messages) {
+  const frequencyMap = analyzeFrequency(messages);
+  const dates = Object.keys(frequencyMap);
+  const totalMessages = messages.length;
+  const activeDays = dates.length;
+  const avgMessages = (totalMessages / activeDays).toFixed(1);
+
+  document.getElementById('totalMessages').textContent = totalMessages;
+  document.getElementById('activeDays').textContent = activeDays;
+  document.getElementById('avgMessages').textContent = avgMessages;
+
+  const tableBody = document.getElementById('frequencyTableBody');
+  tableBody.innerHTML = '';
+
+  dates.forEach(date => {
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td>${date}</td>
+      <td>${frequencyMap[date]}</td>
+    `;
+    tableBody.appendChild(row);
+  });
+
+  document.getElementById('frequencySection').style.display = 'block';
 }
 
 // Logout

@@ -83,7 +83,7 @@
             Upload a WhatsApp chat export file (.txt) to analyze communication activity.
           </p>
 
-          <!-- UPLOAD SECTION -->
+          <!-- UPLOAD SECTION - S27 -->
           <div id="uploadSection">
             <div class="ims-chips" style="margin-bottom: 1.5rem;">
               <div class="ims-chip">
@@ -109,6 +109,42 @@
             </div>
 
             <p id="uploadMessage" style="margin-top: 1rem; font-size: 0.9rem;"></p>
+          </div>
+
+          <!-- FREQUENCY SECTION - S29 -->
+          <div id="frequencySection" style="display:none; margin-top: 2rem;">
+
+            <div class="ims-divider"></div>
+            <h2 style="margin: 1.5rem 0 1rem;">Message Frequency</h2>
+
+            <!-- Summary Cards -->
+            <div class="ims-chips" style="margin-bottom: 1.5rem; gap: 1rem;">
+              <div class="ims-chip">
+                <span class="ims-dot"></span>
+                Total Messages: <strong id="totalMessages">0</strong>
+              </div>
+              <div class="ims-chip">
+                <span class="ims-dot gold"></span>
+                Active Days: <strong id="activeDays">0</strong>
+              </div>
+              <div class="ims-chip">
+                <span class="ims-dot"></span>
+                Avg Per Day: <strong id="avgMessages">0</strong>
+              </div>
+            </div>
+
+            <!-- Frequency Table -->
+            <table class="members-table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Messages</th>
+                </tr>
+              </thead>
+              <tbody id="frequencyTableBody">
+              </tbody>
+            </table>
+
           </div>
 
         </div>
