@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dashboard - Organization X</title>
+  <title>WhatsApp Analytics - Organization X</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
@@ -30,13 +30,13 @@
       <div class="ims-nav-section">
         <p class="ims-section-title">Workspace</p>
         <nav class="ims-nav">
-          <a href="#" class="ims-nav-link active" onclick="showDashboardPage()">Dashboard</a>
+          <a href="dashboard.html" class="ims-nav-link">Dashboard</a>
           <a href="profile.html" class="ims-nav-link">Profile</a>
-          <a href="#" class="ims-nav-link admin-only" onclick="showMemberManagementPage()">Member Management</a>
+          <a href="dashboard.html" class="ims-nav-link admin-only">Member Management</a>
           <a href="data-migration.html" class="ims-nav-link admin-only">Data Import</a>
           <a href="./documents.html" class="ims-nav-link">Documents</a>
           <a href="./election.html" class="ims-nav-link">E-Voting</a>
-          <a href="./whatsapp.html" class="ims-nav-link">WhatsApp Analytics</a>
+          <a href="./whatsapp.html" class="ims-nav-link active">WhatsApp Analytics</a>
           <a href="#" class="ims-nav-link">Smart Notifications</a>
           <a href="#" class="ims-nav-link">Meetings</a>
           <a href="./income.html" class="ims-nav-link admin-only">Finance</a>
@@ -67,85 +67,56 @@
 
     <!-- MAIN CONTENT -->
     <main class="ims-main ims-main-simple">
-
-      <!-- DASHBOARD PAGE -->
-      <section id="dashboardPage" class="ims-page">
+      <section class="ims-page">
         <div class="ims-welcome-card">
+
           <p class="ims-breadcrumb">
             <span>Org X</span>
             <span class="ims-sep">／</span>
-            <span>Dashboard</span>
+            <span>WhatsApp Analytics</span>
           </p>
 
-          <h1 class="ims-welcome-heading" id="welcomeMessage">Welcome</h1>
-
+          <h1 class="ims-welcome-heading">WhatsApp Analytics</h1>
           <div class="ims-divider"></div>
 
           <p class="ims-welcome-body">
-            You are logged in to the Integrated Management System.
-            Use the sidebar to navigate through the available features and modules.
+            Upload a WhatsApp chat export file (.txt) to analyze communication activity.
           </p>
 
-          <div class="ims-chips">
-            <div class="ims-chip">
-              <span class="ims-dot"></span>
-              System Online
+          <!-- UPLOAD SECTION -->
+          <div id="uploadSection">
+            <div class="ims-chips" style="margin-bottom: 1.5rem;">
+              <div class="ims-chip">
+                <span class="ims-dot"></span>
+                Admin Only
+              </div>
+              <div class="ims-chip">
+                <span class="ims-dot gold"></span>
+                .txt files only
+              </div>
             </div>
-            <div class="ims-chip">
-              <span class="ims-dot gold"></span>
-              <span id="sessionChip">Session Active</span>
+
+            <div style="display: flex; flex-direction: column; gap: 1rem; max-width: 480px;">
+              <input
+                type="file"
+                id="chatFileInput"
+                accept=".txt"
+                style="padding: 0.5rem; font-family: inherit;"
+              />
+              <button class="ims-logout-btn" onclick="uploadChat()" style="width: fit-content;">
+                Upload Chat
+              </button>
             </div>
+
+            <p id="uploadMessage" style="margin-top: 1rem; font-size: 0.9rem;"></p>
           </div>
 
-          <p class="msg" id="msg"></p>
         </div>
       </section>
-
-      <!-- MEMBER MANAGEMENT PAGE -->
-      <section id="memberManagementPage" class="ims-page hidden">
-        <div class="member-page-header">
-          <h1>Member Management</h1>
-        </div>
-
-        <div id="roleMessage" class="role-message hidden"></div>
-
-        <div class="members-card">
-
-          <!-- MEMBER SEARCH INSIDE MEMBER MANAGEMENT -->
-          <div class="member-management-search">
-            <input
-              type="text"
-              id="memberSearchInput"
-              placeholder="Search members by name, email, or role..."
-            />
-          </div>
-
-          <p id="memberSearchMessage" class="member-search-message hidden">
-            No members found.
-          </p>
-
-          <table class="members-table">
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Role</th>
-                <th>Status</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-
-            <tbody id="membersTableBody">
-              <!-- Members load here from dashboard.js -->
-            </tbody>
-          </table>
-        </div>
-      </section>
-
     </main>
 
   </div>
 
-  <script src="../js/dashboard.js"></script>
+  <script src="../js/whatsapp.js"></script>
 </body>
 </html>
