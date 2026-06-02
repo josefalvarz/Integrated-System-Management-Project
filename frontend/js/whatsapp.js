@@ -62,11 +62,12 @@ function uploadChat() {
   reader.onload = function (e) {
     const chatContent = e.target.result;
 
-    // Store chat content temporarily in sessionStorage
+    // Store raw chat content
     sessionStorage.setItem('whatsappChatData', chatContent);
 
-    uploadMessage.style.color = 'green';
-    uploadMessage.textContent = 'Chat uploaded successfully! Ready for analysis.';
+    // Parse messages - S28
+    const messages = parseWhatsAppChat(chatContent);
+    displayParseResult(messages);
   };
 
   reader.onerror = function () {
@@ -75,6 +76,53 @@ function uploadChat() {
   };
 
   reader.readAsText(file);
+}
+
+// S28 - Parse WhatsApp Messages
+
+function parseWhatsAppChat(chatContent) {
+  const lines = chatContent.split('\n');
+  const messages = [];
+
+  // Regex to match WhatsApp export format
+  // Example: 12/01/2024, 10:30 - John: Hello!
+  const messageRegex = /^(\d{1,2}\/\d{1,2}\/\d{2,4}),\s(\d{1,2}:\d{2}(?:\s?[AP]M)?)\s-\s([^:]+):\s(.+)$/;
+
+  lines.forEach(line => {
+    line = line.trim();
+
+    // Skip empty lines
+    if (!line) return;
+
+    const match = line.match(messageRegex);
+
+    if (match) {
+      messages.push({
+        date: match[1],
+        time: match[2],
+        sender: match[3].trim(),
+        content: match[4].trim()
+      });
+    }
+  });
+
+  return messages;
+}
+
+function displayParseResult(messages) {
+  const uploadMessage = document.getElementById('uploadMessage');
+
+  if (!messages || messages.length === 0) {
+    uploadMessage.style.color = 'red';
+    uploadMessage.textContent = 'Error: Could not read chat format. Please check the file.';
+    return;
+  }
+
+  // Store parsed messages in sessionStorage
+  sessionStorage.setItem('whatsappParsedMessages', JSON.stringify(messages));
+
+  uploadMessage.style.color = 'green';
+  uploadMessage.textContent = `Chat uploaded successfully! Total messages parsed: ${messages.length}`;
 }
 
 // Logout
