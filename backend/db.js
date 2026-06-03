@@ -95,4 +95,18 @@ db.run(`
   )
 `);
 
+// S23 — Cast Vote
+db.run(`
+  CREATE TABLE IF NOT EXISTS votes (
+    id           INTEGER PRIMARY KEY AUTOINCREMENT,
+    election_id  INTEGER NOT NULL,
+    candidate_id INTEGER NOT NULL,
+    user_id      INTEGER NOT NULL,
+    created_at   TEXT NOT NULL DEFAULT (datetime('now')),
+    UNIQUE(election_id, user_id),
+    FOREIGN KEY (election_id) REFERENCES elections(id),
+    FOREIGN KEY (candidate_id) REFERENCES candidates(id),
+    FOREIGN KEY (user_id) REFERENCES users(id)
+  )
+`);
 module.exports = db;

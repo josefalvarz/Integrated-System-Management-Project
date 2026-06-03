@@ -115,7 +115,49 @@ router.patch('/:id/open', requireLogin, requireAdmin, async (req, res) => {
     res.status(500).json({ error: 'Something went wrong.' });
   }
 });
+// S23 — Cast vote
+router.post('/:id/vote', requireLogin, async (req, res) => {
+  const { candidateId } = req.body;
+  const userId = req.session.user.id;
 
+  if (!candidateId) {
+    return res.status(400).json({ error: 'Candidate is required.' });
+  }
+
+  try {
+    const election = await Election.getById(req.params.id);
+
+    if (!election) {
+      return res.status(404).json({ error: 'Election not found.' });
+    }
+
+    if (election.status !== 'Open') {
+      return res.status(400).json({ error: 'You can only vote in open elections.' });
+    }
+
+    const candidates = await Election.getCandidates(req.params.id);
+
+    const candidateBelongsToElection = candidates.some(
+      (candidate) => candidate.id == candidateId
+    );
+
+    if (!candidateBelongsToElection) {
+      return res.status(400).json({ error: 'Invalid candidate for this election.' });
+    }
+
+    const existingVote = await Election.hasUserVoted(req.params.id, userId);
+
+    if (existingVote) {
+      return res.status(400).json({ error: 'You have already voted in this election.' });
+    }
+
+    await Election.castVote(req.params.id, candidateId, userId);
+
+    res.status(201).json({ message: 'Vote submitted successfully.' });
+  } catch (err) {
+    res.status(500).json({ error: 'Something went wrong.' });
+  }
+});
 // S22 — Delete election
 router.delete('/:id', requireLogin, requireAdmin, async (req, res) => {
   try {

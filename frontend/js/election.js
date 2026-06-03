@@ -18,7 +18,7 @@ window.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("addCandidateBtn").addEventListener("click", addCandidate);
   document.getElementById("backBtn").addEventListener("click", goBackToElections);
   document.getElementById("openElectionBtn").addEventListener("click", openElection);
-
+  document.getElementById("submitVoteBtn").addEventListener("click", submitVote);
 });
 
 // Check if current user is admin
@@ -192,6 +192,17 @@ async function viewElection(id) {
       openElectionBtn.style.display =
         isAdmin() && election.status === "Draft" ? "inline-block" : "none";
     }
+    const voteSection = document.getElementById("voteSection");
+    const voteMessage = document.getElementById("voteMessage");
+
+    if (voteMessage) {
+      voteMessage.textContent = "";
+    }
+
+    if (voteSection) {
+      voteSection.style.display =
+      !isAdmin() && election.status === "Open" ? "block" : "none";
+    }
     loadCandidates(election.candidates);
 
     document.getElementById("electionList").parentElement.style.display = "none";
@@ -206,7 +217,7 @@ async function viewElection(id) {
   }
 }
 
-// S21 — Load candidates
+// S21/S23 — Load candidates
 function loadCandidates(candidates) {
   const list = document.getElementById("candidateList");
 
@@ -223,18 +234,23 @@ function loadCandidates(candidates) {
   list.innerHTML =
     warning +
     candidates
-      .map(
-        (c) => `
-          <div class="candidate-item">
-            <span>• ${c.name}</span>
-            ${
-              isAdmin()
-                ? `<button class="profile-btn-ghost" onclick="removeCandidate(${c.id})">Remove</button>`
-                : ""
-            }
-          </div>
-        `
-      )
+      .map((c) => {
+        if (isAdmin()) {
+          return `
+            <div class="candidate-item">
+              <span>• ${c.name}</span>
+              <button class="profile-btn-ghost" onclick="removeCandidate(${c.id})">Remove</button>
+            </div>
+          `;
+        }
+
+        return `
+          <label class="candidate-item">
+            <input type="radio" name="candidateVote" value="${c.id}">
+            <span>${c.name}</span>
+          </label>
+        `;
+      })
       .join("");
 }
 
@@ -345,6 +361,60 @@ async function openElection() {
       showMessage(
         msg,
         data.error || "Error opening election.",
+        "error"
+      );
+    }
+  } catch {
+    showMessage(
+      msg,
+      "Server error. Please try again.",
+      "error"
+    );
+  }
+}
+// S23 — Submit vote
+async function submitVote() {
+  if (isAdmin()) {
+    alert("Administrators cannot vote from this view.");
+    return;
+  }
+
+  const selectedCandidate = document.querySelector(
+    'input[name="candidateVote"]:checked'
+  );
+
+  const msg = document.getElementById("voteMessage");
+
+  if (!selectedCandidate) {
+    return showMessage(msg, "Please select one candidate.", "error");
+  }
+
+  try {
+    const res = await fetch(`/api/elections/${currentElectionId}/vote`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        candidateId: selectedCandidate.value
+      })
+    });
+
+    const data = await res.json();
+
+    if (res.ok) {
+      showMessage(
+        msg,
+        data.message || "Vote submitted successfully.",
+        "success"
+      );
+
+      document.getElementById("submitVoteBtn").disabled = true;
+      document.getElementById("submitVoteBtn").textContent = "Vote Submitted";
+    } else {
+      showMessage(
+        msg,
+        data.error || "Error submitting vote.",
         "error"
       );
     }
