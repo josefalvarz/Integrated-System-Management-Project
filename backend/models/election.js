@@ -66,6 +66,58 @@ const Election = {
         else resolve();
       });
     });
+  },
+  updateStatus(id, status) {
+    return new Promise((resolve, reject) => {
+      db.run(
+        'UPDATE elections SET status = ? WHERE id = ?',
+        [status, id],
+        function (err) {
+          if (err) reject(err);
+          else resolve({ changes: this.changes });
+        }
+      );
+    });
+  },
+  getOpenOnly() {
+    return new Promise((resolve, reject) => {
+      db.all(
+        "SELECT * FROM elections WHERE status = 'Open' ORDER BY created_at DESC",
+        [],
+        (err, rows) => {
+          if (err) reject(err);
+          else resolve(rows);
+        }
+      );
+    });
+  },
+
+  closeExpiredElections() {
+    return new Promise((resolve, reject) => {
+      const today = new Date().toISOString().split("T")[0];
+
+      db.run(
+        "UPDATE elections SET status = 'Closed' WHERE end_date < ? AND status != 'Closed'",
+        [today],
+        function (err) {
+          if (err) reject(err);
+          else resolve({ changes: this.changes });
+        }
+      );
+    });
+  },
+
+  deleteElection(id) {
+    return new Promise((resolve, reject) => {
+      db.run("DELETE FROM candidates WHERE election_id = ?", [id], (candidateErr) => {
+        if (candidateErr) reject(candidateErr);
+
+        db.run("DELETE FROM elections WHERE id = ?", [id], function (electionErr) {
+          if (electionErr) reject(electionErr);
+          else resolve({ changes: this.changes });
+        });
+      });
+    });
   }
 };
 

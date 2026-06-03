@@ -17,7 +17,13 @@ function requireAdmin(req, res, next) {
 // S20 — Get all elections
 router.get('/', requireLogin, async (req, res) => {
   try {
-    const elections = await Election.getAll();
+    await Election.closeExpiredElections();
+
+    const elections =
+      req.session.user.role === 'admin'
+        ? await Election.getAll()
+        : await Election.getOpenOnly();
+
     res.json(elections);
   } catch (err) {
     res.status(500).json({ error: 'Something went wrong.' });
@@ -72,6 +78,58 @@ router.delete('/:id/candidates/:candidateId', requireLogin, requireAdmin, async 
   try {
     await Election.removeCandidate(req.params.candidateId);
     res.json({ message: 'Candidate removed successfully.' });
+  } catch (err) {
+    res.status(500).json({ error: 'Something went wrong.' });
+  }
+});
+
+// S22 — Open voting session
+router.patch('/:id/open', requireLogin, requireAdmin, async (req, res) => {
+  try {
+    const election = await Election.getById(req.params.id);
+
+    if (!election) {
+      return res.status(404).json({ error: 'Election not found.' });
+    }
+
+    if (election.status !== 'Draft') {
+      return res.status(400).json({
+        error: 'Only draft elections can be opened.'
+      });
+    }
+
+    const candidates = await Election.getCandidates(req.params.id);
+
+    if (candidates.length < 2) {
+      return res.status(400).json({
+        error: 'Election must have at least 2 candidates before opening.'
+      });
+    }
+
+    await Election.updateStatus(req.params.id, 'Open');
+
+    res.json({
+      message: 'Election opened successfully.'
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'Something went wrong.' });
+  }
+});
+
+// S22 — Delete election
+router.delete('/:id', requireLogin, requireAdmin, async (req, res) => {
+  try {
+    const election = await Election.getById(req.params.id);
+
+    if (!election) {
+      return res.status(404).json({ error: 'Election not found.' });
+    }
+
+    await Election.deleteElection(req.params.id);
+
+    res.json({
+      message: 'Election deleted successfully.'
+    });
   } catch (err) {
     res.status(500).json({ error: 'Something went wrong.' });
   }
