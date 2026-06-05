@@ -132,6 +132,30 @@ castVote(electionId, candidateId, userId) {
   });
 },
 
+getResults(electionId) {
+  return new Promise((resolve, reject) => {
+    db.all(
+      `
+      SELECT 
+        candidates.id,
+        candidates.name,
+        COUNT(votes.id) AS vote_count
+      FROM candidates
+      LEFT JOIN votes 
+        ON votes.candidate_id = candidates.id
+      WHERE candidates.election_id = ?
+      GROUP BY candidates.id, candidates.name
+      ORDER BY vote_count DESC, candidates.name ASC
+      `,
+      [electionId],
+      (err, rows) => {
+        if (err) reject(err);
+        else resolve(rows);
+      }
+    );
+  });
+},
+
   deleteElection(id) {
   return new Promise((resolve, reject) => {
     db.run("DELETE FROM votes WHERE election_id = ?", [id], (voteErr) => {

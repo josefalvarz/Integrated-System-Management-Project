@@ -10,7 +10,7 @@ if (!loggedInUser) {
 
 function initializeDashboard() {
   const name = loggedInUser.name || loggedInUser.email || 'User';
-  const role = loggedInUser.role || 'member';
+  const role = (loggedInUser.role || 'member').toLowerCase();
 
   const welcomeMessage = document.getElementById('welcomeMessage');
   const userName = document.getElementById('userName');
@@ -41,16 +41,13 @@ function initializeDashboard() {
     userInitials.textContent = initials || 'U';
   }
 
-  if (role !== 'admin') {
-    document.querySelectorAll('.admin-only').forEach(element => {
-      element.style.display = 'none';
-    });
-  }
+  applyRoleBasedAccess();
 
   const sessionStart = new Date();
 
   setInterval(() => {
     if (!sessionChip) return;
+
     const diff = Math.floor((Date.now() - sessionStart) / 60000);
     sessionChip.textContent = diff === 0 ? 'Session Active' : `Active ${diff}m`;
   }, 30000);
@@ -63,6 +60,25 @@ function initializeDashboard() {
   }
 
   setupMemberSearchInput();
+}
+
+/* ROLE-BASED ACCESS */
+
+function isAdmin() {
+  const role = (loggedInUser.role || '').toLowerCase();
+  return role === 'admin' || role === 'administrator';
+}
+
+function applyRoleBasedAccess() {
+  const admin = isAdmin();
+
+  document.querySelectorAll('.admin-only').forEach(element => {
+    element.style.display = admin ? '' : 'none';
+  });
+
+  document.querySelectorAll('.member-only').forEach(element => {
+    element.style.display = admin ? 'none' : '';
+  });
 }
 
 /* PAGE SWITCHING */
@@ -79,11 +95,12 @@ function showDashboardPage() {
     dashboardPage.classList.remove('hidden');
   }
 
+  applyRoleBasedAccess();
   setActiveNavLink('Dashboard');
 }
 
 function showMemberManagementPage() {
-  if (!loggedInUser || loggedInUser.role !== 'admin') {
+  if (!loggedInUser || !isAdmin()) {
     alert('Admin access required.');
     return;
   }
@@ -99,6 +116,7 @@ function showMemberManagementPage() {
     memberManagementPage.classList.remove('hidden');
   }
 
+  applyRoleBasedAccess();
   setActiveNavLink('Member Management');
   loadMembers();
 }
@@ -107,7 +125,9 @@ function setActiveNavLink(label) {
   document.querySelectorAll('.ims-nav-link').forEach(link => {
     link.classList.remove('active');
 
-    if (link.textContent.trim() === label) {
+    const linkText = link.textContent.trim();
+
+    if (linkText === label) {
       link.classList.add('active');
     }
   });
@@ -169,6 +189,7 @@ function renderMembers(users) {
       memberSearchMessage.classList.remove('hidden');
       memberSearchMessage.textContent = 'No members found.';
     }
+
     return;
   }
 
@@ -282,9 +303,12 @@ async function updateUserRole(event) {
 
       if (newRole !== 'admin') {
         showRoleMessage('Your role changed. Admin access removed.', 'error');
+
         setTimeout(() => {
           window.location.reload();
         }, 1200);
+      } else {
+        applyRoleBasedAccess();
       }
     }
 

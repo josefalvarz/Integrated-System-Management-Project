@@ -37,7 +37,8 @@
           <a href="./dashboard.html?page=members" class="ims-nav-link admin-only">Member Management</a>
           <a href="./data-migration.html" class="ims-nav-link admin-only">Data Import</a>
           <a href="./documents.html" class="ims-nav-link">Documents</a>
-          <a href="./election.html" class="ims-nav-link active">E-Voting</a>
+          <a href="./election.html" class="ims-nav-link active admin-only">E-Voting Management</a>
+          <a href="./vote.html" class="ims-nav-link member-only">E-Voting</a>
           <a href="#" class="ims-nav-link">WhatsApp Analytics</a>
           <a href="#" class="ims-nav-link">Smart Notifications</a>
           <a href="#" class="ims-nav-link">Meetings</a>
@@ -147,11 +148,16 @@
 
         <h3>Candidates</h3>
         <div id="candidateList" class="candidate-list"></div>
-        <!-- S23 — Submit Vote -->
-        <div id="voteSection" style="display:none">
-          <button id="submitVoteBtn" class="profile-btn">Submit Vote</button>
-          <p id="voteMessage" class="profile-message"></p>
-        </div> 
+
+        <div id="resultsSection" class="results-section admin-only">
+          <div class="profile-divider"></div>
+
+          <h3>Vote Results</h3>
+          <p id="resultsSummary" class="results-summary">No votes counted yet.</p>
+
+        <div id="resultsList" class="results-list"></div>
+      </div>
+      
         <!-- S21 — Add Candidate -->
         <div id="addCandidateSection" class="add-candidate-section" style="display:none">
           <input type="text" id="candidateName" class="profile-input" placeholder="Candidate name">

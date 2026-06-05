@@ -33,7 +33,8 @@
           <a href="dashboard.html?page=members" class="ims-nav-link admin-only">Member Management</a>
           <a href="data-migration.html" class="ims-nav-link admin-only active">Data Import</a>
           <a href="./documents.html" class="ims-nav-link">Documents</a>
-          <a href="./election.html" class="ims-nav-link">E-Voting</a>
+          <a href="./election.html" class="ims-nav-link admin-only">E-Voting Management</a>
+          <a href="./vote.html" class="ims-nav-link member-only">E-Voting</a>
           <a href="#" class="ims-nav-link">WhatsApp Analytics</a>
           <a href="#" class="ims-nav-link">Smart Notifications</a>
           <a href="#" class="ims-nav-link">Meetings</a>
@@ -208,5 +209,23 @@
   </div>
 
   <script src="../js/dataMigration.js"></script>
+  <script>
+  const sidebarLoggedInUser = JSON.parse(sessionStorage.getItem("loggedInUser"));
+
+  if (!sidebarLoggedInUser) {
+    window.location.href = "./login.html";
+  } else {
+    const sidebarRole = (sidebarLoggedInUser.role || "member").toLowerCase();
+    const sidebarIsAdmin = sidebarRole === "admin" || sidebarRole === "administrator";
+
+    document.querySelectorAll(".admin-only").forEach((element) => {
+      element.style.display = sidebarIsAdmin ? "" : "none";
+    });
+
+    document.querySelectorAll(".member-only").forEach((element) => {
+      element.style.display = sidebarIsAdmin ? "none" : "";
+    });
+  }
+</script>
 </body>
 </html>

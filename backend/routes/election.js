@@ -30,6 +30,34 @@ router.get('/', requireLogin, async (req, res) => {
   }
 });
 
+// S23 — Get vote results for an election
+router.get('/:id/results', requireLogin, requireAdmin, async (req, res) => {
+  try {
+    const election = await Election.getById(req.params.id);
+
+    if (!election) {
+      return res.status(404).json({ error: 'Election not found.' });
+    }
+
+    const results = await Election.getResults(req.params.id);
+
+    const totalVotes = results.reduce((sum, option) => {
+      return sum + option.vote_count;
+    }, 0);
+
+    res.json({
+      electionId: election.id,
+      title: election.title,
+      status: election.status,
+      totalVotes,
+      results
+    });
+  } catch (err) {
+    console.error('Results error:', err);
+    res.status(500).json({ error: 'Something went wrong.' });
+  }
+});
+
 // S20 — Get single election with candidates
 router.get('/:id', requireLogin, async (req, res) => {
   try {
