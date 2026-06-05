@@ -106,19 +106,73 @@ const Election = {
       );
     });
   },
+hasUserVoted(electionId, userId) {
+  return new Promise((resolve, reject) => {
+    db.get(
+      "SELECT * FROM votes WHERE election_id = ? AND user_id = ?",
+      [electionId, userId],
+      (err, row) => {
+        if (err) reject(err);
+        else resolve(row);
+      }
+    );
+  });
+},
+
+castVote(electionId, candidateId, userId) {
+  return new Promise((resolve, reject) => {
+    db.run(
+      "INSERT INTO votes (election_id, candidate_id, user_id) VALUES (?, ?, ?)",
+      [electionId, candidateId, userId],
+      function (err) {
+        if (err) reject(err);
+        else resolve({ id: this.lastID });
+      }
+    );
+  });
+},
+
+getResults(electionId) {
+  return new Promise((resolve, reject) => {
+    db.all(
+      `
+      SELECT 
+        candidates.id,
+        candidates.name,
+        COUNT(votes.id) AS vote_count
+      FROM candidates
+      LEFT JOIN votes 
+        ON votes.candidate_id = candidates.id
+      WHERE candidates.election_id = ?
+      GROUP BY candidates.id, candidates.name
+      ORDER BY vote_count DESC, candidates.name ASC
+      `,
+      [electionId],
+      (err, rows) => {
+        if (err) reject(err);
+        else resolve(rows);
+      }
+    );
+  });
+},
 
   deleteElection(id) {
-    return new Promise((resolve, reject) => {
+  return new Promise((resolve, reject) => {
+    db.run("DELETE FROM votes WHERE election_id = ?", [id], (voteErr) => {
+      if (voteErr) return reject(voteErr);
+
       db.run("DELETE FROM candidates WHERE election_id = ?", [id], (candidateErr) => {
-        if (candidateErr) reject(candidateErr);
+        if (candidateErr) return reject(candidateErr);
 
         db.run("DELETE FROM elections WHERE id = ?", [id], function (electionErr) {
-          if (electionErr) reject(electionErr);
-          else resolve({ changes: this.changes });
+          if (electionErr) return reject(electionErr);
+
+          resolve({ changes: this.changes });
         });
       });
     });
-  }
+  });
+}
 };
 
 module.exports = Election;

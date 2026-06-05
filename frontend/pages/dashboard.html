@@ -3,10 +3,17 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
   <title>Dashboard - Organization X</title>
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=DM+Sans:wght@300;400;500&display=swap"
+    rel="stylesheet"
+  >
+
   <link rel="stylesheet" href="../css/styles.css" />
 </head>
 
@@ -21,6 +28,7 @@
 
       <div class="ims-brand">
         <div class="ims-brand-icon">IMS</div>
+
         <div class="ims-brand-text">
           <h2>Organization X</h2>
           <p>Management System</p>
@@ -29,25 +37,67 @@
 
       <div class="ims-nav-section">
         <p class="ims-section-title">Workspace</p>
+
         <nav class="ims-nav">
-          <a href="#" class="ims-nav-link active" onclick="showDashboardPage()">Dashboard</a>
-          <a href="profile.html" class="ims-nav-link">Profile</a>
-          <a href="#" class="ims-nav-link admin-only" onclick="showMemberManagementPage()">Member Management</a>
-          <a href="data-migration.html" class="ims-nav-link admin-only">Data Import</a>
-          <a href="./documents.html" class="ims-nav-link">Documents</a>
-          <a href="./election.html" class="ims-nav-link">E-Voting</a>
-          <a href="#" class="ims-nav-link">WhatsApp Analytics</a>
-          <a href="#" class="ims-nav-link">Smart Notifications</a>
-          <a href="#" class="ims-nav-link">Meetings</a>
-          <a href="./income.html" class="ims-nav-link admin-only">Finance</a>
+          <a href="#" class="ims-nav-link active" onclick="showDashboardPage()">
+            Dashboard
+          </a>
+
+          <a href="profile.html" class="ims-nav-link">
+            Profile
+          </a>
+
+          <a href="#" class="ims-nav-link admin-only" onclick="showMemberManagementPage()">
+            Member Management
+          </a>
+
+          <a href="data-migration.html" class="ims-nav-link admin-only">
+            Data Import
+          </a>
+
+          <a href="./documents.html" class="ims-nav-link">
+            Documents
+          </a>
+
+          <!-- ADMIN E-VOTING LINK -->
+          <a href="./election.html" class="ims-nav-link admin-only">
+            E-Voting Management
+          </a>
+
+          <!-- MEMBER E-VOTING LINK -->
+          <a href="./vote.html" class="ims-nav-link member-only">
+            E-Voting
+          </a>
+
+          <a href="#" class="ims-nav-link">
+            WhatsApp Analytics
+          </a>
+
+          <a href="#" class="ims-nav-link">
+            Smart Notifications
+          </a>
+
+          <a href="#" class="ims-nav-link">
+            Meetings
+          </a>
+
+          <a href="./income.html" class="ims-nav-link admin-only">
+            Finance
+          </a>
         </nav>
       </div>
 
       <div class="ims-nav-section admin-only">
         <p class="ims-section-title">System</p>
+
         <nav class="ims-nav">
-          <a href="#" class="ims-nav-link">Settings</a>
-          <a href="#" class="ims-nav-link">Audit Logs</a>
+          <a href="#" class="ims-nav-link">
+            Settings
+          </a>
+
+          <a href="#" class="ims-nav-link">
+            Audit Logs
+          </a>
         </nav>
       </div>
 
@@ -55,13 +105,16 @@
 
       <div class="ims-user-panel">
         <div class="ims-avatar" id="userInitials">U</div>
+
         <div class="ims-user-info">
           <strong id="userName">User</strong>
           <span id="userRole">Member</span>
         </div>
       </div>
 
-      <button class="ims-logout-btn" onclick="logout()">Sign Out</button>
+      <button class="ims-logout-btn" onclick="logout()">
+        Sign Out
+      </button>
 
     </aside>
 
@@ -77,7 +130,9 @@
             <span>Dashboard</span>
           </p>
 
-          <h1 class="ims-welcome-heading" id="welcomeMessage">Welcome</h1>
+          <h1 class="ims-welcome-heading" id="welcomeMessage">
+            Welcome
+          </h1>
 
           <div class="ims-divider"></div>
 
@@ -91,6 +146,7 @@
               <span class="ims-dot"></span>
               System Online
             </div>
+
             <div class="ims-chip">
               <span class="ims-dot gold"></span>
               <span id="sessionChip">Session Active</span>
@@ -139,6 +195,7 @@
               <!-- Members load here from dashboard.js -->
             </tbody>
           </table>
+
         </div>
       </section>
 
