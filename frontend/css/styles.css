@@ -3508,14 +3508,15 @@ body.auth-page::before {
 }
 
 .wa-primary-btn {
-  padding: 12px 28px;
+  width: 100%;
+  padding: 14px;
   background: linear-gradient(135deg, var(--gold) 0%, #b8912f 100%);
   border: none;
   border-radius: 10px;
   color: var(--navy);
   font-family: var(--font-sans);
-  font-size: 14px;
-  font-weight: 500;
+  font-size: 15px;
+  font-weight: 600;
   letter-spacing: 0.04em;
   cursor: pointer;
   transition: opacity 0.18s ease, transform 0.12s ease;
@@ -3535,49 +3536,65 @@ body.auth-page::before {
 .wa-message.success { color: var(--success); }
 .wa-message.error   { color: #f87171; }
 
+/* Stat cards */
 .wa-stats-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 14px;
-  margin-bottom: 22px;
+  gap: 16px;
+  margin-bottom: 24px;
 }
 
 .wa-stat-card {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 18px 20px;
-  transition: border-color 0.18s ease;
+  background: rgba(212, 175, 97, 0.06);
+  border: 1px solid rgba(212, 175, 97, 0.2);
+  border-radius: 16px;
+  padding: 24px 26px;
+  transition: border-color 0.18s ease, background 0.18s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.wa-stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 20px; right: 20px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  opacity: 0.4;
 }
 
 .wa-stat-card:hover {
-  border-color: var(--border-hover);
+  border-color: rgba(212, 175, 97, 0.45);
+  background: rgba(212, 175, 97, 0.1);
 }
 
 .wa-stat-card p {
-  font-size: 10px;
-  letter-spacing: 0.1em;
+  font-size: 11px;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--text-faint);
-  margin: 0 0 8px;
+  color: var(--text-muted);
+  margin: 0 0 10px;
+  font-weight: 600;
 }
 
 .wa-stat-card h2 {
   font-family: var(--font-serif);
-  font-size: 32px;
-  font-weight: 400;
-  color: var(--gold-light);
+  font-size: 40px;
+  font-weight: 500;
+  color: var(--text);
   margin: 0;
   line-height: 1;
 }
 
 .wa-stat-card small {
   display: block;
-  margin-top: 6px;
-  color: var(--text-muted);
+  margin-top: 8px;
+  color: var(--gold);
   font-size: 12px;
+  font-weight: 500;
 }
 
+/* Table */
 .wa-table-scroll {
   width: 100%;
   overflow-x: auto;
@@ -3590,22 +3607,26 @@ body.auth-page::before {
 }
 
 .wa-table th {
-  padding: 10px 12px;
-  color: var(--text-faint);
-  font-size: 10px;
-  font-weight: 500;
+  padding: 12px 14px;
+  color: var(--gold);
+  font-size: 11px;
+  font-weight: 600;
   letter-spacing: 0.1em;
   text-transform: uppercase;
+  text-align: left;
+  border-bottom: 1px solid rgba(212, 175, 97, 0.2);
+}
+
+.wa-table td {
+  padding: 13px 14px;
+  color: var(--text);
+  font-size: 14px;
   text-align: left;
   border-bottom: 1px solid var(--border);
 }
 
-.wa-table td {
-  padding: 11px 12px;
-  color: var(--text-muted);
-  font-size: 13px;
-  text-align: left;
-  border-bottom: 1px solid var(--border);
+.wa-table tr:hover td {
+  background: rgba(212, 175, 97, 0.03);
 }
 
 .wa-table tr:last-child td {
@@ -3630,7 +3651,7 @@ body.auth-page::before {
 
 .wa-table-note {
   font-size: 12px !important;
-  color: var(--text-faint) !important;
+  color: var(--text-muted) !important;
   font-style: italic;
   text-align: center !important;
   padding: 14px !important;
