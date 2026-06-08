@@ -159,6 +159,7 @@ function parseChat(rawText) {
 
   renderParseSummary();
   analyseFrequency();
+  analyseUserActivity();
 }
 
 function isSystemMessage(sender, content) {
@@ -222,6 +223,96 @@ function renderParseSummary() {
   `;
 }
 
+// ────────────────────────────────────────────────────────────
+// S30 — Analyse User Activity (Most / Least Active)
+// ────────────────────────────────────────────────────────────
+function analyseUserActivity() {
+  const activitySection   = document.getElementById('activitySection');
+  const mostActiveList    = document.getElementById('mostActiveList');
+  const leastActiveList   = document.getElementById('leastActiveList');
+  const activityTableBody = document.getElementById('activityTableBody');
+
+  if (!activitySection) return;
+
+  if (!parsedMessages || parsedMessages.length === 0) {
+    activitySection.classList.remove('hidden');
+    activityTableBody.innerHTML = `
+      <tr>
+        <td colspan="4" style="text-align:center; padding:2rem; color:#6b7280;">
+          No chat data found. Upload a WhatsApp export to see user activity.
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  // Count messages per sender
+  const senderMap = {};
+  for (const msg of parsedMessages) {
+    senderMap[msg.sender] = (senderMap[msg.sender] || 0) + 1;
+  }
+
+  // Sort from highest to lowest
+  const sorted = Object.entries(senderMap)
+    .map(([name, count]) => ({ name, message_count: count }))
+    .sort((a, b) => b.message_count - a.message_count);
+
+  const maxCount = sorted[0]?.message_count || 1;
+
+  // Top 5 most active
+  const mostActive = sorted.slice(0, 5);
+
+  // Bottom 5 least active
+  const leastActive = sorted.length > 5
+    ? [...sorted].reverse().slice(0, 5).reverse()
+    : [...sorted].reverse();
+
+  // Render most active list
+  mostActiveList.innerHTML = '';
+  mostActive.forEach((user, index) => {
+    const li = document.createElement('li');
+    li.className = 'wa-activity-item';
+    li.innerHTML = `
+      <span class="wa-activity-rank">#${index + 1}</span>
+      <span class="wa-activity-name">${user.name}</span>
+      <span class="wa-activity-count">${user.message_count} msg</span>
+    `;
+    mostActiveList.appendChild(li);
+  });
+
+  // Render least active list
+  leastActiveList.innerHTML = '';
+  leastActive.forEach((user, index) => {
+    const li = document.createElement('li');
+    li.className = 'wa-activity-item';
+    li.innerHTML = `
+      <span class="wa-activity-rank">#${index + 1}</span>
+      <span class="wa-activity-name">${user.name}</span>
+      <span class="wa-activity-count">${user.message_count} msg</span>
+    `;
+    leastActiveList.appendChild(li);
+  });
+
+  // Render full activity table
+  activityTableBody.innerHTML = '';
+  sorted.forEach((user, index) => {
+    const pct = Math.round((user.message_count / maxCount) * 100);
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${index + 1}</td>
+      <td>${user.name}</td>
+      <td>${user.message_count}</td>
+      <td>
+        <div class="wa-bar-track">
+          <div class="wa-bar-fill" style="width:${pct}%"></div>
+        </div>
+      </td>
+    `;
+    activityTableBody.appendChild(tr);
+  });
+
+  activitySection.classList.remove('hidden');
+}
 // ────────────────────────────────────────────────────────────
 // S29 — Analyse Message Frequency
 // ────────────────────────────────────────────────────────────

@@ -132,6 +132,49 @@
           </table>
         </div>
       </section>
+      <!-- S30: USER ACTIVITY -->
+      <section id="activitySection" class="wa-card hidden">
+        <div class="profile-top-rule"></div>
+        <h2>User Activity</h2>
+        <p class="wa-card-subtitle">
+          Messages sent per user, sorted from most to least active.
+        </p>
+
+        <div class="wa-activity-grid">
+
+          <div class="wa-activity-card">
+            <h3 class="wa-activity-title">
+              Most Active Users
+              <span class="wa-activity-badge wa-badge-most">Top 5</span>
+            </h3>
+            <ul class="wa-activity-list" id="mostActiveList"></ul>
+          </div>
+
+          <div class="wa-activity-card">
+            <h3 class="wa-activity-title">
+              Least Active Users
+              <span class="wa-activity-badge wa-badge-least">Bottom 5</span>
+            </h3>
+            <ul class="wa-activity-list" id="leastActiveList"></ul>
+          </div>
+
+        </div>
+
+        <div class="wa-table-scroll" style="margin-top:1.5rem">
+          <table class="wa-table">
+            <thead>
+              <tr>
+                <th>Rank</th>
+                <th>User / Sender</th>
+                <th>Messages Sent</th>
+                <th>Activity</th>
+              </tr>
+            </thead>
+            <tbody id="activityTableBody"></tbody>
+          </table>
+        </div>
+
+      </section>
 
     </main>
   </div>
