@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Data Migration | Integrated Management System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/styles.css" />
+</head>
+<body class="dashboard-page">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+
+  <div class="ims-dashboard">
+
+    <!-- SIDEBAR -->
+    <aside class="ims-sidebar">
+      <div class="ims-brand">
+        <div class="ims-brand-icon">IMS</div>
+        <div class="ims-brand-text">
+          <h2>Organization X</h2>
+          <p>Management System</p>
+        </div>
+      </div>
+
+      <div class="ims-nav-section">
+        <p class="ims-section-title">Workspace</p>
+        <nav class="ims-nav">
+          <a href="dashboard.html" class="ims-nav-link">Dashboard</a>
+          <a href="profile.html" class="ims-nav-link">Profile</a>
+          <a href="dashboard.html?page=members" class="ims-nav-link admin-only">Member Management</a>
+          <a href="data-migration.html" class="ims-nav-link admin-only active">Data Import</a>
+          <a href="./documents.html" class="ims-nav-link">Documents</a>
+          <a href="./election.html" class="ims-nav-link admin-only">E-Voting Management</a>
+          <a href="./vote.html" class="ims-nav-link member-only">E-Voting</a>
+          <a href="./whatsapp.html" class="ims-nav-link">WhatsApp Analytics</a>
+          <a href="#" class="ims-nav-link">Smart Notifications</a>
+          <a href="#" class="ims-nav-link">Meetings</a>
+          <a href="./income.html" class="ims-nav-link admin-only">Finance</a>
+        </nav>
+      </div>
+
+      <div class="ims-nav-section admin-only">
+        <p class="ims-section-title">System</p>
+        <nav class="ims-nav">
+          <a href="#" class="ims-nav-link">Settings</a>
+          <a href="#" class="ims-nav-link">Audit Logs</a>
+        </nav>
+      </div>
+
+      <div class="ims-sidebar-spacer"></div>
+
+      <div class="ims-user-panel">
+        <div class="ims-avatar" id="userInitials">A</div>
+        <div class="ims-user-info">
+          <strong id="sidebarUserName">Admin</strong>
+          <span id="sidebarUserRole">Administrator</span>
+        </div>
+      </div>
+
+      <button id="logoutBtn" class="ims-logout-btn">Sign Out</button>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="ims-main dm-main">
+
+      <!-- HEADER -->
+      <header class="dm-header">
+        <p class="dm-breadcrumb">
+          <span>Org X</span>
+          <span class="ims-sep">／</span>
+          <span>Data Migration</span>
+        </p>
+        <h1 class="dm-title">Data <em>Migration</em></h1>
+        <p class="dm-subtitle">Import existing member records from CSV or Excel files.</p>
+      </header>
+
+      <!-- STATS -->
+      <section class="dm-stats-grid">
+        <div class="dm-stat-card">
+          <p>Total rows</p>
+          <h2 id="totalRows">0</h2>
+        </div>
+        <div class="dm-stat-card">
+          <p>Ready to import</p>
+          <h2 id="importedRows">0</h2>
+        </div>
+        <div class="dm-stat-card">
+          <p>Invalid</p>
+          <h2 id="invalidRows">0</h2>
+        </div>
+        <div class="dm-stat-card">
+          <p>Duplicates</p>
+          <h2 id="duplicateRows">0</h2>
+        </div>
+      </section>
+
+      <!-- IMPORT + ISSUES GRID -->
+      <section class="dm-grid">
+
+        <!-- Import card -->
+        <div class="dm-card">
+          <h2>Import member data</h2>
+          <p>Upload a CSV or Excel file. Required fields: <strong>name</strong> and <strong>email</strong>.</p>
+
+          <form id="importForm">
+            <label for="memberFile" class="dm-upload-box">
+              <div class="dm-upload-icon">↑</div>
+              <h3>Click to choose a file</h3>
+              <p>Accepted formats: .csv, .xlsx, .xls</p>
+              <span id="selectedFileName">No file selected</span>
+            </label>
+            <input type="file" id="memberFile" name="memberFile" accept=".csv,.xlsx,.xls" hidden />
+            <button type="submit" class="dm-primary-btn">Preview member data</button>
+          </form>
+
+          <div class="dm-pipeline">
+            <div class="dm-pipeline-header">
+              <strong>Import progress</strong>
+              <span id="pipelineStatus">0%</span>
+            </div>
+            <div class="dm-progress-bar">
+              <div id="progressFill"></div>
+            </div>
+            <div class="dm-pipeline-steps">
+              <span>Upload</span>
+              <span>Validation</span>
+              <span>Preview</span>
+              <span>Database</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Failed rows card -->
+        <div class="dm-card">
+          <h2>Failed rows</h2>
+          <p>Invalid or duplicate rows will appear here before importing.</p>
+          <div id="issueList" class="dm-issue-list">
+            <p class="dm-empty-message">No issues detected yet.</p>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- PREVIEW SECTION -->
+      <section id="previewSection" class="dm-card dm-preview-card hidden">
+        <h2>Import preview</h2>
+        <p>Review the cleaned records before saving them into the system database.</p>
+
+        <div class="dm-preview-actions">
+          <button id="confirmImportBtn" type="button" class="dm-primary-btn">
+            Confirm Import
+          </button>
+
+          <button id="cancelImportBtn" type="button" class="dm-secondary-btn">
+            Cancel Import
+          </button>
+        </div>
+
+        <div class="dm-preview-table-wrapper">
+          <h3>Valid records ready to import</h3>
+          <div class="dm-table-scroll">
+            <table class="import-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Phone</th>
+                  <th>Joined</th>
+                </tr>
+              </thead>
+              <tbody id="validPreviewTableBody"></tbody>
+            </table>
+          </div>
+          <p id="validPreviewNote" class="table-note"></p>
+        </div>
+
+        <div class="dm-preview-table-wrapper">
+          <h3>Invalid or duplicate records</h3>
+          <div class="dm-table-scroll">
+            <table class="import-table invalid-preview-table">
+              <thead>
+                <tr>
+                  <th>Row</th>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Issue</th>
+                </tr>
+              </thead>
+              <tbody id="invalidPreviewTableBody"></tbody>
+            </table>
+          </div>
+          <p id="invalidPreviewNote" class="table-note"></p>
+        </div>
+      </section>
+
+      <!-- SUMMARY -->
+      <section class="dm-card dm-summary-card">
+        <h2>Import summary</h2>
+        <p>Successfully imported records will appear here after confirmation.</p>
+        <div id="summaryBox" class="dm-summary-box">
+          Upload a CSV or Excel file to preview the import results.
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <script src="../js/dataMigration.js"></script>
+  <script>
+  const sidebarLoggedInUser = JSON.parse(sessionStorage.getItem("loggedInUser"));
+
+  if (!sidebarLoggedInUser) {
+    window.location.href = "./login.html";
+  } else {
+    const sidebarRole = (sidebarLoggedInUser.role || "member").toLowerCase();
+    const sidebarIsAdmin = sidebarRole === "admin" || sidebarRole === "administrator";
+
+    document.querySelectorAll(".admin-only").forEach((element) => {
+      element.style.display = sidebarIsAdmin ? "" : "none";
+    });
+
+    document.querySelectorAll(".member-only").forEach((element) => {
+      element.style.display = sidebarIsAdmin ? "none" : "";
+    });
+  }
+</script>
+</body>
+</html>

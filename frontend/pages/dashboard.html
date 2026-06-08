@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Dashboard - Organization X</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=DM+Sans:wght@300;400;500&display=swap"
+    rel="stylesheet"
+  >
+
+  <link rel="stylesheet" href="../css/styles.css" />
+</head>
+
+<body class="dashboard-page">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+
+  <div class="ims-dashboard">
+
+    <!-- SIDEBAR -->
+    <aside class="ims-sidebar">
+
+      <div class="ims-brand">
+        <div class="ims-brand-icon">IMS</div>
+
+        <div class="ims-brand-text">
+          <h2>Organization X</h2>
+          <p>Management System</p>
+        </div>
+      </div>
+
+      <div class="ims-nav-section">
+        <p class="ims-section-title">Workspace</p>
+
+        <nav class="ims-nav">
+          <a href="#" class="ims-nav-link active" onclick="showDashboardPage()">
+            Dashboard
+          </a>
+
+          <a href="profile.html" class="ims-nav-link">
+            Profile
+          </a>
+
+          <a href="#" class="ims-nav-link admin-only" onclick="showMemberManagementPage()">
+            Member Management
+          </a>
+
+          <a href="data-migration.html" class="ims-nav-link admin-only">
+            Data Import
+          </a>
+
+          <a href="./documents.html" class="ims-nav-link">
+            Documents
+          </a>
+
+          <!-- ADMIN E-VOTING LINK -->
+          <a href="./election.html" class="ims-nav-link admin-only">
+            E-Voting Management
+          </a>
+
+          <!-- MEMBER E-VOTING LINK -->
+          <a href="./vote.html" class="ims-nav-link member-only">
+            E-Voting
+          </a>
+
+          <a href="./whatsapp.html" class="ims-nav-link admin-only">
+            WhatsApp Analytics
+          </a>
+
+          <a href="#" class="ims-nav-link">
+            Smart Notifications
+          </a>
+
+          <a href="#" class="ims-nav-link">
+            Meetings
+          </a>
+
+          <a href="./income.html" class="ims-nav-link admin-only">
+            Finance
+          </a>
+        </nav>
+      </div>
+
+      <div class="ims-nav-section admin-only">
+        <p class="ims-section-title">System</p>
+
+        <nav class="ims-nav">
+          <a href="#" class="ims-nav-link">
+            Settings
+          </a>
+
+          <a href="#" class="ims-nav-link">
+            Audit Logs
+          </a>
+        </nav>
+      </div>
+
+      <div class="ims-sidebar-spacer"></div>
+
+      <div class="ims-user-panel">
+        <div class="ims-avatar" id="userInitials">U</div>
+
+        <div class="ims-user-info">
+          <strong id="userName">User</strong>
+          <span id="userRole">Member</span>
+        </div>
+      </div>
+
+      <button class="ims-logout-btn" onclick="logout()">
+        Sign Out
+      </button>
+
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="ims-main ims-main-simple">
+
+      <!-- DASHBOARD PAGE -->
+      <section id="dashboardPage" class="ims-page">
+        <div class="ims-welcome-card">
+          <p class="ims-breadcrumb">
+            <span>Org X</span>
+            <span class="ims-sep">／</span>
+            <span>Dashboard</span>
+          </p>
+
+          <h1 class="ims-welcome-heading" id="welcomeMessage">
+            Welcome
+          </h1>
+
+          <div class="ims-divider"></div>
+
+          <p class="ims-welcome-body">
+            You are logged in to the Integrated Management System.
+            Use the sidebar to navigate through the available features and modules.
+          </p>
+
+          <div class="ims-chips">
+            <div class="ims-chip">
+              <span class="ims-dot"></span>
+              System Online
+            </div>
+
+            <div class="ims-chip">
+              <span class="ims-dot gold"></span>
+              <span id="sessionChip">Session Active</span>
+            </div>
+          </div>
+
+          <p class="msg" id="msg"></p>
+        </div>
+      </section>
+
+      <!-- MEMBER MANAGEMENT PAGE -->
+      <section id="memberManagementPage" class="ims-page hidden">
+        <div class="member-page-header">
+          <h1>Member Management</h1>
+        </div>
+
+        <div id="roleMessage" class="role-message hidden"></div>
+
+        <div class="members-card">
+
+          <!-- MEMBER SEARCH INSIDE MEMBER MANAGEMENT -->
+          <div class="member-management-search">
+            <input
+              type="text"
+              id="memberSearchInput"
+              placeholder="Search members by name, email, or role..."
+            />
+          </div>
+
+          <p id="memberSearchMessage" class="member-search-message hidden">
+            No members found.
+          </p>
+
+          <table class="members-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+
+            <tbody id="membersTableBody">
+              <!-- Members load here from dashboard.js -->
+            </tbody>
+          </table>
+
+        </div>
+      </section>
+
+    </main>
+
+  </div>
+
+  <script src="../js/dashboard.js"></script>
+</body>
+</html>

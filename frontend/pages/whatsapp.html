@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WhatsApp Analytics - Organization X</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/styles.css" />
+</head>
+
+<body class="dashboard-page">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+
+  <div class="ims-dashboard">
+
+    <aside class="ims-sidebar">
+      <div class="ims-brand">
+        <div class="ims-brand-icon">IMS</div>
+        <div class="ims-brand-text">
+          <h2>Organization X</h2>
+          <p>Management System</p>
+        </div>
+      </div>
+
+      <div class="ims-nav-section">
+        <p class="ims-section-title">Workspace</p>
+        <nav class="ims-nav">
+          <a href="./dashboard.html" class="ims-nav-link">Dashboard</a>
+          <a href="./profile.html" class="ims-nav-link">Profile</a>
+          <a href="./dashboard.html?page=members" class="ims-nav-link admin-only">Member Management</a>
+          <a href="./data-migration.html" class="ims-nav-link admin-only">Data Import</a>
+          <a href="./documents.html" class="ims-nav-link">Documents</a>
+          <a href="./election.html" class="ims-nav-link admin-only">E-Voting Management</a>
+          <a href="./vote.html" class="ims-nav-link member-only">E-Voting</a>
+          <a href="./whatsapp.html" class="ims-nav-link active admin-only">WhatsApp Analytics</a>
+          <a href="#" class="ims-nav-link">Smart Notifications</a>
+          <a href="#" class="ims-nav-link">Meetings</a>
+          <a href="./income.html" class="ims-nav-link admin-only">Finance</a>
+        </nav>
+      </div>
+
+      <div class="ims-nav-section admin-only">
+        <p class="ims-section-title">System</p>
+        <nav class="ims-nav">
+          <a href="#" class="ims-nav-link">Settings</a>
+          <a href="#" class="ims-nav-link">Audit Logs</a>
+        </nav>
+      </div>
+
+      <div class="ims-sidebar-spacer"></div>
+
+      <div class="ims-user-panel">
+        <div class="ims-avatar" id="userInitials">U</div>
+        <div class="ims-user-info">
+          <strong id="userName">User</strong>
+          <span id="userRole">Member</span>
+        </div>
+      </div>
+
+      <button class="ims-logout-btn" onclick="window.location.href='./logout.html'">Sign Out</button>
+    </aside>
+
+    <main class="wa-main">
+
+      <header class="wa-header">
+        <p class="profile-breadcrumb">
+          <span>Org X</span>
+          <span class="ims-sep">／</span>
+          <span>WhatsApp Analytics</span>
+        </p>
+        <h1 class="profile-title">WhatsApp <em>Analytics</em></h1>
+        <p class="wa-subtitle">
+          Upload a WhatsApp chat export to analyze communication activity,
+          active members, message frequency, and more.
+        </p>
+      </header>
+
+      <!-- S27: UPLOAD SECTION (Admin only) -->
+      <section id="uploadSection" class="wa-card admin-only">
+        <div class="profile-top-rule"></div>
+        <h2>Upload Chat Export</h2>
+        <p class="wa-card-subtitle">
+          Select a WhatsApp exported <strong>.txt</strong> file to begin analysis.
+        </p>
+
+        <div class="wa-upload-box" onclick="document.getElementById('chatFileInput').click()">
+          <div class="wa-upload-icon">📁</div>
+          <h3>Click to select a .txt file</h3>
+          <p>WhatsApp chat export format only</p>
+          <span id="selectedFileName"></span>
+        </div>
+
+        <input type="file" id="chatFileInput" accept=".txt" style="display:none" />
+
+        <button class="wa-primary-btn" onclick="handleUpload()">Analyse Chat</button>
+
+        <p id="uploadMessage" class="wa-message"></p>
+      </section>
+
+      <!-- S28: PARSE SUMMARY -->
+      <section id="parseSummarySection" class="wa-card hidden">
+        <div class="profile-top-rule"></div>
+        <h2>Parse Summary</h2>
+        <p class="wa-card-subtitle">
+          Messages extracted from the uploaded chat file.
+        </p>
+        <div class="wa-stats-grid" id="parseSummaryGrid"></div>
+        <p id="parseError" class="wa-message error"></p>
+      </section>
+
+      <!-- S29: MESSAGE FREQUENCY -->
+      <section id="frequencySection" class="wa-card hidden">
+        <div class="profile-top-rule"></div>
+        <h2>Message Frequency</h2>
+        <p class="wa-card-subtitle">Daily message count across the chat history.</p>
+
+        <div class="wa-stats-grid" id="frequencySummaryGrid"></div>
+
+        <div class="wa-table-scroll">
+          <table class="wa-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Messages</th>
+                <th>Activity</th>
+              </tr>
+            </thead>
+            <tbody id="frequencyTableBody"></tbody>
+          </table>
+        </div>
+      </section>
+      <!-- S30: USER ACTIVITY -->
+      <section id="activitySection" class="wa-card hidden">
+        <div class="profile-top-rule"></div>
+        <h2>User Activity</h2>
+        <p class="wa-card-subtitle">
+          Messages sent per user, sorted from most to least active.
+        </p>
+
+        <div class="wa-activity-grid">
+
+          <div class="wa-activity-card">
+            <h3 class="wa-activity-title">
+              Most Active Users
+              <span class="wa-activity-badge wa-badge-most">Top 5</span>
+            </h3>
+            <ul class="wa-activity-list" id="mostActiveList"></ul>
+          </div>
+
+          <div class="wa-activity-card">
+            <h3 class="wa-activity-title">
+              Least Active Users
+              <span class="wa-activity-badge wa-badge-least">Bottom 5</span>
+            </h3>
+            <ul class="wa-activity-list" id="leastActiveList"></ul>
+          </div>
+
+        </div>
+
+        <div class="wa-table-scroll" style="margin-top:1.5rem">
+          <table class="wa-table">
+            <thead>
+              <tr>
+                <th>Rank</th>
+                <th>User / Sender</th>
+                <th>Messages Sent</th>
+                <th>Activity</th>
+              </tr>
+            </thead>
+            <tbody id="activityTableBody"></tbody>
+          </table>
+        </div>
+
+      </section>
+
+    </main>
+  </div>
+
+  <script src="../js/whatsapp.js"></script>
+  <script>
+    const sidebarUser = JSON.parse(sessionStorage.getItem('loggedInUser'));
+    if (!sidebarUser) {
+      window.location.href = './login.html';
+    } else {
+      const role = (sidebarUser.role || 'member').toLowerCase();
+      const admin = role === 'admin' || role === 'administrator';
+      document.querySelectorAll('.admin-only').forEach(el => {
+        el.style.display = admin ? '' : 'none';
+      });
+      document.querySelectorAll('.member-only').forEach(el => {
+        el.style.display = admin ? 'none' : '';
+      });
+    }
+  </script>
+</body>
+</html>

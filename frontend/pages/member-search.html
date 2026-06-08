@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Member Search - Organization X</title>
+
+  <link rel="stylesheet" href="../css/styles.css" />
+</head>
+
+<body class="dashboard-page">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+
+  <div class="ims-dashboard">
+    <aside class="ims-sidebar">
+      <div class="ims-brand">
+        <div class="ims-brand-icon">IMS</div>
+        <div class="ims-brand-text">
+          <h2>Organization X</h2>
+          <p>Management System</p>
+        </div>
+      </div>
+
+      <div class="ims-nav-section">
+        <p class="ims-section-title">Workspace</p>
+
+        <nav class="ims-nav">
+          <a href="./dashboard.html" class="ims-nav-link">Dashboard</a>
+          <a href="./profile.html" class="ims-nav-link">Profile</a>
+          <a href="./data-migration.html" class="ims-nav-link admin-only">Data Migration</a>
+          <a href="./whatsapp.html" class="ims-nav-link">WhatsApp Analytics</a>
+          <a href="./income.html" class="ims-nav-link admin-only">Finance</a>
+          <a href="./member-search.html" class="ims-nav-link admin-only active">Member Search</a>
+          <a href="./logout.html" class="ims-nav-link">Logout</a>
+        </nav>
+      </div>
+    </aside>
+
+    <main class="ims-main">
+      <header class="ims-header">
+        <div>
+          <h1>Member Search</h1>
+          <p>Search registered and imported members by name, email, or role.</p>
+        </div>
+      </header>
+
+      <section class="member-search-card">
+        <div class="member-search-top">
+          <div>
+            <h2>Search Members</h2>
+            <p>Only administrators can access this page.</p>
+          </div>
+        </div>
+
+        <div class="member-search-box">
+          <input 
+            type="text" 
+            id="memberSearchInput" 
+            placeholder="Search by name, email, or role..."
+          />
+        </div>
+
+        <div id="memberSearchMessage" class="member-search-message"></div>
+
+        <div class="member-table-wrapper">
+          <table class="member-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Source</th>
+              </tr>
+            </thead>
+
+            <tbody id="memberResultsBody">
+              <!-- Results will be inserted here with JavaScript -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="../js/memberSearch.js"></script>
+</body>
+</html>

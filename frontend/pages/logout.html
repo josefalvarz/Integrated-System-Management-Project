@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Register — IMS</title>
+  <title>Logout — IMS</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
@@ -27,21 +27,18 @@
     <div class="auth-card">
       <div class="auth-card-top-rule"></div>
 
-      <h2 class="auth-heading">Create your account</h2>
-      
-      <input type="text"  id="name"     placeholder="Full name" />
-      <input type="email" id="email"    placeholder="Email address" />
-      <input type="password" id="password" placeholder="Password (min. 8 characters)" />
+      <h2 class="auth-heading">See you later</h2>
+      <p class="auth-sub">Are you sure you want to sign out?</p>
 
-      <button onclick="register()">Create my account</button>
+      <button onclick="logout()">Yes, sign me out</button>
 
       <div class="msg" id="msg"></div>
 
-      <p class="auth-footer">Already have an account? <a href="login.html">Sign in here</a></p>
+      <p class="auth-footer"><a href="javascript:history.back()">No, take me back</a></p>
     </div>
 
   </div>
 
-  <script src="../js/register.js"></script>
+  <script src="../js/logout.js"></script>
 </body>
 </html>
