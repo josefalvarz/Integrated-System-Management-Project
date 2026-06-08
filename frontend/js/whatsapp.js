@@ -9,11 +9,17 @@ if (!loggedInUser) {
   window.location.href = 'login.html';
 }
 
-// ── Helpers ──────────────────────────────────────────────────
+// Block members from accessing WhatsApp Analytics directly
 function isAdmin() {
   const role = (loggedInUser?.role || '').toLowerCase();
   return role === 'admin' || role === 'administrator';
 }
+
+if (!isAdmin()) {
+  alert('Access denied. Only administrators can access WhatsApp Analytics.');
+  window.location.href = 'dashboard.html';
+}
+
 
 function loadUserInfo() {
   const name = loggedInUser?.name || loggedInUser?.email || 'User';
