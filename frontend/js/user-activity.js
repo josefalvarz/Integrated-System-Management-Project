@@ -5,9 +5,6 @@ const loggedInUser = JSON.parse(sessionStorage.getItem('loggedInUser'));
 
 if (!loggedInUser) {
   window.location.href = 'login.html';
-} else if (loggedInUser.role !== 'admin') {
-  alert('Admin access required.');
-  window.location.href = 'dashboard.html';
 } else {
   initActivityPage();
 }
