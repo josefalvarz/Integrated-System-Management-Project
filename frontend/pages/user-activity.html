@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>User Activity - Organization X</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/styles.css" />
+  <style>
+    .activity-page-header {
+      margin-bottom: 1.5rem;
+    }
+
+    .activity-page-header h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2rem;
+      font-weight: 600;
+      color: var(--text-primary, #1a1a2e);
+      margin: 0 0 0.25rem 0;
+    }
+
+    .activity-page-header p {
+      color: var(--text-muted, #6b7280);
+      font-size: 0.9rem;
+      margin: 0;
+    }
+
+    .activity-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    @media (max-width: 768px) {
+      .activity-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .activity-card {
+      background: rgba(255, 255, 255, 0.85);
+      border: 1px solid rgba(0, 0, 0, 0.07);
+      border-radius: 16px;
+      padding: 1.5rem;
+      backdrop-filter: blur(10px);
+    }
+
+    .activity-card-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin: 0 0 1rem 0;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .activity-card-title .badge {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.7rem;
+      font-weight: 500;
+      padding: 0.2rem 0.6rem;
+      border-radius: 999px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .badge-most {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .badge-least {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .activity-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .activity-list-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.6rem 0;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .activity-list-item:last-child {
+      border-bottom: none;
+    }
+
+    .activity-rank {
+      font-size: 0.75rem;
+      color: var(--text-muted, #6b7280);
+      width: 1.5rem;
+      flex-shrink: 0;
+    }
+
+    .activity-name {
+      flex: 1;
+      font-size: 0.9rem;
+      color: var(--text-primary, #1a1a2e);
+      margin: 0 0.5rem;
+    }
+
+    .activity-count {
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text-primary, #1a1a2e);
+      background: rgba(0, 0, 0, 0.05);
+      padding: 0.2rem 0.6rem;
+      border-radius: 999px;
+      white-space: nowrap;
+    }
+
+    .activity-full-card {
+      background: rgba(255, 255, 255, 0.85);
+      border: 1px solid rgba(0, 0, 0, 0.07);
+      border-radius: 16px;
+      padding: 1.5rem;
+      backdrop-filter: blur(10px);
+    }
+
+    .activity-full-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin: 0 0 1rem 0;
+    }
+
+    .activity-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+
+    .activity-table thead tr {
+      border-bottom: 2px solid rgba(0, 0, 0, 0.08);
+    }
+
+    .activity-table th {
+      text-align: left;
+      padding: 0.6rem 0.75rem;
+      font-size: 0.75rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted, #6b7280);
+    }
+
+    .activity-table td {
+      padding: 0.65rem 0.75rem;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+      color: var(--text-primary, #1a1a2e);
+    }
+
+    .activity-table tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    .activity-table tbody tr:hover {
+      background: rgba(0, 0, 0, 0.02);
+    }
+
+    .rank-number {
+      color: var(--text-muted, #6b7280);
+      font-size: 0.8rem;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: var(--text-muted, #6b7280);
+    }
+
+    .empty-state p {
+      margin: 0.5rem 0 0 0;
+      font-size: 0.9rem;
+    }
+
+    .loading-state {
+      text-align: center;
+      padding: 2rem;
+      color: var(--text-muted, #6b7280);
+      font-size: 0.9rem;
+    }
+
+    .ims-breadcrumb {
+      font-size: 0.8rem;
+      color: var(--text-muted, #6b7280);
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+  </style>
+</head>
+
+<body class="dashboard-page">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+
+  <div class="ims-dashboard">
+
+    <!-- SIDEBAR -->
+    <aside class="ims-sidebar">
+      <div class="ims-brand">
+        <div class="ims-brand-icon">IMS</div>
+        <div class="ims-brand-text">
+          <h2>Organization X</h2>
+          <p>Management System</p>
+        </div>
+      </div>
+
+      <div class="ims-nav-section">
+        <p class="ims-section-title">Workspace</p>
+        <nav class="ims-nav">
+          <a href="dashboard.html" class="ims-nav-link">Dashboard</a>
+          <a href="profile.html" class="ims-nav-link">Profile</a>
+          <a href="dashboard.html" class="ims-nav-link admin-only">Member Management</a>
+          <a href="data-migration.html" class="ims-nav-link admin-only">Data Import</a>
+          <a href="./documents.html" class="ims-nav-link">Documents</a>
+          <a href="./election.html" class="ims-nav-link">E-Voting</a>
+          <a href="user-activity.html" class="ims-nav-link active admin-only">WhatsApp Analytics</a>
+          <a href="#" class="ims-nav-link">Smart Notifications</a>
+          <a href="#" class="ims-nav-link">Meetings</a>
+          <a href="./income.html" class="ims-nav-link admin-only">Finance</a>
+        </nav>
+      </div>
+
+      <div class="ims-nav-section admin-only">
+        <p class="ims-section-title">System</p>
+        <nav class="ims-nav">
+          <a href="#" class="ims-nav-link">Settings</a>
+          <a href="#" class="ims-nav-link">Audit Logs</a>
+        </nav>
+      </div>
+
+      <div class="ims-sidebar-spacer"></div>
+
+      <div class="ims-user-panel">
+        <div class="ims-avatar" id="sidebarInitials">U</div>
+        <div class="ims-user-info">
+          <strong id="sidebarName">User</strong>
+          <span id="sidebarRole">Member</span>
+        </div>
+      </div>
+
+      <button class="ims-logout-btn" onclick="logout()">Sign Out</button>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="ims-main ims-main-simple">
+      <section class="ims-page">
+
+        <div class="activity-page-header">
+          <p class="ims-breadcrumb">
+            <span>Org X</span>
+            <span class="ims-sep">／</span>
+            <span>WhatsApp Analytics</span>
+            <span class="ims-sep">／</span>
+            <span>User Activity</span>
+          </p>
+          <h1>User Activity</h1>
+          <p>Tracks message counts from imported WhatsApp chats. Users ranked from most to least active.</p>
+        </div>
+
+        <!-- Loading state shown while data is being fetched -->
+        <div id="loadingState" class="loading-state">
+          Loading activity data...
+        </div>
+
+        <!-- Empty state shown if no chat data exists -->
+        <div id="emptyState" class="empty-state" style="display:none;">
+          <p><strong>No chat data found.</strong></p>
+          <p>Import a WhatsApp chat export to start tracking user activity.</p>
+        </div>
+
+        <!-- Main content shown when data exists -->
+        <div id="activityContent" style="display:none;">
+
+          <!-- Top cards: Most Active + Least Active -->
+          <div class="activity-grid">
+
+            <div class="activity-card">
+              <h2 class="activity-card-title">
+                Most Active Users
+                <span class="badge badge-most">Top 5</span>
+              </h2>
+              <ul class="activity-list" id="mostActiveList">
+              </ul>
+            </div>
+
+            <div class="activity-card">
+              <h2 class="activity-card-title">
+                Least Active Users
+                <span class="badge badge-least">Bottom 5</span>
+              </h2>
+              <ul class="activity-list" id="leastActiveList">
+              </ul>
+            </div>
+
+          </div>
+
+          <!-- Full summary table -->
+          <div class="activity-full-card">
+            <h2 class="activity-full-title">Full Activity Summary</h2>
+            <table class="activity-table">
+              <thead>
+                <tr>
+                  <th>Rank</th>
+                  <th>User / Sender</th>
+                  <th>Messages Sent</th>
+                </tr>
+              </thead>
+              <tbody id="activityTableBody">
+              </tbody>
+            </table>
+          </div>
+
+        </div>
+
+      </section>
+    </main>
+
+  </div>
+
+  <script src="../js/user-activity.js"></script>
+</body>
+</html>
