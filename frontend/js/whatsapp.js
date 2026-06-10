@@ -55,6 +55,14 @@ const parseError           = document.getElementById('parseError');
 const frequencySection     = document.getElementById('frequencySection');
 const frequencySummaryGrid = document.getElementById('frequencySummaryGrid');
 const frequencyTableBody   = document.getElementById('frequencyTableBody');
+const peakHoursSection     = document.getElementById('peakHoursSection');
+const peakHoursSummaryGrid = document.getElementById('peakHoursSummaryGrid');
+const peakHoursTableBody   = document.getElementById('peakHoursTableBody');
+const filterSection        = document.getElementById('filterSection');
+const filterStatus         = document.getElementById('filterStatus');
+
+// Active filter state — period is one of: 'all' | 'daily' | 'weekly' | 'monthly' | 'yearly'
+let activeFilter = { period: 'all', value: '' };
 
 // ── File selection preview ────────────────────────────────────
 chatFileInput?.addEventListener('change', () => {
@@ -166,6 +174,7 @@ function parseChat(rawText) {
   renderParseSummary();
   analyseFrequency();
   analyseUserActivity();
+  analysePeakHours();
 }
 
 function isSystemMessage(sender, content) {
@@ -212,10 +221,13 @@ function showParseError(msg) {
   parseSummaryGrid.innerHTML = '';
   parseError.textContent = msg;
   frequencySection.classList.add('hidden');
+  if (peakHoursSection) peakHoursSection.classList.add('hidden');
+  if (filterSection)    filterSection.classList.add('hidden');
 }
 
 function renderParseSummary() {
   parseSummarySection.classList.remove('hidden');
+  if (filterSection) filterSection.classList.remove('hidden');
 
   const uniqueSenders = new Set(parsedMessages.map(m => m.sender)).size;
   const uniqueDates   = new Set(parsedMessages.map(m => m.date)).size;
@@ -240,12 +252,15 @@ function analyseUserActivity() {
 
   if (!activitySection) return;
 
-  if (!parsedMessages || parsedMessages.length === 0) {
+  const msgs = getMessages();
+  if (!msgs || msgs.length === 0) {
     activitySection.classList.remove('hidden');
+    mostActiveList.innerHTML  = '';
+    leastActiveList.innerHTML = '';
     activityTableBody.innerHTML = `
       <tr>
         <td colspan="4" style="text-align:center; padding:2rem; color:#6b7280;">
-          No chat data found. Upload a WhatsApp export to see user activity.
+          No messages found for the selected period.
         </td>
       </tr>
     `;
@@ -254,7 +269,7 @@ function analyseUserActivity() {
 
   // Count messages per sender
   const senderMap = {};
-  for (const msg of parsedMessages) {
+  for (const msg of msgs) {
     senderMap[msg.sender] = (senderMap[msg.sender] || 0) + 1;
   }
 
@@ -325,15 +340,26 @@ function analyseUserActivity() {
 function analyseFrequency() {
   frequencySection.classList.remove('hidden');
 
+  const msgs = getMessages();
   const frequencyMap = {};
-  for (const msg of parsedMessages) {
+  for (const msg of msgs) {
     frequencyMap[msg.date] = (frequencyMap[msg.date] || 0) + 1;
   }
 
   const dates  = Object.keys(frequencyMap).sort();
   const counts = dates.map(d => frequencyMap[d]);
 
-  if (dates.length === 0) return;
+  if (dates.length === 0) {
+    frequencySummaryGrid.innerHTML = '';
+    frequencyTableBody.innerHTML = `
+      <tr>
+        <td colspan="3" style="text-align:center; padding:2rem; color:#6b7280;">
+          No messages found for the selected period.
+        </td>
+      </tr>
+    `;
+    return;
+  }
 
   const totalMsgs = counts.reduce((a, b) => a + b, 0);
   const avgPerDay = Math.round(totalMsgs / dates.length);
@@ -403,6 +429,246 @@ function showMessage(el, text, type) {
   if (!el) return;
   el.textContent = text;
   el.className   = 'wa-message' + (type ? ' ' + type : '');
+}
+
+// ────────────────────────────────────────────────────────────
+// DATE FILTER — shared by S29, S30, S31
+// ────────────────────────────────────────────────────────────
+
+// Returns the ISO Monday–Sunday range for a week-input value like "2024-W03"
+function getWeekRange(weekValue) {
+  const [yearStr, weekPart] = weekValue.split('-W');
+  const year = parseInt(yearStr, 10);
+  const week = parseInt(weekPart, 10);
+  // ISO week 1 is the week containing Jan 4
+  const jan4    = new Date(Date.UTC(year, 0, 4));
+  const jan4Day = jan4.getUTCDay() || 7;          // Mon=1 … Sun=7
+  const monday  = new Date(jan4);
+  monday.setUTCDate(jan4.getUTCDate() - jan4Day + 1 + (week - 1) * 7);
+  const sunday  = new Date(monday);
+  sunday.setUTCDate(monday.getUTCDate() + 6);
+  return {
+    from: monday.toISOString().slice(0, 10),
+    to:   sunday.toISOString().slice(0, 10),
+  };
+}
+
+// Returns the subset of parsedMessages that matches the active filter.
+// Returns the full array when period is 'all' or no value is selected yet.
+function getMessages() {
+  if (activeFilter.period === 'all' || !activeFilter.value) return parsedMessages;
+
+  const val = activeFilter.value;
+
+  switch (activeFilter.period) {
+    case 'daily':
+      return parsedMessages.filter(m => m.date === val);
+    case 'weekly': {
+      const range = getWeekRange(val);
+      return parsedMessages.filter(m => m.date >= range.from && m.date <= range.to);
+    }
+    case 'monthly':
+      return parsedMessages.filter(m => m.date.startsWith(val));
+    case 'yearly':
+      return parsedMessages.filter(m => m.date.startsWith(val));
+    default:
+      return parsedMessages;
+  }
+}
+
+// Called when the user clicks one of the period buttons (All Time / Daily / etc.)
+function selectPeriod(period) {
+  activeFilter.period = period;
+  activeFilter.value  = '';
+
+  // Highlight the active button
+  ['all', 'daily', 'weekly', 'monthly', 'yearly'].forEach(p => {
+    const btn = document.getElementById(`filterBtn-${p}`);
+    if (btn) btn.classList.toggle('active', p === period);
+  });
+
+  const inputArea = document.getElementById('filterInputArea');
+  const label     = document.getElementById('filterInputLabel');
+  const input     = document.getElementById('filterDateInput');
+
+  // "All Time" — hide the date picker and immediately re-run analyses
+  if (period === 'all') {
+    inputArea.classList.add('hidden');
+    showMessage(filterStatus, '', '');
+    analyseFrequency();
+    analyseUserActivity();
+    analysePeakHours();
+    return;
+  }
+
+  // Show the date picker configured for the chosen period
+  inputArea.classList.remove('hidden');
+  input.value = '';
+
+  switch (period) {
+    case 'daily':
+      label.textContent = 'Select a day:';
+      input.type        = 'date';
+      input.placeholder = '';
+      break;
+    case 'weekly':
+      label.textContent = 'Select a week:';
+      input.type        = 'week';
+      input.placeholder = '';
+      break;
+    case 'monthly':
+      label.textContent = 'Select a month:';
+      input.type        = 'month';
+      input.placeholder = '';
+      break;
+    case 'yearly':
+      label.textContent = 'Enter a year:';
+      input.type        = 'number';
+      input.min         = '2000';
+      input.max         = '2100';
+      input.placeholder = 'e.g. 2024';
+      break;
+  }
+
+  showMessage(filterStatus, '', '');
+}
+
+// Called automatically whenever the date input changes (oninput on the element)
+function applyFilter() {
+  const input = document.getElementById('filterDateInput');
+  const val   = (input ? input.value : '').trim();
+
+  if (!val) return;
+
+  activeFilter.value = val;
+
+  // Build a human-readable status label
+  let label = '';
+  switch (activeFilter.period) {
+    case 'daily':
+      label = `Showing data for ${formatDisplayDate(val)}`;
+      break;
+    case 'weekly': {
+      const r = getWeekRange(val);
+      label = `Showing week of ${formatDisplayDate(r.from)} – ${formatDisplayDate(r.to)}`;
+      break;
+    }
+    case 'monthly': {
+      const [y, m] = val.split('-');
+      const months = ['Jan','Feb','Mar','Apr','May','Jun',
+                      'Jul','Aug','Sep','Oct','Nov','Dec'];
+      label = `Showing data for ${months[parseInt(m, 10) - 1]} ${y}`;
+      break;
+    }
+    case 'yearly':
+      label = `Showing data for year ${val}`;
+      break;
+  }
+
+  showMessage(filterStatus, label, 'success');
+  analyseFrequency();
+  analyseUserActivity();
+  analysePeakHours();
+}
+
+// ────────────────────────────────────────────────────────────
+// S31 — Detect Peak Chat Hours
+// ────────────────────────────────────────────────────────────
+
+// Converts a time string like "10:30 AM", "14:30", "10:30:45 AM" to a
+// 24-hour integer (0–23). Returns null if the string cannot be parsed.
+function extractHour(timeStr) {
+  const t = timeStr.trim();
+
+  // 12-hour format with AM/PM  e.g. "10:30 AM" or "10:30:45 PM"
+  const amPmMatch = t.match(/^(\d{1,2}):\d{2}(?::\d{2})?\s*([APap][Mm])$/);
+  if (amPmMatch) {
+    let hour = parseInt(amPmMatch[1], 10);
+    const period = amPmMatch[2].toUpperCase();
+    if (period === 'PM' && hour !== 12) hour += 12;
+    if (period === 'AM' && hour === 12) hour = 0;
+    return hour;
+  }
+
+  // 24-hour format  e.g. "14:30" or "14:30:45"
+  const match24 = t.match(/^(\d{1,2}):/);
+  if (match24) return parseInt(match24[1], 10);
+
+  return null;
+}
+
+// Converts a 24-hour integer to a readable label  e.g. 14 → "2 PM"
+function formatHour(hour) {
+  if (hour === 0)  return '12 AM (Midnight)';
+  if (hour === 12) return '12 PM (Noon)';
+  return hour < 12 ? `${hour} AM` : `${hour - 12} PM`;
+}
+
+function analysePeakHours() {
+  if (!peakHoursSection) return;
+
+  peakHoursSection.classList.remove('hidden');
+
+  const msgs = getMessages();
+  if (!msgs || msgs.length === 0) {
+    peakHoursSummaryGrid.innerHTML = '';
+    peakHoursTableBody.innerHTML = `
+      <tr>
+        <td colspan="3" style="text-align:center; padding:2rem; color:#6b7280;">
+          No messages found for the selected period.
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  // Step 1: Initialise a slot for every hour of the day
+  const hourMap = {};
+  for (let h = 0; h < 24; h++) hourMap[h] = 0;
+
+  // Step 2: Extract hour from each message timestamp and count
+  for (const msg of msgs) {
+    const hour = extractHour(msg.time);
+    if (hour !== null && hour >= 0 && hour <= 23) {
+      hourMap[hour]++;
+    }
+  }
+
+  // Step 3: Identify peak hour
+  const allCounts  = Object.values(hourMap);
+  const maxCount   = Math.max(...allCounts);
+  const peakHour   = parseInt(Object.keys(hourMap).find(h => hourMap[h] === maxCount), 10);
+  const totalMsgs  = allCounts.reduce((a, b) => a + b, 0);
+  const activeHours = allCounts.filter(c => c > 0).length;
+  const avgPerHour  = Math.round(totalMsgs / 24);
+
+  // Step 4: Render summary cards (Peak Chat Hour card is primary)
+  peakHoursSummaryGrid.innerHTML = `
+    ${statCard('Peak Chat Hour',   maxCount > 0 ? formatHour(peakHour) : 'N/A', maxCount > 0 ? maxCount + ' messages' : 'No data')}
+    ${statCard('Messages at Peak', maxCount)}
+    ${statCard('Active Hours',     activeHours + ' / 24')}
+    ${statCard('Avg / Hour',       avgPerHour)}
+  `;
+
+  // Step 5: Render hourly activity table (all 24 hours, 0 → 23)
+  peakHoursTableBody.innerHTML = '';
+  for (let h = 0; h < 24; h++) {
+    const count  = hourMap[h];
+    const pct    = maxCount > 0 ? Math.round((count / maxCount) * 100) : 0;
+    const isPeak = h === peakHour && maxCount > 0;
+
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${formatHour(h)}${isPeak ? ' ★' : ''}</td>
+      <td>${count}</td>
+      <td>
+        <div class="wa-bar-track">
+          <div class="wa-bar-fill" style="width:${pct}%"></div>
+        </div>
+      </td>
+    `;
+    peakHoursTableBody.appendChild(tr);
+  }
 }
 
 // ── On load: restore previous upload if available ────────────
