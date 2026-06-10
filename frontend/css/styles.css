@@ -3941,4 +3941,22 @@ body.auth-page::before {
 
 .wa-sentiment-dot-pos { background: #4ade9a; }
 .wa-sentiment-dot-neg { background: #f87171; }
+
+/* ============================================
+   S34 — SPAM DETECTION
+   ============================================ */
+
+.wa-spam-kw {
+  display: inline-block;
+  background: rgba(248, 113, 113, 0.12);
+  color: #f87171;
+  border: 1px solid rgba(248, 113, 113, 0.25);
+  border-radius: 999px;
+  padding: 2px 9px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  margin: 2px 2px 2px 0;
+  white-space: nowrap;
+}
 .wa-sentiment-dot-neu { background: #9ca3af; }
