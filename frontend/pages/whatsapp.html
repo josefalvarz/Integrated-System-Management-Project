@@ -111,6 +111,30 @@
         <p id="parseError" class="wa-message error"></p>
       </section>
 
+      <!-- DATE FILTER -->
+      <section id="filterSection" class="wa-card hidden">
+        <div class="profile-top-rule"></div>
+        <h2>Filter by Date</h2>
+        <p class="wa-card-subtitle">
+          Narrow the analysis sections below to a specific time window.
+        </p>
+
+        <div class="wa-filter-bar">
+          <button class="wa-filter-btn active" id="filterBtn-all"     onclick="selectPeriod('all')">All Time</button>
+          <button class="wa-filter-btn"        id="filterBtn-daily"   onclick="selectPeriod('daily')">Daily</button>
+          <button class="wa-filter-btn"        id="filterBtn-weekly"  onclick="selectPeriod('weekly')">Weekly</button>
+          <button class="wa-filter-btn"        id="filterBtn-monthly" onclick="selectPeriod('monthly')">Monthly</button>
+          <button class="wa-filter-btn"        id="filterBtn-yearly"  onclick="selectPeriod('yearly')">Yearly</button>
+        </div>
+
+        <div id="filterInputArea" class="wa-filter-input-area hidden">
+          <span class="wa-filter-label" id="filterInputLabel">Select a date:</span>
+          <input id="filterDateInput" class="wa-filter-input" oninput="applyFilter()" />
+        </div>
+
+        <p id="filterStatus" class="wa-message"></p>
+      </section>
+
       <!-- S29: MESSAGE FREQUENCY -->
       <section id="frequencySection" class="wa-card hidden">
         <div class="profile-top-rule"></div>
@@ -174,6 +198,30 @@
           </table>
         </div>
 
+      </section>
+
+      <!-- S31: PEAK CHAT HOURS -->
+      <section id="peakHoursSection" class="wa-card hidden">
+        <div class="profile-top-rule"></div>
+        <h2>Peak Chat Hours</h2>
+        <p class="wa-card-subtitle">
+          Message distribution across hours of the day.
+        </p>
+
+        <div class="wa-stats-grid" id="peakHoursSummaryGrid"></div>
+
+        <div class="wa-table-scroll" style="margin-top:1.5rem">
+          <table class="wa-table">
+            <thead>
+              <tr>
+                <th>Hour</th>
+                <th>Messages</th>
+                <th>Activity</th>
+              </tr>
+            </thead>
+            <tbody id="peakHoursTableBody"></tbody>
+          </table>
+        </div>
       </section>
 
     </main>

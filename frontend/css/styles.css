@@ -3793,3 +3793,69 @@ body.auth-page::before {
     grid-template-columns: 1fr;
   }
 }
+
+/* ── WhatsApp Date Filter ──────────────────────────────────── */
+.wa-filter-bar {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.wa-filter-btn {
+  padding: 0.4rem 1.1rem;
+  border: 1px solid rgba(212, 175, 97, 0.35);
+  background: transparent;
+  color: var(--text-muted);
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  letter-spacing: 0.02em;
+  transition: all 0.18s;
+}
+
+.wa-filter-btn:hover {
+  background: var(--gold-dim);
+  color: var(--text);
+  border-color: var(--gold);
+}
+
+.wa-filter-btn.active {
+  background: var(--gold);
+  color: var(--navy);
+  font-weight: 600;
+  border-color: var(--gold);
+}
+
+.wa-filter-input-area {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.wa-filter-label {
+  font-size: 13px;
+  color: var(--text-muted);
+  letter-spacing: 0.02em;
+}
+
+.wa-filter-input {
+  padding: 0.45rem 0.85rem;
+  background: var(--navy-mid);
+  border: 1px solid rgba(212, 175, 97, 0.3);
+  border-radius: 8px;
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: 0.9rem;
+  color-scheme: dark;
+  min-width: 160px;
+  transition: border-color 0.18s;
+}
+
+.wa-filter-input:focus {
+  outline: none;
+  border-color: var(--gold);
+}
