@@ -175,6 +175,7 @@ function parseChat(rawText) {
   analyseFrequency();
   analyseUserActivity();
   analysePeakHours();
+  analyseMessageTypes();
 }
 
 function isSystemMessage(sender, content) {
@@ -223,6 +224,8 @@ function showParseError(msg) {
   frequencySection.classList.add('hidden');
   if (peakHoursSection) peakHoursSection.classList.add('hidden');
   if (filterSection)    filterSection.classList.add('hidden');
+  const messageTypesSection = document.getElementById('messageTypesSection');
+  if (messageTypesSection) messageTypesSection.classList.add('hidden');
 }
 
 function renderParseSummary() {
@@ -498,6 +501,7 @@ function selectPeriod(period) {
     analyseFrequency();
     analyseUserActivity();
     analysePeakHours();
+    analyseMessageTypes();
     return;
   }
 
@@ -569,6 +573,7 @@ function applyFilter() {
   analyseFrequency();
   analyseUserActivity();
   analysePeakHours();
+  analyseMessageTypes();
 }
 
 // ────────────────────────────────────────────────────────────
@@ -669,6 +674,66 @@ function analysePeakHours() {
     `;
     peakHoursTableBody.appendChild(tr);
   }
+}
+
+// ────────────────────────────────────────────────────────────
+// S32 — Analyse Text vs Media Messages
+// ────────────────────────────────────────────────────────────
+function analyseMessageTypes() {
+  const section     = document.getElementById('messageTypesSection');
+  const summaryGrid = document.getElementById('messageTypesSummaryGrid');
+  const splitBarWrap = document.getElementById('messageTypesSplitBar');
+
+  if (!section) return;
+
+  section.classList.remove('hidden');
+
+  const msgs = getMessages();
+
+  if (!msgs || msgs.length === 0) {
+    summaryGrid.innerHTML = '';
+    splitBarWrap.innerHTML = `
+      <p style="text-align:center; padding:2rem; color:#6b7280;">
+        No messages found for the selected period.
+      </p>
+    `;
+    return;
+  }
+
+  const mediaCount = msgs.filter(m => m.isMedia).length;
+  const textCount  = msgs.length - mediaCount;
+  const total      = msgs.length;
+
+  // Avoid division by zero
+  const textPct  = total > 0 ? Math.round((textCount  / total) * 100) : 0;
+  const mediaPct = total > 0 ? 100 - textPct : 0;
+
+  const dominantLabel = textCount >= mediaCount ? 'Text' : 'Media';
+
+  summaryGrid.innerHTML = `
+    ${statCard('Text Messages',  textCount,  textPct  + '% of total')}
+    ${statCard('Media Messages', mediaCount, mediaPct + '% of total')}
+    ${statCard('Total Messages', total)}
+    ${statCard('Dominant Type',  dominantLabel)}
+  `;
+
+  // Visual split bar showing the text/media proportion
+  splitBarWrap.innerHTML = `
+    <div class="wa-type-split">
+      <div class="wa-type-bar-text"  style="width:${textPct}%"  title="Text: ${textPct}%"></div>
+      <div class="wa-type-bar-media" style="width:${mediaPct}%" title="Media: ${mediaPct}%"></div>
+    </div>
+    <div class="wa-type-legend">
+      <span class="wa-type-legend-item">
+        <span class="wa-type-dot wa-type-dot-text"></span>
+        Text — ${textCount} messages (${textPct}%)
+      </span>
+      <span class="wa-type-legend-item">
+        <span class="wa-type-dot wa-type-dot-media"></span>
+        Media — ${mediaCount} messages (${mediaPct}%)
+      </span>
+    </div>
+  `;
 }
 
 // ── On load: restore previous upload if available ────────────
