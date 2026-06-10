@@ -3859,3 +3859,55 @@ body.auth-page::before {
   outline: none;
   border-color: var(--gold);
 }
+
+/* ============================================
+   S32 - TEXT VS MEDIA COMPARISON
+   ============================================ */
+
+.wa-type-split {
+  display: flex;
+  height: 14px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.06);
+  margin-bottom: 14px;
+}
+
+.wa-type-bar-text {
+  height: 100%;
+  background: linear-gradient(90deg, #4ade9a, #22c55e);
+  border-radius: 999px 0 0 999px;
+  transition: width 0.4s ease;
+}
+
+.wa-type-bar-media {
+  height: 100%;
+  background: linear-gradient(90deg, var(--gold), var(--gold-light));
+  border-radius: 0 999px 999px 0;
+  transition: width 0.4s ease;
+}
+
+.wa-type-legend {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+  margin-top: 6px;
+}
+
+.wa-type-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.wa-type-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.wa-type-dot-text  { background: #4ade9a; }
+.wa-type-dot-media { background: var(--gold); }
