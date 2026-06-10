@@ -251,6 +251,32 @@
         <div id="sentimentSplitBar"></div>
       </section>
 
+      <!-- S34: SPAM DETECTION -->
+      <section id="spamSection" class="wa-card hidden">
+        <div class="profile-top-rule"></div>
+        <h2>Spam Detection</h2>
+        <p class="wa-card-subtitle">
+          Messages flagged as potential spam or promotional content based on keyword matching.
+          Media messages are excluded from this analysis.
+        </p>
+
+        <div class="wa-stats-grid" id="spamSummaryGrid"></div>
+
+        <div class="wa-table-scroll" style="margin-top:1.5rem">
+          <table class="wa-table">
+            <thead>
+              <tr>
+                <th>Sender</th>
+                <th>Message</th>
+                <th>Keywords Found</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody id="spamTableBody"></tbody>
+          </table>
+        </div>
+      </section>
+
     </main>
   </div>
 

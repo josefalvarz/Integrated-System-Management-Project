@@ -177,6 +177,7 @@ function parseChat(rawText) {
   analysePeakHours();
   analyseMessageTypes();
   analyseSentiment();
+  detectSpam();
 }
 
 function isSystemMessage(sender, content) {
@@ -229,6 +230,8 @@ function showParseError(msg) {
   if (messageTypesSection) messageTypesSection.classList.add('hidden');
   const sentimentSection = document.getElementById('sentimentSection');
   if (sentimentSection) sentimentSection.classList.add('hidden');
+  const spamSection = document.getElementById('spamSection');
+  if (spamSection) spamSection.classList.add('hidden');
 }
 
 function renderParseSummary() {
@@ -506,6 +509,7 @@ function selectPeriod(period) {
     analysePeakHours();
     analyseMessageTypes();
     analyseSentiment();
+    detectSpam();
     return;
   }
 
@@ -579,6 +583,7 @@ function applyFilter() {
   analysePeakHours();
   analyseMessageTypes();
   analyseSentiment();
+  detectSpam();
 }
 
 // ────────────────────────────────────────────────────────────
@@ -844,6 +849,101 @@ function analyseSentiment() {
       </span>
     </div>
   `;
+}
+
+// ────────────────────────────────────────────────────────────
+// S34 — Detect Spam or Promotional Messages
+// ────────────────────────────────────────────────────────────
+
+const SPAM_KEYWORDS = [
+  'buy now', 'discount', 'promo', 'click link', 'offer',
+  'free', 'win', 'winner', 'limited time', 'act now',
+  'click here', 'special deal', 'earn money', 'make money',
+  'cash prize', 'subscribe now', 'sign up now',
+];
+
+function escapeHtml(str) {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function detectSpam() {
+  const section     = document.getElementById('spamSection');
+  const summaryGrid = document.getElementById('spamSummaryGrid');
+  const tableBody   = document.getElementById('spamTableBody');
+
+  if (!section) return;
+
+  section.classList.remove('hidden');
+
+  const msgs = getMessages().filter(m => !m.isMedia);
+
+  if (!msgs || msgs.length === 0) {
+    summaryGrid.innerHTML = '';
+    tableBody.innerHTML = `
+      <tr>
+        <td colspan="4" style="text-align:center; padding:2rem; color:#6b7280;">
+          No text messages found for the selected period.
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  // Check each message against the spam keyword list
+  const spamMessages = [];
+  for (const msg of msgs) {
+    const lower   = msg.content.toLowerCase();
+    const matched = SPAM_KEYWORDS.filter(kw => lower.includes(kw));
+    if (matched.length > 0) {
+      spamMessages.push({ ...msg, matchedKeywords: matched });
+    }
+  }
+
+  summaryGrid.innerHTML = `
+    ${statCard('Suspected Spam',        spamMessages.length)}
+    ${statCard('Text Messages Scanned', msgs.length)}
+  `;
+
+  if (spamMessages.length === 0) {
+    tableBody.innerHTML = `
+      <tr>
+        <td colspan="4" style="text-align:center; padding:2rem; color:#4ade9a; font-weight:500;">
+          No spam detected.
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  tableBody.innerHTML = '';
+  for (const msg of spamMessages) {
+    const tr  = document.createElement('tr');
+    const td1 = document.createElement('td');
+    const td2 = document.createElement('td');
+    const td3 = document.createElement('td');
+    const td4 = document.createElement('td');
+
+    td1.textContent = msg.sender;
+    // Truncate very long messages so the table stays readable
+    td2.textContent = msg.content.length > 160
+      ? msg.content.substring(0, 160) + '…'
+      : msg.content;
+    // Keywords come from our own constant — safe to render as HTML
+    td3.innerHTML = msg.matchedKeywords
+      .map(kw => `<span class="wa-spam-kw">${escapeHtml(kw)}</span>`)
+      .join(' ');
+    td4.textContent = formatDisplayDate(msg.date);
+
+    tr.appendChild(td1);
+    tr.appendChild(td2);
+    tr.appendChild(td3);
+    tr.appendChild(td4);
+    tableBody.appendChild(tr);
+  }
 }
 
 // ── On load: restore previous upload if available ────────────
