@@ -176,6 +176,7 @@ function parseChat(rawText) {
   analyseUserActivity();
   analysePeakHours();
   analyseMessageTypes();
+  analyseSentiment();
 }
 
 function isSystemMessage(sender, content) {
@@ -226,6 +227,8 @@ function showParseError(msg) {
   if (filterSection)    filterSection.classList.add('hidden');
   const messageTypesSection = document.getElementById('messageTypesSection');
   if (messageTypesSection) messageTypesSection.classList.add('hidden');
+  const sentimentSection = document.getElementById('sentimentSection');
+  if (sentimentSection) sentimentSection.classList.add('hidden');
 }
 
 function renderParseSummary() {
@@ -502,6 +505,7 @@ function selectPeriod(period) {
     analyseUserActivity();
     analysePeakHours();
     analyseMessageTypes();
+    analyseSentiment();
     return;
   }
 
@@ -574,6 +578,7 @@ function applyFilter() {
   analyseUserActivity();
   analysePeakHours();
   analyseMessageTypes();
+  analyseSentiment();
 }
 
 // ────────────────────────────────────────────────────────────
@@ -731,6 +736,111 @@ function analyseMessageTypes() {
       <span class="wa-type-legend-item">
         <span class="wa-type-dot wa-type-dot-media"></span>
         Media — ${mediaCount} messages (${mediaPct}%)
+      </span>
+    </div>
+  `;
+}
+
+// ────────────────────────────────────────────────────────────
+// S33 — Basic Sentiment Classification
+// ────────────────────────────────────────────────────────────
+
+const POSITIVE_KEYWORDS = [
+  'good', 'great', 'thanks', 'thank you', 'awesome', 'excellent', 'amazing',
+  'wonderful', 'love', 'happy', 'perfect', 'fantastic', 'nice', 'brilliant',
+  'well done', 'congratulations', 'congrats', 'helpful', 'appreciate',
+  'beautiful', 'enjoy', 'glad', 'pleased', 'support', 'welcome',
+  'absolutely', 'positive', 'proud', 'blessing', 'blessed', 'excited',
+];
+
+const NEGATIVE_KEYWORDS = [
+  'bad', 'problem', 'angry', 'hate', 'terrible', 'awful', 'horrible',
+  'wrong', 'issue', 'error', 'fail', 'failed', 'failure', 'broken',
+  'sad', 'upset', 'disappointed', 'frustrating', 'frustrated', 'annoying',
+  'annoyed', 'worried', 'concern', 'confused', 'disagree', 'complaint',
+  'complain', 'unfortunately', 'incorrect', 'mistake', 'cancel',
+  'not working', "doesn't work", 'delayed', 'missing', 'absent',
+];
+
+// Returns 'positive', 'negative', or 'neutral' for a message string.
+// Counts how many keywords from each list appear in the lowercased content.
+// Whichever side scores higher wins; a tie or zero matches → neutral.
+function classifyMessageSentiment(content) {
+  const lower = content.toLowerCase();
+
+  const posScore = POSITIVE_KEYWORDS.filter(kw => lower.includes(kw)).length;
+  const negScore = NEGATIVE_KEYWORDS.filter(kw => lower.includes(kw)).length;
+
+  if (posScore === 0 && negScore === 0) return 'neutral';
+  if (posScore > negScore)              return 'positive';
+  if (negScore > posScore)              return 'negative';
+  return 'neutral';
+}
+
+function analyseSentiment() {
+  const section      = document.getElementById('sentimentSection');
+  const summaryGrid  = document.getElementById('sentimentSummaryGrid');
+  const splitBarWrap = document.getElementById('sentimentSplitBar');
+
+  if (!section) return;
+
+  section.classList.remove('hidden');
+
+  // Only text messages carry readable content worth classifying
+  const msgs = getMessages().filter(m => !m.isMedia);
+
+  if (!msgs || msgs.length === 0) {
+    summaryGrid.innerHTML = '';
+    splitBarWrap.innerHTML = `
+      <p style="text-align:center; padding:2rem; color:#6b7280;">
+        No text messages found for the selected period.
+      </p>
+    `;
+    return;
+  }
+
+  let positive = 0;
+  let negative = 0;
+  let neutral  = 0;
+
+  for (const msg of msgs) {
+    const sentiment = classifyMessageSentiment(msg.content);
+    if      (sentiment === 'positive') positive++;
+    else if (sentiment === 'negative') negative++;
+    else                               neutral++;
+  }
+
+  const total  = msgs.length;
+  const posPct = total > 0 ? Math.round((positive / total) * 100) : 0;
+  const negPct = total > 0 ? Math.round((negative / total) * 100) : 0;
+  // Derive neutral % from remainder so the three values always sum to 100
+  const neuPct = total > 0 ? 100 - posPct - negPct : 0;
+
+  summaryGrid.innerHTML = `
+    ${statCard('Positive Messages', positive, posPct + '% of text messages')}
+    ${statCard('Negative Messages', negative, negPct + '% of text messages')}
+    ${statCard('Neutral Messages',  neutral,  neuPct + '% of text messages')}
+    ${statCard('Text Messages Analysed', total)}
+  `;
+
+  splitBarWrap.innerHTML = `
+    <div class="wa-sentiment-split">
+      <div class="wa-sentiment-bar-pos" style="width:${posPct}%" title="Positive: ${posPct}%"></div>
+      <div class="wa-sentiment-bar-neg" style="width:${negPct}%" title="Negative: ${negPct}%"></div>
+      <div class="wa-sentiment-bar-neu" style="width:${neuPct}%" title="Neutral: ${neuPct}%"></div>
+    </div>
+    <div class="wa-type-legend">
+      <span class="wa-type-legend-item">
+        <span class="wa-type-dot wa-sentiment-dot-pos"></span>
+        Positive — ${positive} messages (${posPct}%)
+      </span>
+      <span class="wa-type-legend-item">
+        <span class="wa-type-dot wa-sentiment-dot-neg"></span>
+        Negative — ${negative} messages (${negPct}%)
+      </span>
+      <span class="wa-type-legend-item">
+        <span class="wa-type-dot wa-sentiment-dot-neu"></span>
+        Neutral — ${neutral} messages (${neuPct}%)
       </span>
     </div>
   `;

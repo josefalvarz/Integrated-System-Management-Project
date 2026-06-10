@@ -3911,3 +3911,34 @@ body.auth-page::before {
 
 .wa-type-dot-text  { background: #4ade9a; }
 .wa-type-dot-media { background: var(--gold); }
+
+/* ============================================
+   S33 — Sentiment Analysis
+   ============================================ */
+
+.wa-sentiment-split {
+  display: flex;
+  height: 14px;
+  border-radius: 7px;
+  overflow: hidden;
+  margin: 1.5rem 0 1rem;
+}
+
+.wa-sentiment-bar-pos {
+  height: 100%;
+  background: linear-gradient(90deg, #4ade9a, #22c55e);
+}
+
+.wa-sentiment-bar-neg {
+  height: 100%;
+  background: linear-gradient(90deg, #f87171, #ef4444);
+}
+
+.wa-sentiment-bar-neu {
+  height: 100%;
+  background: rgba(156, 163, 175, 0.35);
+}
+
+.wa-sentiment-dot-pos { background: #4ade9a; }
+.wa-sentiment-dot-neg { background: #f87171; }
+.wa-sentiment-dot-neu { background: #9ca3af; }
