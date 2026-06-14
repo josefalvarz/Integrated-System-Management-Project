@@ -109,4 +109,18 @@ db.run(`
     FOREIGN KEY (user_id) REFERENCES users(id)
   )
 `);
+
+// S35 — Broadcast Notifications
+db.run(`
+  CREATE TABLE IF NOT EXISTS notifications (
+    id           INTEGER PRIMARY KEY AUTOINCREMENT,
+    title        TEXT    NOT NULL,
+    message      TEXT    NOT NULL,
+    target_group TEXT    NOT NULL DEFAULT 'all',
+    created_by   INTEGER NOT NULL,
+    created_at   TEXT    NOT NULL DEFAULT (datetime('now')),
+    FOREIGN KEY (created_by) REFERENCES users(id)
+  )
+`);
+
 module.exports = db;

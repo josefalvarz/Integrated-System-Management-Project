@@ -9,6 +9,7 @@ const usersRoutes = require('./routes/users');
 const dataMigrationRoutes = require('./routes/dataMigration');
 const profileRoutes = require('./routes/profile');
 const electionRoutes = require('./routes/election');
+const notificationsRoutes = require('./routes/notifications');
 
 const app = express();
 const PORT = 5500;
@@ -34,6 +35,7 @@ app.use('/api/users', usersRoutes);
 app.use('/api/data-migration', dataMigrationRoutes);
 app.use('/api/profile', profileRoutes);
 app.use('/api/elections', electionRoutes);
+app.use('/api/notifications', notificationsRoutes);
 
 app.get('/me', (req, res) => {
   if (!req.session.user) {

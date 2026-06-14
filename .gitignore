@@ -143,3 +143,4 @@ vite.config.ts.timestamp-*
 .vite/
 database/app.db
 node_modules/
+.claude/
