@@ -151,4 +151,26 @@ db.run(`
   )
 `);
 
+// S37 — Select Meeting Participants
+// Add participant_type to meetings if the column does not exist yet
+db.all("PRAGMA table_info(meetings)", (err, columns) => {
+  if (err) return;
+  const hasParticipantType = columns.some(c => c.name === 'participant_type');
+  if (!hasParticipantType) {
+    db.run("ALTER TABLE meetings ADD COLUMN participant_type TEXT NOT NULL DEFAULT 'all'");
+  }
+});
+
+// Join table: which users are invited to a specific meeting
+db.run(`
+  CREATE TABLE IF NOT EXISTS meeting_participants (
+    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    meeting_id INTEGER NOT NULL,
+    user_id    INTEGER NOT NULL,
+    UNIQUE(meeting_id, user_id),
+    FOREIGN KEY (meeting_id) REFERENCES meetings(id),
+    FOREIGN KEY (user_id)    REFERENCES users(id)
+  )
+`);
+
 module.exports = db;

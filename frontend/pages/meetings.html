@@ -138,6 +138,25 @@
                 ></textarea>
               </div>
 
+              <!-- S37 — Participant selection -->
+              <div class="profile-field meetings-participant-field">
+                <span class="profile-label">Participants</span>
+                <div class="meetings-participant-options">
+                  <label class="meetings-participant-option">
+                    <input type="radio" name="participantType" id="participantAll" value="all" checked />
+                    <span class="meetings-participant-label">All Members</span>
+                  </label>
+                  <label class="meetings-participant-option">
+                    <input type="radio" name="participantType" id="participantSelected" value="selected" />
+                    <span class="meetings-participant-label">Select Members</span>
+                  </label>
+                </div>
+                <div id="participantChecklist" class="meetings-checklist" style="display:none;">
+                  <p id="checklistStatus" class="meetings-checklist-hint">Loading members...</p>
+                  <div id="checklistItems" class="meetings-checklist-items"></div>
+                </div>
+              </div>
+
               <button type="submit" class="profile-btn">Schedule Meeting</button>
 
             </form>
