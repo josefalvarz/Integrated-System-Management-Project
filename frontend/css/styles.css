@@ -4479,3 +4479,80 @@ body.auth-page::before {
   color: var(--text-faint);
   text-transform: capitalize;
 }
+
+/* ============================================
+   S38 - ADD ONLINE MEETING LINKS
+   ============================================ */
+
+/* Row that wraps the Physical / Online / Hybrid radio buttons */
+.meetings-type-options {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 6px;
+}
+
+/* Small "(Required)" / "(Optional)" hint next to the label */
+.meetings-link-required {
+  font-size: 11px;
+  color: var(--text-faint);
+  font-weight: 400;
+  margin-left: 4px;
+}
+
+/* Meeting type pill shown inside each reminder card */
+.meetings-type-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+
+.meetings-type-badge-online {
+  background: rgba(96, 165, 250, 0.1);
+  border: 1px solid rgba(96, 165, 250, 0.3);
+  color: #60a5fa;
+}
+
+.meetings-type-badge-hybrid {
+  background: rgba(167, 139, 250, 0.1);
+  border: 1px solid rgba(167, 139, 250, 0.3);
+  color: #a78bfa;
+}
+
+.meetings-type-badge-physical {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border);
+  color: var(--text-faint);
+}
+
+/* "Join Meeting" link row inside a reminder card */
+.meetings-online-link-row {
+  margin: 6px 0 8px;
+}
+
+.meetings-online-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--gold);
+  text-decoration: none;
+  padding: 5px 14px;
+  border-radius: 8px;
+  border: 1px solid rgba(212, 175, 97, 0.25);
+  background: rgba(212, 175, 97, 0.06);
+  transition: background 0.18s, border-color 0.18s, color 0.18s;
+}
+
+.meetings-online-link:hover {
+  background: rgba(212, 175, 97, 0.12);
+  border-color: rgba(212, 175, 97, 0.4);
+  color: var(--gold-light);
+}

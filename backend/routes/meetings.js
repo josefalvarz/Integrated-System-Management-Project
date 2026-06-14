@@ -14,7 +14,7 @@ router.get('/', requireLogin, (req, res) => {
   if (role === 'admin') {
     query = `
       SELECT m.id, m.title, m.date, m.time, m.location, m.description,
-             m.participant_type, m.created_at,
+             m.participant_type, m.meeting_type, m.online_link, m.created_at,
              u.name AS created_by_name
       FROM meetings m
       LEFT JOIN users u ON m.created_by = u.id
@@ -23,7 +23,7 @@ router.get('/', requireLogin, (req, res) => {
   } else {
     query = `
       SELECT m.id, m.title, m.date, m.time, m.location, m.description,
-             m.participant_type, m.created_at
+             m.participant_type, m.meeting_type, m.online_link, m.created_at
       FROM meetings m
       WHERE m.participant_type = 'all'
          OR EXISTS (
@@ -53,7 +53,7 @@ router.get('/reminders', requireLogin, (req, res) => {
   if (role === 'admin') {
     query = `
       SELECT r.id, r.meeting_id, r.title, r.date, r.time, r.description, r.created_at,
-             m.location, m.participant_type,
+             m.location, m.participant_type, m.meeting_type, m.online_link,
              (SELECT COUNT(*) FROM meeting_participants mp WHERE mp.meeting_id = m.id) AS participant_count
       FROM reminders r
       LEFT JOIN meetings m ON r.meeting_id = m.id
@@ -62,7 +62,7 @@ router.get('/reminders', requireLogin, (req, res) => {
   } else {
     query = `
       SELECT r.id, r.meeting_id, r.title, r.date, r.time, r.description, r.created_at,
-             m.location, m.participant_type,
+             m.location, m.participant_type, m.meeting_type, m.online_link,
              (SELECT COUNT(*) FROM meeting_participants mp WHERE mp.meeting_id = m.id) AS participant_count
       FROM reminders r
       LEFT JOIN meetings m ON r.meeting_id = m.id
@@ -107,7 +107,7 @@ router.get('/:id/participants', requireLogin, requireAdmin, (req, res) => {
 
 // POST create meeting — admin only; saves participants and auto-creates a reminder
 router.post('/', requireLogin, requireAdmin, (req, res) => {
-  const { title, date, time, location, description, participant_type, participant_ids } = req.body;
+  const { title, date, time, location, description, participant_type, participant_ids, meeting_type, online_link } = req.body;
 
   if (!title || !title.trim()) {
     return res.status(400).json({ error: 'Title is required.' });
@@ -117,6 +117,13 @@ router.post('/', requireLogin, requireAdmin, (req, res) => {
   }
   if (!time) {
     return res.status(400).json({ error: 'Time is required.' });
+  }
+
+  const cleanMeetingType = ['online', 'hybrid', 'physical'].includes(meeting_type) ? meeting_type : 'physical';
+  const cleanOnlineLink = (online_link || '').trim();
+
+  if (cleanMeetingType === 'online' && !cleanOnlineLink) {
+    return res.status(400).json({ error: 'A meeting link is required for online meetings.' });
   }
 
   const createdBy = req.session.user.id;
@@ -130,9 +137,9 @@ router.post('/', requireLogin, requireAdmin, (req, res) => {
   const partType = (participant_type === 'selected' && selectedIds.length > 0) ? 'selected' : 'all';
 
   db.run(
-    `INSERT INTO meetings (title, date, time, location, description, participant_type, created_by)
-     VALUES (?, ?, ?, ?, ?, ?, ?)`,
-    [cleanTitle, date, time, cleanLocation, cleanDescription, partType, createdBy],
+    `INSERT INTO meetings (title, date, time, location, description, participant_type, meeting_type, online_link, created_by)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    [cleanTitle, date, time, cleanLocation, cleanDescription, partType, cleanMeetingType, cleanOnlineLink || null, createdBy],
     function (err) {
       if (err) {
         console.error('Create meeting error:', err);

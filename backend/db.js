@@ -161,6 +161,20 @@ db.all("PRAGMA table_info(meetings)", (err, columns) => {
   }
 });
 
+// S38 — Add Online Meeting Links
+// Add meeting_type and online_link to meetings if they do not exist yet
+db.all("PRAGMA table_info(meetings)", (err, columns) => {
+  if (err) return;
+  const hasMeetingType = columns.some(c => c.name === 'meeting_type');
+  if (!hasMeetingType) {
+    db.run("ALTER TABLE meetings ADD COLUMN meeting_type TEXT NOT NULL DEFAULT 'physical'");
+  }
+  const hasOnlineLink = columns.some(c => c.name === 'online_link');
+  if (!hasOnlineLink) {
+    db.run("ALTER TABLE meetings ADD COLUMN online_link TEXT");
+  }
+});
+
 // Join table: which users are invited to a specific meeting
 db.run(`
   CREATE TABLE IF NOT EXISTS meeting_participants (

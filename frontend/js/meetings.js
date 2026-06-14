@@ -22,6 +22,11 @@ const participantChecklist = document.getElementById('participantChecklist');
 const checklistStatus = document.getElementById('checklistStatus');
 const checklistItems = document.getElementById('checklistItems');
 
+// S38 — meeting type & link UI elements
+const meetingLinkField = document.getElementById('meetingLinkField');
+const meetingLinkInput = document.getElementById('meetingLink');
+const meetingLinkRequired = document.getElementById('meetingLinkRequired');
+
 if (loggedInUser) {
   const name = loggedInUser.name || loggedInUser.email || 'User';
 
@@ -38,10 +43,11 @@ if (loggedInUser) {
   }
 }
 
-// Admins get the participant checklist loaded and the toggle wired up
+// Admins get the participant checklist loaded and the toggles wired up
 if (isAdmin) {
   loadMembersForChecklist();
   setupParticipantToggle();
+  setupMeetingTypeToggle();
 }
 
 loadReminders();
@@ -58,6 +64,33 @@ function setupParticipantToggle() {
   participantSelectedRadio.addEventListener('change', () => {
     participantChecklist.style.display = 'block';
   });
+}
+
+// ─── Meeting type toggle ──────────────────────────────────────────────────────
+
+function setupMeetingTypeToggle() {
+  const radios = document.querySelectorAll('input[name="meetingType"]');
+  if (!radios.length || !meetingLinkField) return;
+
+  radios.forEach(radio => {
+    radio.addEventListener('change', () => {
+      applyMeetingTypeToggle(radio.value);
+    });
+  });
+}
+
+function applyMeetingTypeToggle(type) {
+  if (!meetingLinkField) return;
+
+  if (type === 'physical') {
+    meetingLinkField.style.display = 'none';
+    if (meetingLinkInput) meetingLinkInput.value = '';
+  } else {
+    meetingLinkField.style.display = '';
+    if (meetingLinkRequired) {
+      meetingLinkRequired.textContent = type === 'online' ? '(Required)' : '(Optional)';
+    }
+  }
 }
 
 // Fetch all users and populate the checklist
@@ -124,6 +157,16 @@ if (meetingForm) {
       return;
     }
 
+    // S38 — collect meeting type and link
+    const meetingTypeEl = document.querySelector('input[name="meetingType"]:checked');
+    const meeting_type = meetingTypeEl ? meetingTypeEl.value : 'physical';
+    const online_link = meetingLinkInput ? meetingLinkInput.value.trim() : '';
+
+    if (meeting_type === 'online' && !online_link) {
+      showStatusMessage('Please enter a meeting link for online meetings.', 'error');
+      return;
+    }
+
     // Collect participant data
     const participantTypeEl = document.querySelector('input[name="participantType"]:checked');
     const participant_type = participantTypeEl ? participantTypeEl.value : 'all';
@@ -143,7 +186,7 @@ if (meetingForm) {
       const response = await fetch('/api/meetings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, date, time, location, description, participant_type, participant_ids })
+        body: JSON.stringify({ title, date, time, location, description, participant_type, participant_ids, meeting_type, online_link })
       });
 
       const data = await response.json();
@@ -163,6 +206,12 @@ if (meetingForm) {
           cb.checked = false;
         });
       }
+
+      // S38 — reset meeting type back to Physical and hide link field
+      const physicalRadio = document.getElementById('meetingTypePhysical');
+      if (physicalRadio) physicalRadio.checked = true;
+      if (meetingLinkField) meetingLinkField.style.display = 'none';
+      if (meetingLinkInput) meetingLinkInput.value = '';
 
       showStatusMessage('Meeting scheduled and reminder created!', 'success');
       loadReminders();
@@ -244,6 +293,26 @@ function renderReminderList(container, reminders, isExpired) {
       ? '<span class="meetings-badge meetings-badge-expired">Expired</span>'
       : '<span class="meetings-badge meetings-badge-upcoming">Upcoming</span>';
 
+    // S38 — meeting type badge
+    const typeBadgeClass = {
+      online: 'meetings-type-badge-online',
+      hybrid: 'meetings-type-badge-hybrid',
+      physical: 'meetings-type-badge-physical'
+    }[reminder.meeting_type] || 'meetings-type-badge-physical';
+    const typeLabel = reminder.meeting_type
+      ? reminder.meeting_type.charAt(0).toUpperCase() + reminder.meeting_type.slice(1)
+      : 'Physical';
+    const typeBadgeHtml = `<span class="meetings-type-badge ${typeBadgeClass}">${typeLabel}</span>`;
+
+    // S38 — clickable online link (shown to all users when a link exists)
+    const onlineLinkHtml = reminder.online_link
+      ? `<div class="meetings-online-link-row">
+           <a href="${escapeHtml(reminder.online_link)}" target="_blank" rel="noopener noreferrer" class="meetings-online-link">
+             Join Meeting
+           </a>
+         </div>`
+      : '';
+
     const deleteBtn = isAdmin
       ? `<button class="notif-delete-btn" onclick="deleteMeeting(${reminder.meeting_id})">Delete</button>`
       : '';
@@ -271,6 +340,7 @@ function renderReminderList(container, reminders, isExpired) {
       <div class="meetings-reminder-header">
         <h3 class="meetings-reminder-title">${escapeHtml(reminder.title)}</h3>
         ${statusBadge}
+        ${typeBadgeHtml}
       </div>
       <div class="meetings-reminder-datetime">
         <span>${formattedDate}</span>
@@ -279,6 +349,7 @@ function renderReminderList(container, reminders, isExpired) {
         ${locationHtml}
       </div>
       ${reminder.description ? `<p class="meetings-reminder-desc">${escapeHtml(reminder.description)}</p>` : ''}
+      ${onlineLinkHtml}
       ${participantHtml}
       <div class="meetings-reminder-footer">
         ${deleteBtn}
