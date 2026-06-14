@@ -84,9 +84,12 @@
         <div class="admin-only">
           <div class="profile-card meetings-form-card">
             <div class="profile-top-rule"></div>
-            <p class="profile-edit-title">Schedule a meeting</p>
+            <p class="profile-edit-title" id="formModeTitle">Schedule a meeting</p>
 
             <form id="meetingForm" class="profile-form">
+
+              <!-- Hidden input tracks which meeting is being edited (empty = create mode) -->
+              <input type="hidden" id="editMeetingId" value="" />
 
               <div class="profile-field">
                 <span class="profile-label">Meeting Title</span>
@@ -191,7 +194,10 @@
                 </div>
               </div>
 
-              <button type="submit" class="profile-btn">Schedule Meeting</button>
+              <div class="meetings-form-btn-row">
+                <button type="submit" id="formSubmitBtn" class="profile-btn">Schedule Meeting</button>
+                <button type="button" id="cancelEditBtn" class="profile-btn-ghost" style="display:none;" onclick="exitEditMode()">Cancel Edit</button>
+              </div>
 
             </form>
           </div>

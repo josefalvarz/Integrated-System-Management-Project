@@ -175,6 +175,16 @@ db.all("PRAGMA table_info(meetings)", (err, columns) => {
   }
 });
 
+// S41/S42 — Edit Meeting Details / Cancel Meetings
+// Add status column to meetings if it does not exist yet
+db.all("PRAGMA table_info(meetings)", (err, columns) => {
+  if (err) return;
+  const hasStatus = columns.some(c => c.name === 'status');
+  if (!hasStatus) {
+    db.run("ALTER TABLE meetings ADD COLUMN status TEXT NOT NULL DEFAULT 'Scheduled'");
+  }
+});
+
 // Join table: which users are invited to a specific meeting
 db.run(`
   CREATE TABLE IF NOT EXISTS meeting_participants (
