@@ -4237,6 +4237,12 @@ body.auth-page::before {
   color: var(--text-faint);
 }
 
+.meetings-badge-cancelled {
+  background: rgba(248, 113, 113, 0.08);
+  border: 1px solid rgba(248, 113, 113, 0.3);
+  color: #f87171;
+}
+
 .meetings-reminder-datetime {
   display: flex;
   align-items: center;
@@ -4271,8 +4277,15 @@ body.auth-page::before {
 
 .meetings-reminder-footer {
   display: flex;
-  justify-content: flex-end;
+  align-items: center;
+  justify-content: space-between;
   margin-top: 4px;
+}
+
+.meetings-reminder-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
 }
 
 .meetings-empty {
@@ -4555,4 +4568,64 @@ body.auth-page::before {
   background: rgba(212, 175, 97, 0.12);
   border-color: rgba(212, 175, 97, 0.4);
   color: var(--gold-light);
+}
+
+/* ============================================
+   S41/S42 - EDIT & CANCEL MEETINGS
+   ============================================ */
+
+/* Row that holds the Schedule/Save and Cancel Edit buttons side by side */
+.meetings-form-btn-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* Edit button inside reminder cards */
+.meetings-edit-btn {
+  width: auto !important;
+  padding: 4px 12px !important;
+  background: transparent !important;
+  border: 1px solid rgba(212, 175, 97, 0.35) !important;
+  color: var(--gold) !important;
+  border-radius: 8px !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.05em !important;
+  text-transform: uppercase !important;
+  cursor: pointer !important;
+  transition: all 0.18s ease !important;
+  margin: 0 !important;
+  box-shadow: none !important;
+  font-family: var(--font-sans) !important;
+}
+
+.meetings-edit-btn:hover {
+  background: rgba(212, 175, 97, 0.08) !important;
+  border-color: rgba(212, 175, 97, 0.6) !important;
+}
+
+/* Cancel Meeting button inside reminder cards */
+.meetings-cancel-meeting-btn {
+  width: auto !important;
+  padding: 4px 12px !important;
+  background: transparent !important;
+  border: 1px solid rgba(251, 146, 60, 0.3) !important;
+  color: #fb923c !important;
+  border-radius: 8px !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.05em !important;
+  text-transform: uppercase !important;
+  cursor: pointer !important;
+  transition: all 0.18s ease !important;
+  margin: 0 !important;
+  box-shadow: none !important;
+  font-family: var(--font-sans) !important;
+}
+
+.meetings-cancel-meeting-btn:hover {
+  background: rgba(251, 146, 60, 0.08) !important;
+  border-color: rgba(251, 146, 60, 0.55) !important;
 }

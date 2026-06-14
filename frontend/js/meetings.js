@@ -27,6 +27,15 @@ const meetingLinkField = document.getElementById('meetingLinkField');
 const meetingLinkInput = document.getElementById('meetingLink');
 const meetingLinkRequired = document.getElementById('meetingLinkRequired');
 
+// S41/S42 — edit mode UI elements
+const formModeTitle = document.getElementById('formModeTitle');
+const formSubmitBtn = document.getElementById('formSubmitBtn');
+const editMeetingIdInput = document.getElementById('editMeetingId');
+const cancelEditBtn = document.getElementById('cancelEditBtn');
+
+// Stores the last-fetched reminder list so editMeeting() can look up data by meeting_id
+let allReminders = [];
+
 if (loggedInUser) {
   const name = loggedInUser.name || loggedInUser.email || 'User';
 
@@ -182,9 +191,14 @@ if (meetingForm) {
       }
     }
 
+    // S41 — if editMeetingId has a value we are in edit mode, otherwise create mode
+    const editId = editMeetingIdInput ? editMeetingIdInput.value : '';
+    const apiUrl = editId ? `/api/meetings/${editId}` : '/api/meetings';
+    const apiMethod = editId ? 'PUT' : 'POST';
+
     try {
-      const response = await fetch('/api/meetings', {
-        method: 'POST',
+      const response = await fetch(apiUrl, {
+        method: apiMethod,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ title, date, time, location, description, participant_type, participant_ids, meeting_type, online_link })
       });
@@ -192,32 +206,40 @@ if (meetingForm) {
       const data = await response.json();
 
       if (!response.ok) {
-        showStatusMessage(data.error || 'Could not schedule meeting.', 'error');
+        showStatusMessage(data.error || (editId ? 'Could not update meeting.' : 'Could not schedule meeting.'), 'error');
         return;
       }
 
-      meetingForm.reset();
+      if (editId) {
+        // Edit mode: exit edit mode then refresh
+        exitEditMode();
+        showStatusMessage('Meeting updated successfully!', 'success');
+      } else {
+        // Create mode: reset form manually
+        meetingForm.reset();
 
-      // Reset participant section back to "All Members"
-      if (participantAllRadio) participantAllRadio.checked = true;
-      if (participantChecklist) participantChecklist.style.display = 'none';
-      if (checklistItems) {
-        checklistItems.querySelectorAll('.participant-checkbox').forEach(cb => {
-          cb.checked = false;
-        });
+        // Reset participant section back to "All Members"
+        if (participantAllRadio) participantAllRadio.checked = true;
+        if (participantChecklist) participantChecklist.style.display = 'none';
+        if (checklistItems) {
+          checklistItems.querySelectorAll('.participant-checkbox').forEach(cb => {
+            cb.checked = false;
+          });
+        }
+
+        // S38 — reset meeting type back to Physical and hide link field
+        const physicalRadio = document.getElementById('meetingTypePhysical');
+        if (physicalRadio) physicalRadio.checked = true;
+        if (meetingLinkField) meetingLinkField.style.display = 'none';
+        if (meetingLinkInput) meetingLinkInput.value = '';
+
+        showStatusMessage('Meeting scheduled and reminder created!', 'success');
       }
 
-      // S38 — reset meeting type back to Physical and hide link field
-      const physicalRadio = document.getElementById('meetingTypePhysical');
-      if (physicalRadio) physicalRadio.checked = true;
-      if (meetingLinkField) meetingLinkField.style.display = 'none';
-      if (meetingLinkInput) meetingLinkInput.value = '';
-
-      showStatusMessage('Meeting scheduled and reminder created!', 'success');
       loadReminders();
     } catch (error) {
-      console.error('Schedule meeting error:', error);
-      showStatusMessage('Unable to schedule meeting. Please try again.', 'error');
+      console.error('Schedule/update meeting error:', error);
+      showStatusMessage('Unable to save meeting. Please try again.', 'error');
     }
   });
 }
@@ -238,10 +260,13 @@ async function loadReminders() {
     }
 
     const reminders = data.reminders || [];
+    allReminders = reminders;
     const now = new Date();
 
-    const upcoming = reminders.filter(r => reminderDateTime(r) >= now);
-    const expired = reminders.filter(r => reminderDateTime(r) < now);
+    // Upcoming: future date AND not cancelled
+    const upcoming = reminders.filter(r => r.status !== 'Cancelled' && reminderDateTime(r) >= now);
+    // Past/history: past date OR cancelled (regardless of date)
+    const expired = reminders.filter(r => r.status === 'Cancelled' || reminderDateTime(r) < now);
 
     renderReminderList(upcomingList, upcoming, false);
     renderReminderList(expiredList, expired, true);
@@ -289,9 +314,14 @@ function renderReminderList(container, reminders, isExpired) {
       ? `<span class="meetings-reminder-location">${escapeHtml(reminder.location)}</span>`
       : '';
 
-    const statusBadge = isExpired
-      ? '<span class="meetings-badge meetings-badge-expired">Expired</span>'
-      : '<span class="meetings-badge meetings-badge-upcoming">Upcoming</span>';
+    let statusBadge;
+    if (reminder.status === 'Cancelled') {
+      statusBadge = '<span class="meetings-badge meetings-badge-cancelled">Cancelled</span>';
+    } else if (isExpired) {
+      statusBadge = '<span class="meetings-badge meetings-badge-expired">Expired</span>';
+    } else {
+      statusBadge = '<span class="meetings-badge meetings-badge-upcoming">Upcoming</span>';
+    }
 
     // S38 — meeting type badge
     const typeBadgeClass = {
@@ -313,6 +343,14 @@ function renderReminderList(container, reminders, isExpired) {
          </div>`
       : '';
 
+    // Edit and Cancel Meeting buttons — admin only, upcoming (not cancelled) meetings only
+    const isScheduledUpcoming = !isExpired && reminder.status !== 'Cancelled';
+    const editBtn = isAdmin && isScheduledUpcoming
+      ? `<button class="meetings-edit-btn" onclick="editMeeting(${reminder.meeting_id})">Edit</button>`
+      : '';
+    const cancelMeetingBtn = isAdmin && isScheduledUpcoming
+      ? `<button class="meetings-cancel-meeting-btn" onclick="cancelMeeting(${reminder.meeting_id})">Cancel Meeting</button>`
+      : '';
     const deleteBtn = isAdmin
       ? `<button class="notif-delete-btn" onclick="deleteMeeting(${reminder.meeting_id})">Delete</button>`
       : '';
@@ -352,6 +390,10 @@ function renderReminderList(container, reminders, isExpired) {
       ${onlineLinkHtml}
       ${participantHtml}
       <div class="meetings-reminder-footer">
+        <div class="meetings-reminder-actions">
+          ${editBtn}
+          ${cancelMeetingBtn}
+        </div>
         ${deleteBtn}
       </div>
     `;
@@ -408,6 +450,109 @@ async function toggleParticipantList(button, meetingId) {
   } catch (error) {
     console.error('Load participants error:', error);
     list.innerHTML = '<p class="meetings-checklist-hint">Could not load participants.</p>';
+  }
+}
+
+// ─── Edit meeting ─────────────────────────────────────────────────────────────
+
+async function editMeeting(meetingId) {
+  // Look up the reminder data we already have in memory
+  const reminder = allReminders.find(r => r.meeting_id === meetingId);
+  if (!reminder) return;
+
+  // Switch form to edit mode
+  if (editMeetingIdInput) editMeetingIdInput.value = meetingId;
+  if (formModeTitle) formModeTitle.textContent = 'Edit Meeting';
+  if (formSubmitBtn) formSubmitBtn.textContent = 'Save Changes';
+  if (cancelEditBtn) cancelEditBtn.style.display = '';
+
+  // Populate all form fields with the existing meeting data
+  document.getElementById('meetingTitle').value = reminder.title || '';
+  document.getElementById('meetingDate').value = reminder.date || '';
+  document.getElementById('meetingTime').value = reminder.time || '';
+  document.getElementById('meetingLocation').value = reminder.location || '';
+  document.getElementById('meetingDescription').value = reminder.description || '';
+
+  // Restore meeting type radio and the link field
+  const meetingType = reminder.meeting_type || 'physical';
+  const typeRadio = document.querySelector(`input[name="meetingType"][value="${meetingType}"]`);
+  if (typeRadio) typeRadio.checked = true;
+  applyMeetingTypeToggle(meetingType);
+  if (meetingLinkInput) meetingLinkInput.value = reminder.online_link || '';
+
+  // Restore participant selection
+  if (reminder.participant_type === 'selected') {
+    if (participantSelectedRadio) participantSelectedRadio.checked = true;
+    if (participantChecklist) participantChecklist.style.display = 'block';
+
+    // Fetch the actual participant list and pre-check the right checkboxes
+    try {
+      const response = await fetch(`/api/meetings/${meetingId}/participants`);
+      const data = await response.json();
+      if (response.ok && data.participants) {
+        const selectedIds = data.participants.map(p => p.id);
+        document.querySelectorAll('.participant-checkbox').forEach(cb => {
+          cb.checked = selectedIds.includes(parseInt(cb.value));
+        });
+      }
+    } catch (e) {
+      console.error('Load participants for edit error:', e);
+    }
+  } else {
+    if (participantAllRadio) participantAllRadio.checked = true;
+    if (participantChecklist) participantChecklist.style.display = 'none';
+  }
+
+  // Scroll the form card into view so the admin can see it
+  const formCard = document.querySelector('.meetings-form-card');
+  if (formCard) formCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// Resets the form back to "Schedule a meeting" (create) mode
+function exitEditMode() {
+  if (editMeetingIdInput) editMeetingIdInput.value = '';
+  if (formModeTitle) formModeTitle.textContent = 'Schedule a meeting';
+  if (formSubmitBtn) formSubmitBtn.textContent = 'Schedule Meeting';
+  if (cancelEditBtn) cancelEditBtn.style.display = 'none';
+
+  if (meetingForm) meetingForm.reset();
+
+  if (participantAllRadio) participantAllRadio.checked = true;
+  if (participantChecklist) participantChecklist.style.display = 'none';
+  if (checklistItems) {
+    checklistItems.querySelectorAll('.participant-checkbox').forEach(cb => { cb.checked = false; });
+  }
+
+  const physicalRadio = document.getElementById('meetingTypePhysical');
+  if (physicalRadio) physicalRadio.checked = true;
+  if (meetingLinkField) meetingLinkField.style.display = 'none';
+  if (meetingLinkInput) meetingLinkInput.value = '';
+}
+
+// ─── Cancel meeting ───────────────────────────────────────────────────────────
+
+async function cancelMeeting(meetingId) {
+  if (!confirm('Cancel this meeting? It will be marked as cancelled and all members will be notified.')) {
+    return;
+  }
+
+  try {
+    const response = await fetch(`/api/meetings/${meetingId}/cancel`, {
+      method: 'PATCH'
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      showStatusMessage(data.error || 'Could not cancel meeting.', 'error');
+      return;
+    }
+
+    showStatusMessage('Meeting cancelled. Members have been notified.', 'success');
+    loadReminders();
+  } catch (error) {
+    console.error('Cancel meeting error:', error);
+    showStatusMessage('Unable to cancel meeting. Please try again.', 'error');
   }
 }
 

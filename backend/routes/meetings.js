@@ -53,7 +53,7 @@ router.get('/reminders', requireLogin, (req, res) => {
   if (role === 'admin') {
     query = `
       SELECT r.id, r.meeting_id, r.title, r.date, r.time, r.description, r.created_at,
-             m.location, m.participant_type, m.meeting_type, m.online_link,
+             m.location, m.participant_type, m.meeting_type, m.online_link, m.status,
              (SELECT COUNT(*) FROM meeting_participants mp WHERE mp.meeting_id = m.id) AS participant_count
       FROM reminders r
       LEFT JOIN meetings m ON r.meeting_id = m.id
@@ -62,7 +62,7 @@ router.get('/reminders', requireLogin, (req, res) => {
   } else {
     query = `
       SELECT r.id, r.meeting_id, r.title, r.date, r.time, r.description, r.created_at,
-             m.location, m.participant_type, m.meeting_type, m.online_link,
+             m.location, m.participant_type, m.meeting_type, m.online_link, m.status,
              (SELECT COUNT(*) FROM meeting_participants mp WHERE mp.meeting_id = m.id) AS participant_count
       FROM reminders r
       LEFT JOIN meetings m ON r.meeting_id = m.id
@@ -179,6 +179,115 @@ router.post('/', requireLogin, requireAdmin, (req, res) => {
           }
         );
       });
+    }
+  );
+});
+
+// PUT update meeting — admin only; also updates the linked reminder and participants
+router.put('/:id', requireLogin, requireAdmin, (req, res) => {
+  const { id } = req.params;
+  const { title, date, time, location, description, participant_type, participant_ids, meeting_type, online_link } = req.body;
+
+  if (!title || !title.trim()) return res.status(400).json({ error: 'Title is required.' });
+  if (!date) return res.status(400).json({ error: 'Date is required.' });
+  if (!time) return res.status(400).json({ error: 'Time is required.' });
+
+  const cleanMeetingType = ['online', 'hybrid', 'physical'].includes(meeting_type) ? meeting_type : 'physical';
+  const cleanOnlineLink = (online_link || '').trim();
+
+  if (cleanMeetingType === 'online' && !cleanOnlineLink) {
+    return res.status(400).json({ error: 'A meeting link is required for online meetings.' });
+  }
+
+  const cleanTitle = title.trim();
+  const cleanLocation = (location || '').trim();
+  const cleanDescription = (description || '').trim();
+
+  const selectedIds = Array.isArray(participant_ids)
+    ? participant_ids.map(Number).filter(n => !isNaN(n) && n > 0)
+    : [];
+  const partType = (participant_type === 'selected' && selectedIds.length > 0) ? 'selected' : 'all';
+
+  db.run(
+    `UPDATE meetings
+     SET title=?, date=?, time=?, location=?, description=?, participant_type=?, meeting_type=?, online_link=?
+     WHERE id=?`,
+    [cleanTitle, date, time, cleanLocation, cleanDescription, partType, cleanMeetingType, cleanOnlineLink || null, id],
+    function (err) {
+      if (err) {
+        console.error('Update meeting error:', err);
+        return res.status(500).json({ error: 'Could not update meeting.' });
+      }
+      if (this.changes === 0) {
+        return res.status(404).json({ error: 'Meeting not found.' });
+      }
+
+      // Update the linked reminder title/date/time/description (fire-and-forget)
+      db.run(
+        `UPDATE reminders SET title=?, date=?, time=?, description=? WHERE meeting_id=?`,
+        [cleanTitle, date, time, cleanDescription, id],
+        (reminderErr) => { if (reminderErr) console.error('Update reminder error:', reminderErr); }
+      );
+
+      // Replace participants: delete old ones, insert new ones
+      db.run('DELETE FROM meeting_participants WHERE meeting_id = ?', [id], (delErr) => {
+        if (delErr) console.error('Clear participants error:', delErr);
+
+        if (partType === 'selected' && selectedIds.length > 0) {
+          const stmt = db.prepare(`INSERT OR IGNORE INTO meeting_participants (meeting_id, user_id) VALUES (?, ?)`);
+          selectedIds.forEach(uid => stmt.run([id, uid]));
+          stmt.finalize((finalErr) => {
+            if (finalErr) console.error('Save participants error:', finalErr);
+            return res.status(200).json({ message: 'Meeting updated successfully.' });
+          });
+        } else {
+          return res.status(200).json({ message: 'Meeting updated successfully.' });
+        }
+      });
+    }
+  );
+});
+
+// PATCH cancel meeting — admin only; marks as Cancelled and creates a notification
+router.patch('/:id/cancel', requireLogin, requireAdmin, (req, res) => {
+  const { id } = req.params;
+
+  // Fetch the meeting first so we can use its title in the notification
+  db.get(
+    `SELECT id, title FROM meetings WHERE id = ? AND status != 'Cancelled'`,
+    [id],
+    (fetchErr, meeting) => {
+      if (fetchErr) {
+        console.error('Fetch meeting error:', fetchErr);
+        return res.status(500).json({ error: 'Could not find meeting.' });
+      }
+      if (!meeting) {
+        return res.status(404).json({ error: 'Meeting not found or already cancelled.' });
+      }
+
+      db.run(
+        `UPDATE meetings SET status = 'Cancelled' WHERE id = ?`,
+        [id],
+        function (err) {
+          if (err) {
+            console.error('Cancel meeting error:', err);
+            return res.status(500).json({ error: 'Could not cancel meeting.' });
+          }
+
+          // Create a notification so all members see the cancellation
+          const notifTitle = 'Meeting Cancelled';
+          const notifMessage = `The meeting "${meeting.title}" has been cancelled.`;
+
+          db.run(
+            `INSERT INTO notifications (title, message, target_group, created_by) VALUES (?, ?, 'all', ?)`,
+            [notifTitle, notifMessage, req.session.user.id],
+            (notifErr) => {
+              if (notifErr) console.error('Cancel notification error:', notifErr);
+              return res.status(200).json({ message: 'Meeting cancelled and members notified.' });
+            }
+          );
+        }
+      );
     }
   );
 });
