@@ -138,6 +138,40 @@
                 ></textarea>
               </div>
 
+              <!-- S38 — Meeting type -->
+              <div class="profile-field">
+                <span class="profile-label">Meeting Type</span>
+                <div class="meetings-type-options">
+                  <label class="meetings-participant-option">
+                    <input type="radio" name="meetingType" id="meetingTypePhysical" value="physical" checked />
+                    <span class="meetings-participant-label">Physical</span>
+                  </label>
+                  <label class="meetings-participant-option">
+                    <input type="radio" name="meetingType" id="meetingTypeOnline" value="online" />
+                    <span class="meetings-participant-label">Online</span>
+                  </label>
+                  <label class="meetings-participant-option">
+                    <input type="radio" name="meetingType" id="meetingTypeHybrid" value="hybrid" />
+                    <span class="meetings-participant-label">Hybrid</span>
+                  </label>
+                </div>
+              </div>
+
+              <!-- S38 — Online meeting link (shown for Online / Hybrid) -->
+              <div class="profile-field" id="meetingLinkField" style="display:none;">
+                <span class="profile-label">
+                  Meeting Link
+                  <span id="meetingLinkRequired" class="meetings-link-required">(Required)</span>
+                </span>
+                <input
+                  type="url"
+                  id="meetingLink"
+                  class="profile-input"
+                  placeholder="https://zoom.us/j/... or https://meet.google.com/..."
+                  maxlength="500"
+                />
+              </div>
+
               <!-- S37 — Participant selection -->
               <div class="profile-field meetings-participant-field">
                 <span class="profile-label">Participants</span>
