@@ -123,4 +123,32 @@ db.run(`
   )
 `);
 
+// S36 — Send Event Reminders
+db.run(`
+  CREATE TABLE IF NOT EXISTS meetings (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    title       TEXT    NOT NULL,
+    date        TEXT    NOT NULL,
+    time        TEXT    NOT NULL,
+    location    TEXT,
+    description TEXT,
+    created_by  INTEGER NOT NULL,
+    created_at  TEXT    NOT NULL DEFAULT (datetime('now')),
+    FOREIGN KEY (created_by) REFERENCES users(id)
+  )
+`);
+
+db.run(`
+  CREATE TABLE IF NOT EXISTS reminders (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    meeting_id  INTEGER NOT NULL,
+    title       TEXT    NOT NULL,
+    date        TEXT    NOT NULL,
+    time        TEXT    NOT NULL,
+    description TEXT,
+    created_at  TEXT    NOT NULL DEFAULT (datetime('now')),
+    FOREIGN KEY (meeting_id) REFERENCES meetings(id)
+  )
+`);
+
 module.exports = db;

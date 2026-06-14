@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Smart Notifications - Organization X</title>
+  <title>Meetings &amp; Reminders - Organization X</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
@@ -37,8 +37,8 @@
           <a href="./election.html" class="ims-nav-link admin-only">E-Voting Management</a>
           <a href="./vote.html" class="ims-nav-link member-only">E-Voting</a>
           <a href="./whatsapp.html" class="ims-nav-link admin-only">WhatsApp Analytics</a>
-          <a href="./notifications.html" class="ims-nav-link active">Smart Notifications</a>
-          <a href="./meetings.html" class="ims-nav-link">Meetings</a>
+          <a href="./notifications.html" class="ims-nav-link">Smart Notifications</a>
+          <a href="./meetings.html" class="ims-nav-link active">Meetings</a>
           <a href="./income.html" class="ims-nav-link admin-only">Finance</a>
         </nav>
       </div>
@@ -65,69 +65,106 @@
     </aside>
 
     <!-- MAIN -->
-    <main class="ims-main notifications-main">
+    <main class="ims-main meetings-main">
 
-      <header class="notifications-header">
+      <header class="meetings-header">
         <p class="profile-breadcrumb">
           <span>Org X</span>
           <span class="ims-sep">／</span>
-          <span>Smart Notifications</span>
+          <span>Meetings</span>
         </p>
-        <h1 class="profile-title">Broadcast <em>Notifications</em></h1>
+        <h1 class="profile-title">Meetings &amp; <em>Reminders</em></h1>
       </header>
 
-      <div id="notificationStatusMsg" class="role-message hidden"></div>
+      <div id="meetingsStatusMsg" class="role-message hidden"></div>
 
-      <div class="notifications-grid">
+      <div class="meetings-grid">
 
-        <!-- SEND FORM — visible to admins only -->
+        <!-- SCHEDULE FORM — admin only -->
         <div class="admin-only">
-          <div class="profile-card">
+          <div class="profile-card meetings-form-card">
             <div class="profile-top-rule"></div>
-            <p class="profile-edit-title">Send broadcast announcement</p>
+            <p class="profile-edit-title">Schedule a meeting</p>
 
-            <form id="notificationForm" class="profile-form">
+            <form id="meetingForm" class="profile-form">
 
               <div class="profile-field">
-                <span class="profile-label">Announcement Title</span>
+                <span class="profile-label">Meeting Title</span>
                 <input
                   type="text"
-                  id="notifTitle"
+                  id="meetingTitle"
                   class="profile-input"
-                  placeholder="Enter announcement title"
+                  placeholder="e.g. Monthly Board Review"
                   maxlength="200"
                 />
               </div>
 
+              <div class="meetings-date-row">
+                <div class="profile-field">
+                  <span class="profile-label">Date</span>
+                  <input
+                    type="date"
+                    id="meetingDate"
+                    class="profile-input"
+                  />
+                </div>
+                <div class="profile-field">
+                  <span class="profile-label">Time</span>
+                  <input
+                    type="time"
+                    id="meetingTime"
+                    class="profile-input"
+                  />
+                </div>
+              </div>
+
               <div class="profile-field">
-                <span class="profile-label">Message</span>
+                <span class="profile-label">Location (optional)</span>
+                <input
+                  type="text"
+                  id="meetingLocation"
+                  class="profile-input"
+                  placeholder="e.g. Conference Room A or Zoom link"
+                  maxlength="300"
+                />
+              </div>
+
+              <div class="profile-field">
+                <span class="profile-label">Description (optional)</span>
                 <textarea
-                  id="notifMessage"
-                  class="profile-input notif-textarea"
-                  placeholder="Write your announcement message here..."
+                  id="meetingDescription"
+                  class="profile-input meetings-textarea"
+                  placeholder="Agenda or additional details..."
                 ></textarea>
               </div>
 
-              <div class="profile-field">
-                <span class="profile-label">Target Audience</span>
-                <select id="notifTarget" class="profile-input">
-                  <option value="all">All Members</option>
-                </select>
-              </div>
-
-              <button type="submit" class="profile-btn">Send Broadcast</button>
+              <button type="submit" class="profile-btn">Schedule Meeting</button>
 
             </form>
           </div>
         </div>
 
-        <!-- NOTIFICATIONS LIST — visible to everyone -->
-        <div class="profile-card notifications-list-card">
-          <div class="profile-top-rule"></div>
-          <p class="profile-edit-title">Announcements</p>
-          <div id="notificationsList" class="notifications-list">
-            <p class="notifications-empty">Loading announcements...</p>
+        <!-- REMINDERS LIST — visible to everyone -->
+        <div class="meetings-reminders-col">
+
+          <!-- Upcoming reminders -->
+          <div class="profile-card meetings-list-card">
+            <div class="profile-top-rule"></div>
+            <p class="profile-edit-title">Upcoming reminders</p>
+            <div id="upcomingList" class="meetings-list">
+              <p class="meetings-empty">Loading reminders...</p>
+            </div>
           </div>
+
+          <!-- Past reminders -->
+          <div class="profile-card meetings-list-card">
+            <div class="profile-top-rule"></div>
+            <p class="profile-edit-title">Past reminders</p>
+            <div id="expiredList" class="meetings-list">
+              <p class="meetings-empty">Loading...</p>
+            </div>
+          </div>
+
         </div>
 
       </div>
@@ -136,7 +173,7 @@
 
   </div>
 
-  <script src="../js/notifications.js"></script>
+  <script src="../js/meetings.js"></script>
   <script>
     const sidebarLoggedInUser = JSON.parse(sessionStorage.getItem("loggedInUser"));
 
