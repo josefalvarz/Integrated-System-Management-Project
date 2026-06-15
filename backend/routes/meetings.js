@@ -14,22 +14,24 @@ router.get('/', requireLogin, (req, res) => {
   if (role === 'admin') {
     query = `
       SELECT m.id, m.title, m.date, m.time, m.location, m.description,
-             m.participant_type, m.meeting_type, m.online_link, m.created_at,
+             m.participant_type, m.meeting_type, m.online_link, m.status, m.created_at,
              u.name AS created_by_name
       FROM meetings m
       LEFT JOIN users u ON m.created_by = u.id
+      WHERE m.status != 'Archived'
       ORDER BY m.date ASC, m.time ASC`;
     params = [];
   } else {
     query = `
       SELECT m.id, m.title, m.date, m.time, m.location, m.description,
-             m.participant_type, m.meeting_type, m.online_link, m.created_at
+             m.participant_type, m.meeting_type, m.online_link, m.status, m.created_at
       FROM meetings m
-      WHERE m.participant_type = 'all'
+      WHERE m.status != 'Archived'
+        AND (m.participant_type = 'all'
          OR EXISTS (
            SELECT 1 FROM meeting_participants mp
            WHERE mp.meeting_id = m.id AND mp.user_id = ?
-         )
+         ))
       ORDER BY m.date ASC, m.time ASC`;
     params = [userId];
   }
@@ -54,23 +56,27 @@ router.get('/reminders', requireLogin, (req, res) => {
     query = `
       SELECT r.id, r.meeting_id, r.title, r.date, r.time, r.description, r.created_at,
              m.location, m.participant_type, m.meeting_type, m.online_link, m.status,
+             m.minutes_summary, m.minutes_decisions, m.minutes_action_items, m.minutes_author, m.minutes_date,
              (SELECT COUNT(*) FROM meeting_participants mp WHERE mp.meeting_id = m.id) AS participant_count
       FROM reminders r
       LEFT JOIN meetings m ON r.meeting_id = m.id
+      WHERE m.status != 'Archived'
       ORDER BY r.date ASC, r.time ASC`;
     params = [];
   } else {
     query = `
       SELECT r.id, r.meeting_id, r.title, r.date, r.time, r.description, r.created_at,
              m.location, m.participant_type, m.meeting_type, m.online_link, m.status,
+             m.minutes_summary, m.minutes_decisions, m.minutes_action_items, m.minutes_author, m.minutes_date,
              (SELECT COUNT(*) FROM meeting_participants mp WHERE mp.meeting_id = m.id) AS participant_count
       FROM reminders r
       LEFT JOIN meetings m ON r.meeting_id = m.id
-      WHERE m.participant_type = 'all'
+      WHERE m.status != 'Archived'
+        AND (m.participant_type = 'all'
          OR EXISTS (
            SELECT 1 FROM meeting_participants mp
            WHERE mp.meeting_id = r.meeting_id AND mp.user_id = ?
-         )
+         ))
       ORDER BY r.date ASC, r.time ASC`;
     params = [userId];
   }
@@ -81,6 +87,49 @@ router.get('/reminders', requireLogin, (req, res) => {
       return res.status(500).json({ error: 'Could not load reminders.' });
     }
     return res.status(200).json({ reminders: rows });
+  });
+});
+
+// GET archived meetings — members only see meetings they have access to
+router.get('/archive', requireLogin, (req, res) => {
+  const userId = req.session.user.id;
+  const role = req.session.user.role;
+
+  let query, params;
+
+  if (role === 'admin') {
+    query = `
+      SELECT m.id, m.title, m.date, m.time, m.location, m.description,
+             m.participant_type, m.meeting_type, m.online_link, m.status, m.created_at,
+             m.minutes_summary, m.minutes_decisions, m.minutes_action_items, m.minutes_author, m.minutes_date,
+             u.name AS created_by_name
+      FROM meetings m
+      LEFT JOIN users u ON m.created_by = u.id
+      WHERE m.status = 'Archived'
+      ORDER BY m.date DESC, m.time DESC`;
+    params = [];
+  } else {
+    query = `
+      SELECT m.id, m.title, m.date, m.time, m.location, m.description,
+             m.participant_type, m.meeting_type, m.online_link, m.status, m.created_at,
+             m.minutes_summary, m.minutes_decisions, m.minutes_action_items, m.minutes_author, m.minutes_date
+      FROM meetings m
+      WHERE m.status = 'Archived'
+        AND (m.participant_type = 'all'
+         OR EXISTS (
+           SELECT 1 FROM meeting_participants mp
+           WHERE mp.meeting_id = m.id AND mp.user_id = ?
+         ))
+      ORDER BY m.date DESC, m.time DESC`;
+    params = [userId];
+  }
+
+  db.all(query, params, (err, rows) => {
+    if (err) {
+      console.error('Get archived meetings error:', err);
+      return res.status(500).json({ error: 'Could not load archived meetings.' });
+    }
+    return res.status(200).json({ meetings: rows });
   });
 });
 
@@ -288,6 +337,58 @@ router.patch('/:id/cancel', requireLogin, requireAdmin, (req, res) => {
           );
         }
       );
+    }
+  );
+});
+
+// PUT meeting minutes — admin only; saves discussion summary, decisions, action items, author/date
+router.put('/:id/minutes', requireLogin, requireAdmin, (req, res) => {
+  const { id } = req.params;
+  const { summary, decisions, action_items, author } = req.body;
+
+  const cleanSummary = (summary || '').trim();
+  const cleanDecisions = (decisions || '').trim();
+  const cleanActionItems = (action_items || '').trim();
+  const cleanAuthor = (author || '').trim();
+
+  if (!cleanSummary || !cleanDecisions || !cleanActionItems || !cleanAuthor) {
+    return res.status(400).json({ error: 'Summary, decisions, action items, and author are all required.' });
+  }
+
+  db.run(
+    `UPDATE meetings
+     SET minutes_summary=?, minutes_decisions=?, minutes_action_items=?, minutes_author=?, minutes_date=datetime('now')
+     WHERE id=?`,
+    [cleanSummary, cleanDecisions, cleanActionItems, cleanAuthor, id],
+    function (err) {
+      if (err) {
+        console.error('Save minutes error:', err);
+        return res.status(500).json({ error: 'Could not save meeting minutes.' });
+      }
+      if (this.changes === 0) {
+        return res.status(404).json({ error: 'Meeting not found.' });
+      }
+      return res.status(200).json({ message: 'Meeting minutes saved successfully.' });
+    }
+  );
+});
+
+// PATCH archive meeting — admin only; marks as Archived
+router.patch('/:id/archive', requireLogin, requireAdmin, (req, res) => {
+  const { id } = req.params;
+
+  db.run(
+    `UPDATE meetings SET status = 'Archived' WHERE id = ? AND status != 'Archived'`,
+    [id],
+    function (err) {
+      if (err) {
+        console.error('Archive meeting error:', err);
+        return res.status(500).json({ error: 'Could not archive meeting.' });
+      }
+      if (this.changes === 0) {
+        return res.status(404).json({ error: 'Meeting not found or already archived.' });
+      }
+      return res.status(200).json({ message: 'Meeting archived successfully.' });
     }
   );
 });

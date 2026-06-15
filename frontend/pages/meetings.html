@@ -224,12 +224,68 @@
             </div>
           </div>
 
+          <!-- Archived meetings -->
+          <div class="profile-card meetings-list-card">
+            <div class="profile-top-rule"></div>
+            <p class="profile-edit-title">Archived meetings</p>
+
+            <div class="meetings-archive-search">
+              <input
+                type="text"
+                id="archiveSearchInput"
+                class="profile-input"
+                placeholder="Search by title, date, description, or minutes..."
+              />
+            </div>
+
+            <div id="archivedList" class="meetings-list">
+              <p class="meetings-empty">Loading...</p>
+            </div>
+          </div>
+
         </div>
 
       </div>
 
     </main>
 
+  </div>
+
+  <!-- S40 — Meeting Minutes Modal (admin only) -->
+  <div id="minutesModalOverlay" class="minutes-modal-overlay hidden">
+    <div class="minutes-modal">
+      <div class="profile-top-rule"></div>
+      <p class="profile-edit-title" id="minutesModalTitle">Add Meeting Minutes</p>
+
+      <input type="hidden" id="minutesMeetingId" value="" />
+
+      <div class="profile-field">
+        <span class="profile-label">Discussion Summary</span>
+        <textarea id="minutesSummary" class="profile-input meetings-textarea" placeholder="Summarize what was discussed..."></textarea>
+      </div>
+
+      <div class="profile-field">
+        <span class="profile-label">Decisions</span>
+        <textarea id="minutesDecisions" class="profile-input meetings-textarea" placeholder="List the decisions made..."></textarea>
+      </div>
+
+      <div class="profile-field">
+        <span class="profile-label">Action Items</span>
+        <textarea id="minutesActionItems" class="profile-input meetings-textarea" placeholder="List action items and owners..."></textarea>
+      </div>
+
+      <div class="profile-field">
+        <span class="profile-label">Author</span>
+        <input type="text" id="minutesAuthor" class="profile-input" placeholder="e.g. Jane Doe" maxlength="200" />
+      </div>
+
+      <div id="minutesModalMsg" class="role-message hidden"></div>
+
+      <div class="meetings-form-btn-row">
+        <button type="button" id="minutesSaveBtn" class="profile-btn" onclick="saveMinutes()">Save Minutes</button>
+        <button type="button" class="profile-btn-ghost" onclick="closeMinutesModal()">Cancel</button>
+      </div>
+    </div>
   </div>
 
   <script src="../js/meetings.js"></script>

@@ -185,6 +185,25 @@ db.all("PRAGMA table_info(meetings)", (err, columns) => {
   }
 });
 
+// S40 — Record Meeting Minutes
+// Add minutes columns to meetings if they do not exist yet
+db.all("PRAGMA table_info(meetings)", (err, columns) => {
+  if (err) return;
+  const minutesColumns = [
+    'minutes_summary',
+    'minutes_decisions',
+    'minutes_action_items',
+    'minutes_author',
+    'minutes_date'
+  ];
+  minutesColumns.forEach(columnName => {
+    const hasColumn = columns.some(c => c.name === columnName);
+    if (!hasColumn) {
+      db.run(`ALTER TABLE meetings ADD COLUMN ${columnName} TEXT`);
+    }
+  });
+});
+
 // Join table: which users are invited to a specific meeting
 db.run(`
   CREATE TABLE IF NOT EXISTS meeting_participants (
