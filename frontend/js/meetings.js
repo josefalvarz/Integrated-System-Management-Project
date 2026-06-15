@@ -33,8 +33,25 @@ const formSubmitBtn = document.getElementById('formSubmitBtn');
 const editMeetingIdInput = document.getElementById('editMeetingId');
 const cancelEditBtn = document.getElementById('cancelEditBtn');
 
+// S40 — meeting minutes modal UI elements
+const minutesModalOverlay = document.getElementById('minutesModalOverlay');
+const minutesModalTitle = document.getElementById('minutesModalTitle');
+const minutesMeetingIdInput = document.getElementById('minutesMeetingId');
+const minutesSummaryInput = document.getElementById('minutesSummary');
+const minutesDecisionsInput = document.getElementById('minutesDecisions');
+const minutesActionItemsInput = document.getElementById('minutesActionItems');
+const minutesAuthorInput = document.getElementById('minutesAuthor');
+const minutesModalMsg = document.getElementById('minutesModalMsg');
+
+// S41/S42 — archived meetings UI elements
+const archivedList = document.getElementById('archivedList');
+const archiveSearchInput = document.getElementById('archiveSearchInput');
+
 // Stores the last-fetched reminder list so editMeeting() can look up data by meeting_id
 let allReminders = [];
+
+// Stores the last-fetched archived meetings list for client-side search
+let allArchivedMeetings = [];
 
 if (loggedInUser) {
   const name = loggedInUser.name || loggedInUser.email || 'User';
@@ -60,6 +77,34 @@ if (isAdmin) {
 }
 
 loadReminders();
+loadArchivedMeetings();
+
+// S42 — filter archived meetings as the admin/member types
+if (archiveSearchInput) {
+  archiveSearchInput.addEventListener('input', () => {
+    const term = archiveSearchInput.value.trim().toLowerCase();
+
+    if (!term) {
+      renderArchivedList(allArchivedMeetings);
+      return;
+    }
+
+    const filtered = allArchivedMeetings.filter(meeting => {
+      const haystack = [
+        meeting.title,
+        meeting.date,
+        meeting.description,
+        meeting.minutes_summary,
+        meeting.minutes_decisions,
+        meeting.minutes_action_items
+      ].map(v => (v || '').toString().toLowerCase()).join(' ');
+
+      return haystack.includes(term);
+    });
+
+    renderArchivedList(filtered);
+  });
+}
 
 // ─── Participant toggle ────────────────────────────────────────────────────────
 
@@ -355,6 +400,20 @@ function renderReminderList(container, reminders, isExpired) {
       ? `<button class="notif-delete-btn" onclick="deleteMeeting(${reminder.meeting_id})">Delete</button>`
       : '';
 
+    // S40 — Add/Edit Minutes button — admin only, scheduled or completed (not cancelled) meetings
+    const hasMinutes = !!(reminder.minutes_summary && reminder.minutes_summary.trim());
+    const minutesBtn = isAdmin && reminder.status !== 'Cancelled'
+      ? `<button class="meetings-minutes-btn" onclick="openMinutesModal(${reminder.meeting_id})">${hasMinutes ? 'Edit Minutes' : 'Add Minutes'}</button>`
+      : '';
+
+    // S41 — Archive button — admin only, past (completed) and not cancelled meetings
+    const archiveBtn = isAdmin && isExpired && reminder.status !== 'Cancelled'
+      ? `<button class="meetings-archive-btn" onclick="archiveMeeting(${reminder.meeting_id})">Archive</button>`
+      : '';
+
+    // S40 — Minutes display — visible to anyone with access to this meeting
+    const minutesHtml = hasMinutes ? buildMinutesHtml(reminder) : '';
+
     // S37 — participant info shown to admin in each card
     let participantHtml = '';
     if (isAdmin && reminder.participant_type) {
@@ -389,10 +448,13 @@ function renderReminderList(container, reminders, isExpired) {
       ${reminder.description ? `<p class="meetings-reminder-desc">${escapeHtml(reminder.description)}</p>` : ''}
       ${onlineLinkHtml}
       ${participantHtml}
+      ${minutesHtml}
       <div class="meetings-reminder-footer">
         <div class="meetings-reminder-actions">
           ${editBtn}
           ${cancelMeetingBtn}
+          ${minutesBtn}
+          ${archiveBtn}
         </div>
         ${deleteBtn}
       </div>
@@ -581,6 +643,213 @@ async function deleteMeeting(meetingId) {
     console.error('Delete meeting error:', error);
     showStatusMessage('Unable to delete meeting.', 'error');
   }
+}
+
+// ─── Meeting minutes (S40) ─────────────────────────────────────────────────────
+
+// Builds the read-only minutes display block shown inside a meeting card
+function buildMinutesHtml(record) {
+  const dateLabel = record.minutes_date ? formatMinutesDate(record.minutes_date) : '';
+
+  return `
+    <div class="meetings-minutes">
+      <p class="meetings-minutes-title">Meeting Minutes</p>
+      <div class="meetings-minutes-block">
+        <span class="meetings-minutes-label">Summary</span>
+        <p class="meetings-minutes-text">${escapeHtml(record.minutes_summary)}</p>
+      </div>
+      <div class="meetings-minutes-block">
+        <span class="meetings-minutes-label">Decisions</span>
+        <p class="meetings-minutes-text">${escapeHtml(record.minutes_decisions)}</p>
+      </div>
+      <div class="meetings-minutes-block">
+        <span class="meetings-minutes-label">Action Items</span>
+        <p class="meetings-minutes-text">${escapeHtml(record.minutes_action_items)}</p>
+      </div>
+      <p class="meetings-minutes-meta">Recorded by ${escapeHtml(record.minutes_author)}${dateLabel ? ` · ${dateLabel}` : ''}</p>
+    </div>
+  `;
+}
+
+function formatMinutesDate(value) {
+  const dt = new Date(value.replace(' ', 'T'));
+  if (isNaN(dt.getTime())) return '';
+  return dt.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+}
+
+// Opens the minutes modal pre-filled with any existing minutes for this meeting
+function openMinutesModal(meetingId) {
+  const reminder = allReminders.find(r => r.meeting_id === meetingId);
+  if (!reminder) return;
+
+  if (minutesMeetingIdInput) minutesMeetingIdInput.value = meetingId;
+  if (minutesModalTitle) {
+    minutesModalTitle.textContent = (reminder.minutes_summary && reminder.minutes_summary.trim())
+      ? 'Edit Meeting Minutes'
+      : 'Add Meeting Minutes';
+  }
+  if (minutesSummaryInput) minutesSummaryInput.value = reminder.minutes_summary || '';
+  if (minutesDecisionsInput) minutesDecisionsInput.value = reminder.minutes_decisions || '';
+  if (minutesActionItemsInput) minutesActionItemsInput.value = reminder.minutes_action_items || '';
+  if (minutesAuthorInput) minutesAuthorInput.value = reminder.minutes_author || '';
+  if (minutesModalMsg) minutesModalMsg.className = 'role-message hidden';
+
+  if (minutesModalOverlay) minutesModalOverlay.classList.remove('hidden');
+}
+
+function closeMinutesModal() {
+  if (minutesModalOverlay) minutesModalOverlay.classList.add('hidden');
+}
+
+// Validates and saves meeting minutes, then refreshes the meeting cards
+async function saveMinutes() {
+  const meetingId = minutesMeetingIdInput ? minutesMeetingIdInput.value : '';
+  const summary = minutesSummaryInput ? minutesSummaryInput.value.trim() : '';
+  const decisions = minutesDecisionsInput ? minutesDecisionsInput.value.trim() : '';
+  const action_items = minutesActionItemsInput ? minutesActionItemsInput.value.trim() : '';
+  const author = minutesAuthorInput ? minutesAuthorInput.value.trim() : '';
+
+  if (!summary || !decisions || !action_items || !author) {
+    if (minutesModalMsg) {
+      minutesModalMsg.textContent = 'All fields are required. Minutes cannot be empty.';
+      minutesModalMsg.className = 'role-message error';
+    }
+    return;
+  }
+
+  try {
+    const response = await fetch(`/api/meetings/${meetingId}/minutes`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ summary, decisions, action_items, author })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      if (minutesModalMsg) {
+        minutesModalMsg.textContent = data.error || 'Could not save meeting minutes.';
+        minutesModalMsg.className = 'role-message error';
+      }
+      return;
+    }
+
+    closeMinutesModal();
+    showStatusMessage('Meeting minutes saved successfully!', 'success');
+    loadReminders();
+  } catch (error) {
+    console.error('Save minutes error:', error);
+    if (minutesModalMsg) {
+      minutesModalMsg.textContent = 'Unable to save minutes. Please try again.';
+      minutesModalMsg.className = 'role-message error';
+    }
+  }
+}
+
+// ─── Archive meetings (S41/S42) ────────────────────────────────────────────────
+
+async function archiveMeeting(meetingId) {
+  if (!confirm('Archive this meeting? It will be moved to the meeting history and removed from active lists.')) {
+    return;
+  }
+
+  try {
+    const response = await fetch(`/api/meetings/${meetingId}/archive`, {
+      method: 'PATCH'
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      showStatusMessage(data.error || 'Could not archive meeting.', 'error');
+      return;
+    }
+
+    showStatusMessage('Meeting archived successfully.', 'success');
+    loadReminders();
+    loadArchivedMeetings();
+  } catch (error) {
+    console.error('Archive meeting error:', error);
+    showStatusMessage('Unable to archive meeting. Please try again.', 'error');
+  }
+}
+
+async function loadArchivedMeetings() {
+  if (!archivedList) return;
+
+  try {
+    const response = await fetch('/api/meetings/archive');
+    const data = await response.json();
+
+    if (!response.ok) {
+      archivedList.innerHTML = '<p class="meetings-empty">Could not load archived meetings.</p>';
+      return;
+    }
+
+    allArchivedMeetings = data.meetings || [];
+
+    const term = archiveSearchInput ? archiveSearchInput.value.trim().toLowerCase() : '';
+    if (!term) {
+      renderArchivedList(allArchivedMeetings);
+    } else {
+      archiveSearchInput.dispatchEvent(new Event('input'));
+    }
+  } catch (error) {
+    console.error('Load archived meetings error:', error);
+    archivedList.innerHTML = '<p class="meetings-empty">Could not load archived meetings.</p>';
+  }
+}
+
+function renderArchivedList(meetings) {
+  if (!archivedList) return;
+
+  if (!meetings || meetings.length === 0) {
+    archivedList.innerHTML = '<p class="meetings-empty">No meeting records found.</p>';
+    return;
+  }
+
+  archivedList.innerHTML = '';
+
+  meetings.forEach(meeting => {
+    const item = document.createElement('div');
+    item.className = 'meetings-reminder-item meetings-reminder-archived';
+
+    const dt = new Date(`${meeting.date}T${meeting.time}`);
+    const formattedDate = dt.toLocaleDateString('en-US', {
+      weekday: 'short',
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+    const formattedTime = dt.toLocaleTimeString('en-US', {
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+
+    const locationHtml = meeting.location
+      ? `<span class="meetings-reminder-location">${escapeHtml(meeting.location)}</span>`
+      : '';
+
+    const hasMinutes = !!(meeting.minutes_summary && meeting.minutes_summary.trim());
+    const minutesHtml = hasMinutes ? buildMinutesHtml(meeting) : '';
+
+    item.innerHTML = `
+      <div class="meetings-reminder-header">
+        <h3 class="meetings-reminder-title">${escapeHtml(meeting.title)}</h3>
+        <span class="meetings-badge meetings-badge-archived">Archived</span>
+      </div>
+      <div class="meetings-reminder-datetime">
+        <span>${formattedDate}</span>
+        <span class="meetings-reminder-sep">·</span>
+        <span>${formattedTime}</span>
+        ${locationHtml}
+      </div>
+      ${meeting.description ? `<p class="meetings-reminder-desc">${escapeHtml(meeting.description)}</p>` : ''}
+      ${minutesHtml}
+    `;
+
+    archivedList.appendChild(item);
+  });
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────

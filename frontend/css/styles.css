@@ -4629,3 +4629,156 @@ body.auth-page::before {
   background: rgba(251, 146, 60, 0.08) !important;
   border-color: rgba(251, 146, 60, 0.55) !important;
 }
+
+/* S40 — Add/Edit Minutes button inside reminder cards */
+.meetings-minutes-btn {
+  width: auto !important;
+  padding: 4px 12px !important;
+  background: transparent !important;
+  border: 1px solid rgba(125, 211, 252, 0.3) !important;
+  color: #7dd3fc !important;
+  border-radius: 8px !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.05em !important;
+  text-transform: uppercase !important;
+  cursor: pointer !important;
+  transition: all 0.18s ease !important;
+  margin: 0 !important;
+  box-shadow: none !important;
+  font-family: var(--font-sans) !important;
+}
+
+.meetings-minutes-btn:hover {
+  background: rgba(125, 211, 252, 0.08) !important;
+  border-color: rgba(125, 211, 252, 0.55) !important;
+}
+
+/* S41 — Archive button inside reminder cards */
+.meetings-archive-btn {
+  width: auto !important;
+  padding: 4px 12px !important;
+  background: transparent !important;
+  border: 1px solid var(--border) !important;
+  color: var(--text-muted) !important;
+  border-radius: 8px !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.05em !important;
+  text-transform: uppercase !important;
+  cursor: pointer !important;
+  transition: all 0.18s ease !important;
+  margin: 0 !important;
+  box-shadow: none !important;
+  font-family: var(--font-sans) !important;
+}
+
+.meetings-archive-btn:hover {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border-color: rgba(255, 255, 255, 0.25) !important;
+}
+
+/* S41 — Archived status badge */
+.meetings-badge-archived {
+  background: rgba(125, 211, 252, 0.08);
+  border: 1px solid rgba(125, 211, 252, 0.3);
+  color: #7dd3fc;
+}
+
+/* S41 — Archived meeting card */
+.meetings-reminder-archived {
+  background: rgba(255, 255, 255, 0.015);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 16px 18px;
+  margin-bottom: 12px;
+}
+
+/* S42 — Archive search input */
+.meetings-archive-search {
+  margin-bottom: 16px;
+}
+
+/* S40 — Meeting minutes display block inside a card */
+.meetings-minutes {
+  margin-top: 10px;
+  margin-bottom: 10px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.015);
+}
+
+.meetings-minutes-title {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin: 0 0 8px;
+}
+
+.meetings-minutes-block {
+  margin-bottom: 8px;
+}
+
+.meetings-minutes-block:last-of-type {
+  margin-bottom: 6px;
+}
+
+.meetings-minutes-label {
+  display: block;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  margin-bottom: 2px;
+}
+
+.meetings-minutes-text {
+  font-size: 13px;
+  color: rgba(232, 228, 219, 0.75);
+  font-weight: 300;
+  line-height: 1.6;
+  margin: 0;
+  white-space: pre-line;
+}
+
+.meetings-minutes-meta {
+  font-size: 11px;
+  color: var(--text-faint);
+  margin: 6px 0 0;
+}
+
+/* S40 — Meeting minutes modal */
+.minutes-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(8, 12, 20, 0.7);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 24px;
+}
+
+.minutes-modal {
+  background: var(--navy-glass);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 40px 44px;
+  backdrop-filter: blur(24px);
+  max-width: 560px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+}
+
+@media (max-width: 600px) {
+  .minutes-modal {
+    padding: 28px 22px;
+  }
+}
