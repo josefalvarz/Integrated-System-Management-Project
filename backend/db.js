@@ -216,4 +216,27 @@ db.run(`
   )
 `);
 
+// S43 — Member Attributes Fields
+db.all("PRAGMA table_info(users)", (err, columns) => {
+  if (err) return;
+  const newCols = [
+    { name: 'gender',        def: 'TEXT' },
+    { name: 'qualification', def: 'TEXT' },
+    { name: 'degree_date',   def: 'TEXT' },
+    { name: 'cnic',          def: 'TEXT' },
+    { name: 'province',      def: 'TEXT' },
+    { name: 'university',    def: 'TEXT' },
+    { name: 'department',    def: 'TEXT' },
+    { name: 'designation',   def: 'TEXT' },
+  ];
+  newCols.forEach(({ name, def }) => {
+    if (!columns.some(c => c.name === name)) {
+      db.run(`ALTER TABLE users ADD COLUMN ${name} ${def}`, err2 => {
+        if (err2) console.error(`Error adding ${name} column:`, err2.message);
+        else console.log(`✅ ${name} column added to users table`);
+      });
+    }
+  });
+});
+
 module.exports = db;

@@ -29,11 +29,19 @@ window.addEventListener('DOMContentLoaded', async () => {
 
     const user = await res.json();
 
-    document.getElementById('viewName').textContent    = user.name    || '—';
-    document.getElementById('viewEmail').textContent   = user.email   || '—';
-    document.getElementById('viewPhone').textContent   = user.phone   || 'Not provided';
-    document.getElementById('viewAddress').textContent = user.address || 'Not provided';
-    document.getElementById('viewRole').textContent    = user.role    || '—';
+    document.getElementById('viewName').textContent         = user.name          || '—';
+    document.getElementById('viewEmail').textContent        = user.email         || '—';
+    document.getElementById('viewPhone').textContent        = user.phone         || 'Not provided';
+    document.getElementById('viewAddress').textContent      = user.address       || 'Not provided';
+    document.getElementById('viewRole').textContent         = user.role          || '—';
+    document.getElementById('viewGender').textContent       = user.gender        || 'Not provided';
+    document.getElementById('viewCnic').textContent         = user.cnic          || 'Not provided';
+    document.getElementById('viewQualification').textContent= user.qualification || 'Not provided';
+    document.getElementById('viewDegreeDate').textContent   = user.degree_date   || 'Not provided';
+    document.getElementById('viewProvince').textContent     = user.province      || 'Not provided';
+    document.getElementById('viewUniversity').textContent   = user.university    || 'Not provided';
+    document.getElementById('viewDepartment').textContent   = user.department    || 'Not provided';
+    document.getElementById('viewDesignation').textContent  = user.designation   || 'Not provided';
 
     // Update avatar initials from actual name
     const initials = (user.name || '').split(' ').map(w => w.charAt(0)).join('').substring(0, 2).toUpperCase();
@@ -46,10 +54,18 @@ window.addEventListener('DOMContentLoaded', async () => {
     if (sidebarName) sidebarName.textContent = user.name || '—';
 
     // Pre-fill edit form
-    document.getElementById('editName').value        = user.name    || '';
-    document.getElementById('editPhone').value       = user.phone   || '';
-    document.getElementById('editAddress').value     = user.address || '';
-    document.getElementById('editEmail').textContent = user.email   || '—';
+    document.getElementById('editName').value          = user.name          || '';
+    document.getElementById('editPhone').value         = user.phone         || '';
+    document.getElementById('editAddress').value       = user.address       || '';
+    document.getElementById('editEmail').textContent   = user.email         || '—';
+    document.getElementById('editGender').value        = user.gender        || '';
+    document.getElementById('editCnic').value          = user.cnic          || '';
+    document.getElementById('editQualification').value = user.qualification || '';
+    document.getElementById('editDegreeDate').value    = user.degree_date   || '';
+    document.getElementById('editProvince').value      = user.province      || '';
+    document.getElementById('editUniversity').value    = user.university    || '';
+    document.getElementById('editDepartment').value    = user.department    || '';
+    document.getElementById('editDesignation').value   = user.designation   || '';
 
   } catch {
     window.location.href = '/pages/login.html';
@@ -72,10 +88,18 @@ document.getElementById('cancelBtn').addEventListener('click', () => {
 
 // S7 — Save profile changes
 document.getElementById('saveBtn').addEventListener('click', async () => {
-  const name    = document.getElementById('editName').value.trim();
-  const phone   = document.getElementById('editPhone').value.trim();
-  const address = document.getElementById('editAddress').value.trim();
-  const msg     = document.getElementById('message');
+  const name          = document.getElementById('editName').value.trim();
+  const phone         = document.getElementById('editPhone').value.trim();
+  const address       = document.getElementById('editAddress').value.trim();
+  const gender        = document.getElementById('editGender').value;
+  const cnic          = document.getElementById('editCnic').value.trim();
+  const qualification = document.getElementById('editQualification').value.trim();
+  const degree_date   = document.getElementById('editDegreeDate').value;
+  const province      = document.getElementById('editProvince').value.trim();
+  const university    = document.getElementById('editUniversity').value.trim();
+  const department    = document.getElementById('editDepartment').value.trim();
+  const designation   = document.getElementById('editDesignation').value.trim();
+  const msg           = document.getElementById('message');
 
   if (!name) return showMessage(msg, 'Name is required', 'error');
 
@@ -83,14 +107,22 @@ document.getElementById('saveBtn').addEventListener('click', async () => {
     const res  = await fetch('/api/profile', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, phone, address })
+      body: JSON.stringify({ name, phone, address, gender, cnic, qualification, degree_date, province, university, department, designation })
     });
     const data = await res.json();
 
     if (res.ok) {
-      document.getElementById('viewName').textContent    = name;
-      document.getElementById('viewPhone').textContent   = phone   || 'Not provided';
-      document.getElementById('viewAddress').textContent = address || 'Not provided';
+      document.getElementById('viewName').textContent          = name;
+      document.getElementById('viewPhone').textContent         = phone         || 'Not provided';
+      document.getElementById('viewAddress').textContent       = address       || 'Not provided';
+      document.getElementById('viewGender').textContent        = gender        || 'Not provided';
+      document.getElementById('viewCnic').textContent          = cnic          || 'Not provided';
+      document.getElementById('viewQualification').textContent = qualification || 'Not provided';
+      document.getElementById('viewDegreeDate').textContent    = degree_date   || 'Not provided';
+      document.getElementById('viewProvince').textContent      = province      || 'Not provided';
+      document.getElementById('viewUniversity').textContent    = university    || 'Not provided';
+      document.getElementById('viewDepartment').textContent    = department    || 'Not provided';
+      document.getElementById('viewDesignation').textContent   = designation   || 'Not provided';
 
       // Update avatar initials live
       const initials = name.split(' ').map(w => w.charAt(0)).join('').substring(0, 2).toUpperCase();

@@ -43,7 +43,10 @@ const User = {
   getAll() {
     return new Promise((resolve, reject) => {
       db.all(
-        'SELECT id, name, email, role, is_active, created_at FROM users ORDER BY id ASC',
+        `SELECT id, name, email, role, is_active, created_at,
+                phone, gender, qualification, degree_date, cnic,
+                province, university, department, designation
+         FROM users ORDER BY id ASC`,
         [],
         (err, rows) => {
           if (err) reject(err);
@@ -53,11 +56,15 @@ const User = {
     });
   },
 
-  updateProfile(id, { name, phone, address }) {
+  updateProfile(id, { name, phone, address, gender, qualification, degree_date, cnic, province, university, department, designation }) {
     return new Promise((resolve, reject) => {
       db.run(
-        'UPDATE users SET name = ?, phone = ?, address = ? WHERE id = ?',
-        [name, phone, address, id],
+        `UPDATE users SET
+           name = ?, phone = ?, address = ?,
+           gender = ?, qualification = ?, degree_date = ?, cnic = ?,
+           province = ?, university = ?, department = ?, designation = ?
+         WHERE id = ?`,
+        [name, phone, address, gender, qualification, degree_date, cnic, province, university, department, designation, id],
         function (err) {
           if (err) reject(err);
           else resolve();
