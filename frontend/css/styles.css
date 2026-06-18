@@ -1831,7 +1831,7 @@ body.auth-page::before {
   font-size: 10px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--text-faint);
+  color: var(--gold);
   font-weight: 500;
 }
 
@@ -1880,6 +1880,11 @@ body.auth-page::before {
 
 .profile-input::placeholder {
   color: var(--text-faint);
+}
+
+.profile-input option {
+  background: #1e2133;
+  color: var(--text);
 }
 
 .profile-input:focus {

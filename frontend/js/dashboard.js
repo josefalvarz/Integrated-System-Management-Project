@@ -202,8 +202,17 @@ function renderMembers(users) {
     const row = document.createElement('tr');
 
     row.innerHTML = `
-      <td>${user.name || 'N/A'}</td>
-      <td>${user.email || 'N/A'}</td>
+      <td>${user.name         || 'N/A'}</td>
+      <td>${user.email        || 'N/A'}</td>
+      <td>${user.gender       || '—'}</td>
+      <td>${user.cnic         || '—'}</td>
+      <td>${user.phone        || '—'}</td>
+      <td>${user.qualification|| '—'}</td>
+      <td>${user.degree_date  || '—'}</td>
+      <td>${user.province     || '—'}</td>
+      <td>${user.university   || '—'}</td>
+      <td>${user.department   || '—'}</td>
+      <td>${user.designation  || '—'}</td>
       <td>
         <select class="role-select" data-user-id="${user.id}">
           <option value="member" ${user.role === 'member' ? 'selected' : ''}>Member</option>
