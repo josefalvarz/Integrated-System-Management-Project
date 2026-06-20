@@ -97,6 +97,19 @@ const User = {
         }
       );
     });
+  },
+
+  updatePassword(email, hashedPassword) {
+    return new Promise((resolve, reject) => {
+      db.run(
+        'UPDATE users SET password = ? WHERE email = ?',
+        [hashedPassword, email],
+        function (err) {
+          if (err) reject(err);
+          else resolve();
+        }
+      );
+    });
   }
 };
 
