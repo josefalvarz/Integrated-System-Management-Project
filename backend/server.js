@@ -51,7 +51,10 @@ app.get('/me', (req, res) => {
 });
 
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, '../frontend/pages/login.html'));
+  if (req.session.user) {
+    return res.redirect('/pages/dashboard.html');
+  }
+  res.redirect('/pages/register.html');
 });
 
 app.listen(PORT, () => {
