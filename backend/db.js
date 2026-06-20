@@ -239,4 +239,15 @@ db.all("PRAGMA table_info(users)", (err, columns) => {
   });
 });
 
+// S47 — Password Recovery
+db.run(`
+  CREATE TABLE IF NOT EXISTS password_resets (
+    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    email      TEXT    NOT NULL,
+    token      TEXT    NOT NULL UNIQUE,
+    expires_at TEXT    NOT NULL,
+    created_at TEXT    NOT NULL DEFAULT (datetime('now'))
+  )
+`);
+
 module.exports = db;
