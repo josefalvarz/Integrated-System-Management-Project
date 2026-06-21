@@ -3793,3 +3793,839 @@ body.auth-page::before {
     grid-template-columns: 1fr;
   }
 }
+
+/* ── WhatsApp Date Filter ──────────────────────────────────── */
+.wa-filter-bar {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.wa-filter-btn {
+  padding: 0.4rem 1.1rem;
+  border: 1px solid rgba(212, 175, 97, 0.35);
+  background: transparent;
+  color: var(--text-muted);
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  letter-spacing: 0.02em;
+  transition: all 0.18s;
+}
+
+.wa-filter-btn:hover {
+  background: var(--gold-dim);
+  color: var(--text);
+  border-color: var(--gold);
+}
+
+.wa-filter-btn.active {
+  background: var(--gold);
+  color: var(--navy);
+  font-weight: 600;
+  border-color: var(--gold);
+}
+
+.wa-filter-input-area {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.wa-filter-label {
+  font-size: 13px;
+  color: var(--text-muted);
+  letter-spacing: 0.02em;
+}
+
+.wa-filter-input {
+  padding: 0.45rem 0.85rem;
+  background: var(--navy-mid);
+  border: 1px solid rgba(212, 175, 97, 0.3);
+  border-radius: 8px;
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: 0.9rem;
+  color-scheme: dark;
+  min-width: 160px;
+  transition: border-color 0.18s;
+}
+
+.wa-filter-input:focus {
+  outline: none;
+  border-color: var(--gold);
+}
+
+/* ============================================
+   S32 - TEXT VS MEDIA COMPARISON
+   ============================================ */
+
+.wa-type-split {
+  display: flex;
+  height: 14px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.06);
+  margin-bottom: 14px;
+}
+
+.wa-type-bar-text {
+  height: 100%;
+  background: linear-gradient(90deg, #4ade9a, #22c55e);
+  border-radius: 999px 0 0 999px;
+  transition: width 0.4s ease;
+}
+
+.wa-type-bar-media {
+  height: 100%;
+  background: linear-gradient(90deg, var(--gold), var(--gold-light));
+  border-radius: 0 999px 999px 0;
+  transition: width 0.4s ease;
+}
+
+.wa-type-legend {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+  margin-top: 6px;
+}
+
+.wa-type-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.wa-type-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.wa-type-dot-text  { background: #4ade9a; }
+.wa-type-dot-media { background: var(--gold); }
+
+/* ============================================
+   S33 — Sentiment Analysis
+   ============================================ */
+
+.wa-sentiment-split {
+  display: flex;
+  height: 14px;
+  border-radius: 7px;
+  overflow: hidden;
+  margin: 1.5rem 0 1rem;
+}
+
+.wa-sentiment-bar-pos {
+  height: 100%;
+  background: linear-gradient(90deg, #4ade9a, #22c55e);
+}
+
+.wa-sentiment-bar-neg {
+  height: 100%;
+  background: linear-gradient(90deg, #f87171, #ef4444);
+}
+
+.wa-sentiment-bar-neu {
+  height: 100%;
+  background: rgba(156, 163, 175, 0.35);
+}
+
+.wa-sentiment-dot-pos { background: #4ade9a; }
+.wa-sentiment-dot-neg { background: #f87171; }
+
+/* ============================================
+   S34 — SPAM DETECTION
+   ============================================ */
+
+.wa-spam-kw {
+  display: inline-block;
+  background: rgba(248, 113, 113, 0.12);
+  color: #f87171;
+  border: 1px solid rgba(248, 113, 113, 0.25);
+  border-radius: 999px;
+  padding: 2px 9px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  margin: 2px 2px 2px 0;
+  white-space: nowrap;
+}
+.wa-sentiment-dot-neu { background: #9ca3af; }
+
+/* ============================================
+   S35 - BROADCAST NOTIFICATIONS
+   ============================================ */
+
+.notifications-main {
+  margin-left: 260px;
+  width: calc(100% - 260px);
+  min-height: 100vh;
+  height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 40px 48px;
+  display: block !important;
+  align-items: unset !important;
+  justify-content: unset !important;
+  box-sizing: border-box;
+  position: relative;
+  z-index: 1;
+}
+
+.notifications-header {
+  margin-bottom: 28px;
+}
+
+.notifications-grid {
+  display: grid;
+  grid-template-columns: 380px 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+.notifications-list-card {
+  max-width: none !important;
+}
+
+.notifications-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 4px;
+}
+
+.notification-item {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 18px 20px;
+  transition: border-color 0.18s ease, background 0.18s ease;
+}
+
+.notification-item:hover {
+  border-color: var(--border-hover);
+  background: rgba(212,175,97,0.04);
+}
+
+.notification-item-title {
+  font-family: var(--font-serif);
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--text);
+  margin: 0 0 8px;
+}
+
+.notification-item-message {
+  font-size: 14px;
+  color: rgba(232, 228, 219, 0.72);
+  font-weight: 300;
+  line-height: 1.6;
+  margin: 0 0 12px;
+  white-space: pre-line;
+}
+
+.notification-item-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  font-size: 12px;
+  color: rgba(232, 228, 219, 0.45);
+}
+
+.notification-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  background: var(--gold-dim);
+  border: 1px solid rgba(212,175,97,0.2);
+  color: var(--gold);
+}
+
+.notifications-empty {
+  color: var(--text-faint);
+  font-size: 14px;
+  font-weight: 300;
+  padding: 24px 0;
+  text-align: center;
+}
+
+.notif-textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+.notif-delete-btn {
+  width: auto !important;
+  padding: 4px 12px !important;
+  background: transparent !important;
+  border: 1px solid rgba(248, 113, 113, 0.3) !important;
+  color: #f87171 !important;
+  border-radius: 8px !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.05em !important;
+  text-transform: uppercase !important;
+  cursor: pointer !important;
+  transition: all 0.18s ease !important;
+  margin: 0 !important;
+  box-shadow: none !important;
+  font-family: var(--font-sans) !important;
+}
+
+.notif-delete-btn:hover {
+  background: rgba(248, 113, 113, 0.08) !important;
+  border-color: rgba(248, 113, 113, 0.55) !important;
+}
+
+@media (max-width: 1100px) {
+  .notifications-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 900px) {
+  .notifications-main {
+    margin-left: 0;
+    width: 100%;
+    height: auto;
+    padding: 24px 20px;
+  }
+}
+
+/* ============================================
+   S36 - MEETINGS & EVENT REMINDERS
+   ============================================ */
+
+.meetings-main {
+  margin-left: 260px;
+  width: calc(100% - 260px);
+  min-height: 100vh;
+  height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 40px 48px;
+  display: block !important;
+  align-items: unset !important;
+  justify-content: unset !important;
+  box-sizing: border-box;
+  position: relative;
+  z-index: 1;
+}
+
+.meetings-header {
+  margin-bottom: 28px;
+}
+
+.meetings-grid {
+  display: grid;
+  grid-template-columns: 380px 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+.meetings-form-card {
+  max-width: none !important;
+}
+
+.meetings-date-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.meetings-textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.meetings-reminders-col {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.meetings-list-card {
+  max-width: none !important;
+}
+
+.meetings-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 4px;
+}
+
+.meetings-reminder-item {
+  border-radius: 14px;
+  padding: 18px 20px;
+  transition: border-color 0.18s ease, background 0.18s ease;
+}
+
+.meetings-reminder-upcoming {
+  background: rgba(212, 175, 97, 0.04);
+  border: 1px solid rgba(212, 175, 97, 0.2);
+}
+
+.meetings-reminder-upcoming:hover {
+  border-color: rgba(212, 175, 97, 0.4);
+  background: rgba(212, 175, 97, 0.07);
+}
+
+.meetings-reminder-expired {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border);
+  opacity: 0.6;
+}
+
+.meetings-reminder-expired:hover {
+  opacity: 0.8;
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.meetings-reminder-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.meetings-reminder-title {
+  font-family: var(--font-serif);
+  font-size: 17px;
+  font-weight: 500;
+  color: var(--text);
+  margin: 0;
+}
+
+.meetings-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+
+.meetings-badge-upcoming {
+  background: rgba(74, 222, 154, 0.1);
+  border: 1px solid rgba(74, 222, 154, 0.3);
+  color: #4ade9a;
+}
+
+.meetings-badge-expired {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border);
+  color: var(--text-faint);
+}
+
+.meetings-badge-cancelled {
+  background: rgba(248, 113, 113, 0.08);
+  border: 1px solid rgba(248, 113, 113, 0.3);
+  color: #f87171;
+}
+
+.meetings-reminder-datetime {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+.meetings-reminder-sep {
+  color: var(--text-faint);
+}
+
+.meetings-reminder-location {
+  font-size: 12px;
+  color: var(--gold);
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: var(--gold-dim);
+  border: 1px solid rgba(212, 175, 97, 0.15);
+}
+
+.meetings-reminder-desc {
+  font-size: 13px;
+  color: rgba(232, 228, 219, 0.6);
+  font-weight: 300;
+  line-height: 1.6;
+  margin: 0 0 10px;
+  white-space: pre-line;
+}
+
+.meetings-reminder-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 4px;
+}
+
+.meetings-reminder-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.meetings-empty {
+  color: var(--text-faint);
+  font-size: 14px;
+  font-weight: 300;
+  padding: 20px 0;
+  text-align: center;
+}
+
+@media (max-width: 1100px) {
+  .meetings-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .meetings-date-row {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 900px) {
+  .meetings-main {
+    margin-left: 0;
+    width: 100%;
+    height: auto;
+    padding: 24px 20px;
+  }
+
+  .meetings-date-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ============================================
+   S37 - SELECT MEETING PARTICIPANTS
+   ============================================ */
+
+.meetings-participant-field {
+  margin-top: 4px;
+}
+
+.meetings-participant-options {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 6px;
+}
+
+.meetings-participant-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 9px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.02);
+  transition: border-color 0.18s, background 0.18s;
+}
+
+.meetings-participant-option:hover {
+  border-color: var(--border-hover);
+  background: rgba(212, 175, 97, 0.04);
+}
+
+.meetings-participant-option input[type="radio"] {
+  accent-color: var(--gold);
+  width: 15px;
+  height: 15px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.meetings-participant-label {
+  font-size: 13px;
+  color: var(--text-muted);
+  cursor: pointer;
+  user-select: none;
+}
+
+/* Scrollable checklist of members */
+.meetings-checklist {
+  margin-top: 10px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.meetings-checklist-hint {
+  font-size: 13px;
+  color: var(--text-faint);
+  padding: 12px 14px;
+  margin: 0;
+}
+
+.meetings-checklist-items {
+  display: flex;
+  flex-direction: column;
+}
+
+.meetings-checklist-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  cursor: pointer;
+  border-bottom: 1px solid var(--border);
+  transition: background 0.15s;
+}
+
+.meetings-checklist-item:last-child {
+  border-bottom: none;
+}
+
+.meetings-checklist-item:hover {
+  background: rgba(212, 175, 97, 0.04);
+}
+
+.meetings-checklist-item input[type="checkbox"] {
+  accent-color: var(--gold);
+  width: 15px;
+  height: 15px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.meetings-checklist-item-name {
+  font-size: 14px;
+  color: var(--text);
+  font-weight: 400;
+  flex: 1;
+}
+
+.meetings-checklist-item-role {
+  font-size: 11px;
+  color: var(--text-faint);
+  text-transform: capitalize;
+}
+
+/* Participant info shown inside reminder cards (admin view) */
+.meetings-participant-badge {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.meetings-participant-count {
+  font-size: 11px;
+  padding: 2px 9px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+}
+
+.meetings-participant-view-btn {
+  font-size: 11px;
+  color: var(--gold);
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  width: auto;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.meetings-participant-view-btn:hover {
+  color: var(--gold-light);
+  background: none;
+}
+
+/* Expandable participant list inside a card */
+.meetings-participant-list {
+  width: 100%;
+  margin-top: 6px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.08);
+}
+
+.meetings-participant-list-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 13px;
+  color: var(--text-muted);
+  padding: 7px 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.meetings-participant-list-item:last-child {
+  border-bottom: none;
+}
+
+.meetings-participant-list-role {
+  font-size: 11px;
+  color: var(--text-faint);
+  text-transform: capitalize;
+}
+
+/* ============================================
+   S38 - ADD ONLINE MEETING LINKS
+   ============================================ */
+
+/* Row that wraps the Physical / Online / Hybrid radio buttons */
+.meetings-type-options {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 6px;
+}
+
+/* Small "(Required)" / "(Optional)" hint next to the label */
+.meetings-link-required {
+  font-size: 11px;
+  color: var(--text-faint);
+  font-weight: 400;
+  margin-left: 4px;
+}
+
+/* Meeting type pill shown inside each reminder card */
+.meetings-type-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+
+.meetings-type-badge-online {
+  background: rgba(96, 165, 250, 0.1);
+  border: 1px solid rgba(96, 165, 250, 0.3);
+  color: #60a5fa;
+}
+
+.meetings-type-badge-hybrid {
+  background: rgba(167, 139, 250, 0.1);
+  border: 1px solid rgba(167, 139, 250, 0.3);
+  color: #a78bfa;
+}
+
+.meetings-type-badge-physical {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border);
+  color: var(--text-faint);
+}
+
+/* "Join Meeting" link row inside a reminder card */
+.meetings-online-link-row {
+  margin: 6px 0 8px;
+}
+
+.meetings-online-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--gold);
+  text-decoration: none;
+  padding: 5px 14px;
+  border-radius: 8px;
+  border: 1px solid rgba(212, 175, 97, 0.25);
+  background: rgba(212, 175, 97, 0.06);
+  transition: background 0.18s, border-color 0.18s, color 0.18s;
+}
+
+.meetings-online-link:hover {
+  background: rgba(212, 175, 97, 0.12);
+  border-color: rgba(212, 175, 97, 0.4);
+  color: var(--gold-light);
+}
+
+/* ============================================
+   S41/S42 - EDIT & CANCEL MEETINGS
+   ============================================ */
+
+/* Row that holds the Schedule/Save and Cancel Edit buttons side by side */
+.meetings-form-btn-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* Edit button inside reminder cards */
+.meetings-edit-btn {
+  width: auto !important;
+  padding: 4px 12px !important;
+  background: transparent !important;
+  border: 1px solid rgba(212, 175, 97, 0.35) !important;
+  color: var(--gold) !important;
+  border-radius: 8px !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.05em !important;
+  text-transform: uppercase !important;
+  cursor: pointer !important;
+  transition: all 0.18s ease !important;
+  margin: 0 !important;
+  box-shadow: none !important;
+  font-family: var(--font-sans) !important;
+}
+
+.meetings-edit-btn:hover {
+  background: rgba(212, 175, 97, 0.08) !important;
+  border-color: rgba(212, 175, 97, 0.6) !important;
+}
+
+/* Cancel Meeting button inside reminder cards */
+.meetings-cancel-meeting-btn {
+  width: auto !important;
+  padding: 4px 12px !important;
+  background: transparent !important;
+  border: 1px solid rgba(251, 146, 60, 0.3) !important;
+  color: #fb923c !important;
+  border-radius: 8px !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.05em !important;
+  text-transform: uppercase !important;
+  cursor: pointer !important;
+  transition: all 0.18s ease !important;
+  margin: 0 !important;
+  box-shadow: none !important;
+  font-family: var(--font-sans) !important;
+}
+
+.meetings-cancel-meeting-btn:hover {
+  background: rgba(251, 146, 60, 0.08) !important;
+  border-color: rgba(251, 146, 60, 0.55) !important;
+}

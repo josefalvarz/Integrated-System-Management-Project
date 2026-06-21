@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Meetings &amp; Reminders - Organization X</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/styles.css" />
+</head>
+
+<body class="dashboard-page">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+
+  <div class="ims-dashboard">
+
+    <!-- SIDEBAR -->
+    <aside class="ims-sidebar">
+      <div class="ims-brand">
+        <div class="ims-brand-icon">IMS</div>
+        <div class="ims-brand-text">
+          <h2>Organization X</h2>
+          <p>Management System</p>
+        </div>
+      </div>
+
+      <div class="ims-nav-section">
+        <p class="ims-section-title">Workspace</p>
+        <nav class="ims-nav">
+          <a href="./dashboard.html" class="ims-nav-link">Dashboard</a>
+          <a href="./profile.html" class="ims-nav-link">Profile</a>
+          <a href="./dashboard.html?page=members" class="ims-nav-link admin-only">Member Management</a>
+          <a href="./data-migration.html" class="ims-nav-link admin-only">Data Import</a>
+          <a href="./documents.html" class="ims-nav-link">Documents</a>
+          <a href="./election.html" class="ims-nav-link admin-only">E-Voting Management</a>
+          <a href="./vote.html" class="ims-nav-link member-only">E-Voting</a>
+          <a href="./whatsapp.html" class="ims-nav-link admin-only">WhatsApp Analytics</a>
+          <a href="./notifications.html" class="ims-nav-link">Smart Notifications</a>
+          <a href="./meetings.html" class="ims-nav-link active">Meetings</a>
+          <a href="./income.html" class="ims-nav-link admin-only">Finance</a>
+        </nav>
+      </div>
+
+      <div class="ims-nav-section admin-only">
+        <p class="ims-section-title">System</p>
+        <nav class="ims-nav">
+          <a href="#" class="ims-nav-link">Settings</a>
+          <a href="#" class="ims-nav-link">Audit Logs</a>
+        </nav>
+      </div>
+
+      <div class="ims-sidebar-spacer"></div>
+
+      <div class="ims-user-panel">
+        <div class="ims-avatar" id="userInitials">U</div>
+        <div class="ims-user-info">
+          <strong id="userName">User</strong>
+          <span id="userRole">Member</span>
+        </div>
+      </div>
+
+      <button class="ims-logout-btn" onclick="window.location.href='logout.html'">Sign Out</button>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="ims-main meetings-main">
+
+      <header class="meetings-header">
+        <p class="profile-breadcrumb">
+          <span>Org X</span>
+          <span class="ims-sep">／</span>
+          <span>Meetings</span>
+        </p>
+        <h1 class="profile-title">Meetings &amp; <em>Reminders</em></h1>
+      </header>
+
+      <div id="meetingsStatusMsg" class="role-message hidden"></div>
+
+      <div class="meetings-grid">
+
+        <!-- SCHEDULE FORM — admin only -->
+        <div class="admin-only">
+          <div class="profile-card meetings-form-card">
+            <div class="profile-top-rule"></div>
+            <p class="profile-edit-title" id="formModeTitle">Schedule a meeting</p>
+
+            <form id="meetingForm" class="profile-form">
+
+              <!-- Hidden input tracks which meeting is being edited (empty = create mode) -->
+              <input type="hidden" id="editMeetingId" value="" />
+
+              <div class="profile-field">
+                <span class="profile-label">Meeting Title</span>
+                <input
+                  type="text"
+                  id="meetingTitle"
+                  class="profile-input"
+                  placeholder="e.g. Monthly Board Review"
+                  maxlength="200"
+                />
+              </div>
+
+              <div class="meetings-date-row">
+                <div class="profile-field">
+                  <span class="profile-label">Date</span>
+                  <input
+                    type="date"
+                    id="meetingDate"
+                    class="profile-input"
+                  />
+                </div>
+                <div class="profile-field">
+                  <span class="profile-label">Time</span>
+                  <input
+                    type="time"
+                    id="meetingTime"
+                    class="profile-input"
+                  />
+                </div>
+              </div>
+
+              <div class="profile-field">
+                <span class="profile-label">Location (optional)</span>
+                <input
+                  type="text"
+                  id="meetingLocation"
+                  class="profile-input"
+                  placeholder="e.g. Conference Room A or Zoom link"
+                  maxlength="300"
+                />
+              </div>
+
+              <div class="profile-field">
+                <span class="profile-label">Description (optional)</span>
+                <textarea
+                  id="meetingDescription"
+                  class="profile-input meetings-textarea"
+                  placeholder="Agenda or additional details..."
+                ></textarea>
+              </div>
+
+              <!-- S38 — Meeting type -->
+              <div class="profile-field">
+                <span class="profile-label">Meeting Type</span>
+                <div class="meetings-type-options">
+                  <label class="meetings-participant-option">
+                    <input type="radio" name="meetingType" id="meetingTypePhysical" value="physical" checked />
+                    <span class="meetings-participant-label">Physical</span>
+                  </label>
+                  <label class="meetings-participant-option">
+                    <input type="radio" name="meetingType" id="meetingTypeOnline" value="online" />
+                    <span class="meetings-participant-label">Online</span>
+                  </label>
+                  <label class="meetings-participant-option">
+                    <input type="radio" name="meetingType" id="meetingTypeHybrid" value="hybrid" />
+                    <span class="meetings-participant-label">Hybrid</span>
+                  </label>
+                </div>
+              </div>
+
+              <!-- S38 — Online meeting link (shown for Online / Hybrid) -->
+              <div class="profile-field" id="meetingLinkField" style="display:none;">
+                <span class="profile-label">
+                  Meeting Link
+                  <span id="meetingLinkRequired" class="meetings-link-required">(Required)</span>
+                </span>
+                <input
+                  type="url"
+                  id="meetingLink"
+                  class="profile-input"
+                  placeholder="https://zoom.us/j/... or https://meet.google.com/..."
+                  maxlength="500"
+                />
+              </div>
+
+              <!-- S37 — Participant selection -->
+              <div class="profile-field meetings-participant-field">
+                <span class="profile-label">Participants</span>
+                <div class="meetings-participant-options">
+                  <label class="meetings-participant-option">
+                    <input type="radio" name="participantType" id="participantAll" value="all" checked />
+                    <span class="meetings-participant-label">All Members</span>
+                  </label>
+                  <label class="meetings-participant-option">
+                    <input type="radio" name="participantType" id="participantSelected" value="selected" />
+                    <span class="meetings-participant-label">Select Members</span>
+                  </label>
+                </div>
+                <div id="participantChecklist" class="meetings-checklist" style="display:none;">
+                  <p id="checklistStatus" class="meetings-checklist-hint">Loading members...</p>
+                  <div id="checklistItems" class="meetings-checklist-items"></div>
+                </div>
+              </div>
+
+              <div class="meetings-form-btn-row">
+                <button type="submit" id="formSubmitBtn" class="profile-btn">Schedule Meeting</button>
+                <button type="button" id="cancelEditBtn" class="profile-btn-ghost" style="display:none;" onclick="exitEditMode()">Cancel Edit</button>
+              </div>
+
+            </form>
+          </div>
+        </div>
+
+        <!-- REMINDERS LIST — visible to everyone -->
+        <div class="meetings-reminders-col">
+
+          <!-- Upcoming reminders -->
+          <div class="profile-card meetings-list-card">
+            <div class="profile-top-rule"></div>
+            <p class="profile-edit-title">Upcoming reminders</p>
+            <div id="upcomingList" class="meetings-list">
+              <p class="meetings-empty">Loading reminders...</p>
+            </div>
+          </div>
+
+          <!-- Past reminders -->
+          <div class="profile-card meetings-list-card">
+            <div class="profile-top-rule"></div>
+            <p class="profile-edit-title">Past reminders</p>
+            <div id="expiredList" class="meetings-list">
+              <p class="meetings-empty">Loading...</p>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </main>
+
+  </div>
+
+  <script src="../js/meetings.js"></script>
+  <script>
+    const sidebarLoggedInUser = JSON.parse(sessionStorage.getItem("loggedInUser"));
+
+    if (!sidebarLoggedInUser) {
+      window.location.href = "./login.html";
+    } else {
+      const sidebarRole = (sidebarLoggedInUser.role || "member").toLowerCase();
+      const sidebarIsAdmin = sidebarRole === "admin" || sidebarRole === "administrator";
+
+      document.querySelectorAll(".admin-only").forEach((element) => {
+        element.style.display = sidebarIsAdmin ? "" : "none";
+      });
+
+      document.querySelectorAll(".member-only").forEach((element) => {
+        element.style.display = sidebarIsAdmin ? "none" : "";
+      });
+    }
+  </script>
+</body>
+</html>

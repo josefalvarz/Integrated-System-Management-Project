@@ -109,4 +109,92 @@ db.run(`
     FOREIGN KEY (user_id) REFERENCES users(id)
   )
 `);
+
+// S35 — Broadcast Notifications
+db.run(`
+  CREATE TABLE IF NOT EXISTS notifications (
+    id           INTEGER PRIMARY KEY AUTOINCREMENT,
+    title        TEXT    NOT NULL,
+    message      TEXT    NOT NULL,
+    target_group TEXT    NOT NULL DEFAULT 'all',
+    created_by   INTEGER NOT NULL,
+    created_at   TEXT    NOT NULL DEFAULT (datetime('now')),
+    FOREIGN KEY (created_by) REFERENCES users(id)
+  )
+`);
+
+// S36 — Send Event Reminders
+db.run(`
+  CREATE TABLE IF NOT EXISTS meetings (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    title       TEXT    NOT NULL,
+    date        TEXT    NOT NULL,
+    time        TEXT    NOT NULL,
+    location    TEXT,
+    description TEXT,
+    created_by  INTEGER NOT NULL,
+    created_at  TEXT    NOT NULL DEFAULT (datetime('now')),
+    FOREIGN KEY (created_by) REFERENCES users(id)
+  )
+`);
+
+db.run(`
+  CREATE TABLE IF NOT EXISTS reminders (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    meeting_id  INTEGER NOT NULL,
+    title       TEXT    NOT NULL,
+    date        TEXT    NOT NULL,
+    time        TEXT    NOT NULL,
+    description TEXT,
+    created_at  TEXT    NOT NULL DEFAULT (datetime('now')),
+    FOREIGN KEY (meeting_id) REFERENCES meetings(id)
+  )
+`);
+
+// S37 — Select Meeting Participants
+// Add participant_type to meetings if the column does not exist yet
+db.all("PRAGMA table_info(meetings)", (err, columns) => {
+  if (err) return;
+  const hasParticipantType = columns.some(c => c.name === 'participant_type');
+  if (!hasParticipantType) {
+    db.run("ALTER TABLE meetings ADD COLUMN participant_type TEXT NOT NULL DEFAULT 'all'");
+  }
+});
+
+// S38 — Add Online Meeting Links
+// Add meeting_type and online_link to meetings if they do not exist yet
+db.all("PRAGMA table_info(meetings)", (err, columns) => {
+  if (err) return;
+  const hasMeetingType = columns.some(c => c.name === 'meeting_type');
+  if (!hasMeetingType) {
+    db.run("ALTER TABLE meetings ADD COLUMN meeting_type TEXT NOT NULL DEFAULT 'physical'");
+  }
+  const hasOnlineLink = columns.some(c => c.name === 'online_link');
+  if (!hasOnlineLink) {
+    db.run("ALTER TABLE meetings ADD COLUMN online_link TEXT");
+  }
+});
+
+// S41/S42 — Edit Meeting Details / Cancel Meetings
+// Add status column to meetings if it does not exist yet
+db.all("PRAGMA table_info(meetings)", (err, columns) => {
+  if (err) return;
+  const hasStatus = columns.some(c => c.name === 'status');
+  if (!hasStatus) {
+    db.run("ALTER TABLE meetings ADD COLUMN status TEXT NOT NULL DEFAULT 'Scheduled'");
+  }
+});
+
+// Join table: which users are invited to a specific meeting
+db.run(`
+  CREATE TABLE IF NOT EXISTS meeting_participants (
+    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    meeting_id INTEGER NOT NULL,
+    user_id    INTEGER NOT NULL,
+    UNIQUE(meeting_id, user_id),
+    FOREIGN KEY (meeting_id) REFERENCES meetings(id),
+    FOREIGN KEY (user_id)    REFERENCES users(id)
+  )
+`);
+
 module.exports = db;
