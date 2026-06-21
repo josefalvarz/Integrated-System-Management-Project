@@ -269,23 +269,54 @@ function viewDocument(documentId) {
   }
 
   if (!selectedDocument.fileData) {
-    alert('This document was uploaded with the old simulation version. Please delete it and upload it again.');
+    alert('This document cannot be previewed. Please re-upload it.');
     return;
   }
 
-  const newTab = window.open();
+  const newTab = window.open('', '_blank');
 
   if (!newTab) {
     alert('Please allow pop-ups to view the document.');
     return;
   }
 
-  newTab.document.write(`
-    <iframe 
-      src="${selectedDocument.fileData}" 
-      style="width:100%; height:100vh; border:none;"
-    ></iframe>
-  `);
+  if (selectedDocument.fileType.startsWith('image/')) {
+    newTab.document.write(`
+      <html>
+        <head>
+          <title>${selectedDocument.fileName}</title>
+        </head>
+        <body style="margin:0; display:flex; justify-content:center; align-items:center; min-height:100vh; background:#111;">
+          <img src="${selectedDocument.fileData}" style="max-width:100%; max-height:100vh;" />
+        </body>
+      </html>
+    `);
+    newTab.document.close();
+    return;
+  }
+
+  if (selectedDocument.fileType === 'application/pdf') {
+    newTab.location.href = selectedDocument.fileData;
+    return;
+  }
+
+  if (selectedDocument.fileType === 'text/plain') {
+    newTab.document.write(`
+      <html>
+        <head>
+          <title>${selectedDocument.fileName}</title>
+        </head>
+        <body>
+          <iframe src="${selectedDocument.fileData}" style="width:100%; height:100vh; border:none;"></iframe>
+        </body>
+      </html>
+    `);
+    newTab.document.close();
+    return;
+  }
+
+  newTab.close();
+  alert('This file type cannot be previewed in the browser. Please use the Download button instead.');
 }
 
 function downloadDocument(documentId) {
