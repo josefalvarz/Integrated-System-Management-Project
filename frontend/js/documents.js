@@ -273,19 +273,91 @@ function viewDocument(documentId) {
     return;
   }
 
-  const newTab = window.open();
+  const newTab = window.open('', '_blank');
 
   if (!newTab) {
     alert('Please allow pop-ups to view the document.');
     return;
   }
 
-  newTab.document.write(`
-    <iframe 
-      src="${selectedDocument.fileData}" 
-      style="width:100%; height:100vh; border:none;"
-    ></iframe>
-  `);
+  const fileType = selectedDocument.fileType || '';
+  const fileName = selectedDocument.fileName || 'Document';
+
+  if (fileType.startsWith('image/')) {
+    newTab.document.write(`<!DOCTYPE html>
+<html>
+<head><title>${fileName}</title></head>
+<body style="margin:0;display:flex;justify-content:center;align-items:center;min-height:100vh;background:#111;">
+  <img src="${selectedDocument.fileData}" style="max-width:100%;max-height:100vh;" />
+</body>
+</html>`);
+    newTab.document.close();
+    return;
+  }
+
+  if (fileType === 'application/pdf') {
+    newTab.location.href = selectedDocument.fileData;
+    return;
+  }
+
+  if (fileType === 'text/plain') {
+    newTab.document.write(`<!DOCTYPE html>
+<html>
+<head><title>${fileName}</title></head>
+<body style="margin:0;">
+  <iframe src="${selectedDocument.fileData}" style="width:100%;height:100vh;border:none;"></iframe>
+</body>
+</html>`);
+    newTab.document.close();
+    return;
+  }
+
+  const isWordDoc =
+    fileType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
+    fileType === 'application/msword' ||
+    /\.docx?$/i.test(fileName);
+
+  if (isWordDoc) {
+    const base64 = selectedDocument.fileData.split(',')[1];
+
+    newTab.document.write(`<!DOCTYPE html>
+<html>
+<head>
+  <title>${fileName}</title>
+  <script src="https://cdn.jsdelivr.net/npm/docx-preview@0.3.2/dist/docx-preview.umd.min.js"><\/script>
+  <style>
+    body { margin: 0; padding: 24px; background: #f0f0f0; font-family: sans-serif; }
+    #loading { text-align: center; padding: 40px; color: #555; font-size: 15px; }
+    #docx-container { background: white; max-width: 870px; margin: 0 auto; min-height: 100vh; box-shadow: 0 2px 10px rgba(0,0,0,.2); }
+  </style>
+</head>
+<body>
+  <p id="loading">Loading document...</p>
+  <div id="docx-container"></div>
+  <script>
+    (function () {
+      const b64 = '${base64}';
+      const bin = atob(b64);
+      const bytes = new Uint8Array(bin.length);
+      for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+      const blob = new Blob([bytes.buffer], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+      docx.renderAsync(blob, document.getElementById('docx-container'))
+        .then(function () {
+          document.getElementById('loading').style.display = 'none';
+        })
+        .catch(function () {
+          document.getElementById('loading').textContent = 'Could not render this document in the browser. Please use the Download button.';
+        });
+    })();
+  <\/script>
+</body>
+</html>`);
+    newTab.document.close();
+    return;
+  }
+
+  newTab.close();
+  alert('This file type cannot be previewed in the browser. Please use the Download button instead.');
 }
 
 function downloadDocument(documentId) {
