@@ -296,7 +296,12 @@ function viewDocument(documentId) {
   }
 
   if (fileType === 'application/pdf') {
-    newTab.location.href = selectedDocument.fileData;
+    const pdfBase64 = selectedDocument.fileData.split(',')[1];
+    const pdfBin = atob(pdfBase64);
+    const pdfBytes = new Uint8Array(pdfBin.length);
+    for (let i = 0; i < pdfBin.length; i++) pdfBytes[i] = pdfBin.charCodeAt(i);
+    const pdfBlob = new Blob([pdfBytes.buffer], { type: 'application/pdf' });
+    newTab.location.href = URL.createObjectURL(pdfBlob);
     return;
   }
 
