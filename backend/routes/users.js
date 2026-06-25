@@ -24,6 +24,29 @@ router.get('/', requireLogin, requireAdmin, async (req, res) => {
   }
 });
 
+// UPDATE IMPORTED MEMBER ROLE
+router.patch('/imported/:id/role', requireLogin, requireAdmin, async (req, res) => {
+  const id = Number(req.params.id);
+  const { role } = req.body;
+
+  if (!allowedRoles.includes(role)) {
+    return res.status(400).json({ error: 'Invalid role. Role must be either member or admin.' });
+  }
+
+  try {
+    const result = await User.setImportedRole(id, role);
+
+    if (result.changes === 0) {
+      return res.status(404).json({ error: 'Imported member not found.' });
+    }
+
+    return res.status(200).json({ message: `Role updated to ${role}.` });
+  } catch (err) {
+    console.error('Update imported role error:', err);
+    return res.status(500).json({ error: 'Could not update role.' });
+  }
+});
+
 // UPDATE USER ROLE
 // Only admins can change user roles.
 router.patch('/:id/role', requireLogin, requireAdmin, async (req, res) => {

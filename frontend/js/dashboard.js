@@ -201,6 +201,8 @@ function renderMembers(users) {
   users.forEach(user => {
     const row = document.createElement('tr');
 
+    const source = user.source || 'Registered';
+
     row.innerHTML = `
       <td>${user.name         || 'N/A'}</td>
       <td>${user.email        || 'N/A'}</td>
@@ -214,7 +216,7 @@ function renderMembers(users) {
       <td>${user.department   || '—'}</td>
       <td>${user.designation  || '—'}</td>
       <td>
-        <select class="role-select" data-user-id="${user.id}">
+        <select class="role-select" data-user-id="${user.id}" data-source="${source}">
           <option value="member" ${user.role === 'member' ? 'selected' : ''}>Member</option>
           <option value="admin" ${user.role === 'admin' ? 'selected' : ''}>Admin</option>
         </select>
@@ -224,13 +226,21 @@ function renderMembers(users) {
           ${formatStatus(user.is_active)}
         </span>
       </td>
-      <td>
+      <td style="display:flex;gap:6px;align-items:center;">
         <button
           class="table-action-btn"
           data-user-id="${user.id}"
+          data-source="${source}"
           data-status="${Number(user.is_active) === 1 ? 0 : 1}"
         >
           ${Number(user.is_active) === 1 ? 'Deactivate' : 'Activate'}
+        </button>
+        <button
+          class="table-action-btn document-danger-btn delete-member-btn"
+          data-user-id="${user.id}"
+          data-source="${source}"
+        >
+          Delete
         </button>
       </td>
     `;
@@ -246,8 +256,12 @@ function attachMemberActionEvents() {
     select.addEventListener('change', updateUserRole);
   });
 
-  document.querySelectorAll('.table-action-btn').forEach(button => {
+  document.querySelectorAll('.table-action-btn:not(.delete-member-btn)').forEach(button => {
     button.addEventListener('click', updateUserStatus);
+  });
+
+  document.querySelectorAll('.delete-member-btn').forEach(button => {
+    button.addEventListener('click', deleteMember);
   });
 }
 
@@ -287,10 +301,15 @@ function applyMemberSearch() {
 
 async function updateUserRole(event) {
   const userId = event.target.dataset.userId;
+  const source = event.target.dataset.source;
   const newRole = event.target.value;
 
+  const url = source === 'Imported'
+    ? `/api/users/imported/${userId}/role`
+    : `/api/users/${userId}/role`;
+
   try {
-    const response = await fetch(`/api/users/${userId}/role`, {
+    const response = await fetch(url, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ role: newRole })
@@ -306,7 +325,7 @@ async function updateUserRole(event) {
 
     showRoleMessage(data.message || 'Role updated.');
 
-    if (Number(loggedInUser.id) === Number(userId)) {
+    if (source !== 'Imported' && Number(loggedInUser.id) === Number(userId)) {
       loggedInUser.role = newRole;
       sessionStorage.setItem('loggedInUser', JSON.stringify(loggedInUser));
 
@@ -331,10 +350,15 @@ async function updateUserRole(event) {
 
 async function updateUserStatus(event) {
   const userId = event.target.dataset.userId;
+  const source = event.target.dataset.source;
   const newStatus = Number(event.target.dataset.status);
 
+  const url = source === 'Imported'
+    ? `/api/users/imported/${userId}/status`
+    : `/api/users/${userId}/status`;
+
   try {
-    const response = await fetch(`/api/users/${userId}/status`, {
+    const response = await fetch(url, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ is_active: newStatus })
@@ -352,6 +376,39 @@ async function updateUserStatus(event) {
   } catch (error) {
     console.error('Update status error:', error);
     showRoleMessage('Unable to update status.', 'error');
+  }
+}
+
+async function deleteMember(event) {
+  const userId = event.target.dataset.userId;
+  const source = event.target.dataset.source;
+  const row = event.target.closest('tr');
+  const name = row ? row.querySelector('td').textContent : 'this member';
+
+  if (!confirm(`Delete "${name}"? This cannot be undone.`)) return;
+
+  const url = source === 'Imported'
+    ? `/api/users/imported/${userId}`
+    : `/api/users/${userId}`;
+
+  try {
+    const response = await fetch(url, {
+      method: 'DELETE',
+      credentials: 'include'
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      showRoleMessage(data.error || 'Could not delete member.', 'error');
+      return;
+    }
+
+    showRoleMessage(data.message || 'Member deleted.');
+    await loadMembers();
+  } catch (error) {
+    console.error('Delete member error:', error);
+    showRoleMessage('Unable to delete member.', 'error');
   }
 }
 

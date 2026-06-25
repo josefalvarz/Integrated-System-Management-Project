@@ -251,13 +251,19 @@ db.run(`
   )
 `);
 
-// S48 — Add is_active to imported_members (existing rows default to active)
+// S48 — Add is_active and role to imported_members
 db.all("PRAGMA table_info(imported_members)", (err, columns) => {
   if (err) return;
   if (!columns.some(c => c.name === 'is_active')) {
     db.run("ALTER TABLE imported_members ADD COLUMN is_active INTEGER NOT NULL DEFAULT 1", err2 => {
       if (err2) console.error("Error adding is_active to imported_members:", err2.message);
       else console.log("✅ is_active column added to imported_members table");
+    });
+  }
+  if (!columns.some(c => c.name === 'role')) {
+    db.run("ALTER TABLE imported_members ADD COLUMN role TEXT NOT NULL DEFAULT 'member'", err2 => {
+      if (err2) console.error("Error adding role to imported_members:", err2.message);
+      else console.log("✅ role column added to imported_members table");
     });
   }
 });
