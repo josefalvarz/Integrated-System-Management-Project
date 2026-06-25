@@ -68,7 +68,7 @@ const User = {
            UNION ALL
            SELECT id, name, email,
                   'member' AS role,
-                  1 AS is_active,
+                  is_active,
                   imported_at AS created_at,
                   phone,
                   NULL AS gender, NULL AS qualification, NULL AS degree_date, NULL AS cnic,
@@ -135,6 +135,19 @@ const User = {
         if (err) reject(err);
         else resolve({ changes: this.changes });
       });
+    });
+  },
+
+  setImportedActive(id, isActive) {
+    return new Promise((resolve, reject) => {
+      db.run(
+        'UPDATE imported_members SET is_active = ? WHERE id = ?',
+        [isActive, id],
+        function (err) {
+          if (err) reject(err);
+          else resolve({ changes: this.changes });
+        }
+      );
     });
   },
 

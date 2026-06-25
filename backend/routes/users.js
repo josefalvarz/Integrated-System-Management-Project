@@ -72,6 +72,31 @@ router.patch('/:id/role', requireLogin, requireAdmin, async (req, res) => {
   }
 });
 
+// UPDATE IMPORTED MEMBER ACTIVE STATUS
+router.patch('/imported/:id/status', requireLogin, requireAdmin, async (req, res) => {
+  const id = Number(req.params.id);
+  const { is_active } = req.body;
+
+  if (is_active !== 0 && is_active !== 1) {
+    return res.status(400).json({ error: 'Invalid status. Use 1 for active or 0 for deactivated.' });
+  }
+
+  try {
+    const result = await User.setImportedActive(id, is_active);
+
+    if (result.changes === 0) {
+      return res.status(404).json({ error: 'Imported member not found.' });
+    }
+
+    return res.status(200).json({
+      message: is_active === 1 ? 'Member activated.' : 'Member deactivated.'
+    });
+  } catch (err) {
+    console.error('Update imported status error:', err);
+    return res.status(500).json({ error: 'Could not update status.' });
+  }
+});
+
 // UPDATE USER ACTIVE STATUS
 // This supports the activate/deactivate button shown in your prototype.
 router.patch('/:id/status', requireLogin, requireAdmin, async (req, res) => {
