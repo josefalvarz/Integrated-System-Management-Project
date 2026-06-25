@@ -204,6 +204,9 @@ function deleteUploadedFile(req) {
 async function buildPreview(rawRows) {
   await createImportedMembersTable();
 
+  // Capture column headers in the order they appear in the CSV
+  const columns = rawRows.length > 0 ? Object.keys(rawRows[0]) : [];
+
   const preview = {
     totalRows: rawRows.length,
     validRows: 0,
@@ -211,13 +214,15 @@ async function buildPreview(rawRows) {
     duplicateRows: 0,
     validRecords: [],
     invalidRecords: [],
+    columns,
   };
 
   const emailsInsideFile = new Set();
 
   for (let index = 0; index < rawRows.length; index++) {
     const rowNumber = index + 2;
-    const cleanedRow = normalizeRow(rawRows[index]);
+    const rawRow = rawRows[index];
+    const cleanedRow = normalizeRow(rawRow);
     const validationErrors = validateRow(cleanedRow);
 
     if (validationErrors.length > 0) {
@@ -273,6 +278,7 @@ async function buildPreview(rawRows) {
       email: cleanedRow.email,
       phone: cleanedRow.phone,
       joined: cleanedRow.joined,
+      _originalRow: rawRow,
     });
   }
 
