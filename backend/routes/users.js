@@ -116,4 +116,46 @@ router.patch('/:id/status', requireLogin, requireAdmin, async (req, res) => {
   }
 });
 
+// DELETE IMPORTED MEMBER — must be defined before /:id to avoid route collision
+router.delete('/imported/:id', requireLogin, requireAdmin, async (req, res) => {
+  const id = Number(req.params.id);
+
+  try {
+    const result = await User.deleteImported(id);
+
+    if (result.changes === 0) {
+      return res.status(404).json({ error: 'Imported member not found.' });
+    }
+
+    return res.status(200).json({ message: 'Imported member deleted.' });
+  } catch (err) {
+    console.error('Delete imported member error:', err);
+    return res.status(500).json({ error: 'Could not delete imported member.' });
+  }
+});
+
+// DELETE REGISTERED USER
+router.delete('/:id', requireLogin, requireAdmin, async (req, res) => {
+  const id = Number(req.params.id);
+
+  if (id === Number(req.session.user.id)) {
+    return res.status(400).json({ error: 'You cannot delete your own account.' });
+  }
+
+  try {
+    const user = await User.findById(id);
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found.' });
+    }
+
+    await User.delete(id);
+
+    return res.status(200).json({ message: 'User deleted.' });
+  } catch (err) {
+    console.error('Delete user error:', err);
+    return res.status(500).json({ error: 'Could not delete user.' });
+  }
+});
+
 module.exports = router;

@@ -56,19 +56,70 @@ document.addEventListener("DOMContentLoaded", () => {
 
     members.forEach((member) => {
       const row = document.createElement("tr");
+      const isSelf = loggedInUser && member.source === "Registered" && member.id === loggedInUser.id;
 
       row.innerHTML = `
         <td>${member.name || "N/A"}</td>
         <td>${member.email || "N/A"}</td>
         <td>${member.role || "member"}</td>
         <td>${member.source || "Registered"}</td>
+        <td>
+          ${isSelf
+            ? '<span style="color:#94a3b8;font-size:13px;">—</span>'
+            : `<button class="table-action-btn document-danger-btn" data-id="${member.id}" data-source="${member.source || "Registered"}">Delete</button>`
+          }
+        </td>
       `;
 
       resultsBody.appendChild(row);
     });
   }
 
-  // 4. Search by name, email, or role
+  // 4. Handle delete button clicks (event delegation)
+  resultsBody.addEventListener("click", async (e) => {
+    const btn = e.target.closest(".document-danger-btn");
+    if (!btn) return;
+
+    const id = btn.dataset.id;
+    const source = btn.dataset.source;
+    const name = btn.closest("tr").querySelector("td").textContent;
+
+    if (!confirm(`Delete "${name}"? This cannot be undone.`)) return;
+
+    btn.disabled = true;
+    btn.textContent = "Deleting...";
+
+    try {
+      const url = source === "Imported"
+        ? `/api/users/imported/${id}`
+        : `/api/users/${id}`;
+
+      const res = await fetch(url, {
+        method: "DELETE",
+        credentials: "include",
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        alert(data.error || "Could not delete member.");
+        btn.disabled = false;
+        btn.textContent = "Delete";
+        return;
+      }
+
+      btn.closest("tr").remove();
+      allMembers = allMembers.filter(
+        (m) => !(m.id === Number(id) && (m.source || "Registered") === source)
+      );
+    } catch {
+      alert("Network error. Please try again.");
+      btn.disabled = false;
+      btn.textContent = "Delete";
+    }
+  });
+
+  // 5. Search by name, email, or role
   function searchMembers() {
     const searchValue = searchInput.value.toLowerCase().trim();
 

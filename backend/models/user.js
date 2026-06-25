@@ -129,6 +129,24 @@ const User = {
     });
   },
 
+  delete(id) {
+    return new Promise((resolve, reject) => {
+      db.run('DELETE FROM users WHERE id = ?', [id], function (err) {
+        if (err) reject(err);
+        else resolve({ changes: this.changes });
+      });
+    });
+  },
+
+  deleteImported(id) {
+    return new Promise((resolve, reject) => {
+      db.run('DELETE FROM imported_members WHERE id = ?', [id], function (err) {
+        if (err) reject(err);
+        else resolve({ changes: this.changes });
+      });
+    });
+  },
+
   updatePassword(email, hashedPassword) {
     return new Promise((resolve, reject) => {
       db.run(
