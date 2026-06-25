@@ -59,21 +59,23 @@ const User = {
   getAllWithImported() {
     return new Promise((resolve, reject) => {
       db.all(
-        `SELECT id, name, email, role, is_active, created_at,
-                phone, gender, qualification, degree_date, cnic,
-                province, university, department, designation,
-                'Registered' AS source
-         FROM users
-         UNION ALL
-         SELECT id, name, email,
-                'member' AS role,
-                1 AS is_active,
-                imported_at AS created_at,
-                phone,
-                NULL AS gender, NULL AS qualification, NULL AS degree_date, NULL AS cnic,
-                NULL AS province, NULL AS university, NULL AS department, NULL AS designation,
-                'Imported' AS source
-         FROM imported_members
+        `SELECT * FROM (
+           SELECT id, name, email, role, is_active, created_at,
+                  phone, gender, qualification, degree_date, cnic,
+                  province, university, department, designation,
+                  'Registered' AS source
+           FROM users
+           UNION ALL
+           SELECT id, name, email,
+                  'member' AS role,
+                  1 AS is_active,
+                  imported_at AS created_at,
+                  phone,
+                  NULL AS gender, NULL AS qualification, NULL AS degree_date, NULL AS cnic,
+                  NULL AS province, NULL AS university, NULL AS department, NULL AS designation,
+                  'Imported' AS source
+           FROM imported_members
+         )
          ORDER BY CASE WHEN source = 'Registered' THEN 0 ELSE 1 END, id ASC`,
         [],
         (err, rows) => {

@@ -22,9 +22,9 @@ document.addEventListener("DOMContentLoaded", () => {
   // 2. Load members from backend
   async function loadMembers() {
     try {
-      const response = await fetch("http://localhost:3000/api/users", {
-  credentials: "include"
-});
+      const response = await fetch("/api/users", {
+        credentials: "include"
+      });
 
       if (!response.ok) {
         throw new Error("Could not load members.");
