@@ -10,7 +10,7 @@ const allowedRoles = ['member', 'admin'];
 // Only admins can view the member management list.
 router.get('/', requireLogin, requireAdmin, async (req, res) => {
   try {
-    const users = await User.getAll();
+    const users = await User.getAllWithImported();
 
     return res.status(200).json({
       users

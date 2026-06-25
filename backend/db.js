@@ -239,6 +239,18 @@ db.all("PRAGMA table_info(users)", (err, columns) => {
   });
 });
 
+// S48 — Show imported members in member list
+db.run(`
+  CREATE TABLE IF NOT EXISTS imported_members (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    name        TEXT    NOT NULL,
+    email       TEXT    NOT NULL UNIQUE,
+    phone       TEXT,
+    joined      TEXT,
+    imported_at TEXT    NOT NULL DEFAULT (datetime('now'))
+  )
+`);
+
 // S47 — Password Recovery
 db.run(`
   CREATE TABLE IF NOT EXISTS password_resets (
