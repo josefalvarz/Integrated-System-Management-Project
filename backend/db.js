@@ -251,21 +251,29 @@ db.run(`
   )
 `);
 
-// S48 — Add is_active and role to imported_members
+// S48 — Add is_active, role, and member-attribute columns to imported_members
 db.all("PRAGMA table_info(imported_members)", (err, columns) => {
   if (err) return;
-  if (!columns.some(c => c.name === 'is_active')) {
-    db.run("ALTER TABLE imported_members ADD COLUMN is_active INTEGER NOT NULL DEFAULT 1", err2 => {
-      if (err2) console.error("Error adding is_active to imported_members:", err2.message);
-      else console.log("✅ is_active column added to imported_members table");
-    });
-  }
-  if (!columns.some(c => c.name === 'role')) {
-    db.run("ALTER TABLE imported_members ADD COLUMN role TEXT NOT NULL DEFAULT 'member'", err2 => {
-      if (err2) console.error("Error adding role to imported_members:", err2.message);
-      else console.log("✅ role column added to imported_members table");
-    });
-  }
+  const importedMembersCols = [
+    { name: 'is_active',      def: 'INTEGER NOT NULL DEFAULT 1' },
+    { name: 'role',           def: "TEXT NOT NULL DEFAULT 'member'" },
+    { name: 'gender',         def: 'TEXT' },
+    { name: 'cnic',           def: 'TEXT' },
+    { name: 'qualification',  def: 'TEXT' },
+    { name: 'degree_date',    def: 'TEXT' },
+    { name: 'province',       def: 'TEXT' },
+    { name: 'university',     def: 'TEXT' },
+    { name: 'department',     def: 'TEXT' },
+    { name: 'designation',    def: 'TEXT' },
+  ];
+  importedMembersCols.forEach(({ name, def }) => {
+    if (!columns.some(c => c.name === name)) {
+      db.run(`ALTER TABLE imported_members ADD COLUMN ${name} ${def}`, err2 => {
+        if (err2) console.error(`Error adding ${name} to imported_members:`, err2.message);
+        else console.log(`✅ ${name} column added to imported_members table`);
+      });
+    }
+  });
 });
 
 // S47 — Password Recovery

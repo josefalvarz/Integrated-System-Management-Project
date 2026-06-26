@@ -65,19 +65,49 @@ function getQuery(sql, params = []) {
   });
 }
 
-function createImportedMembersTable() {
-  const sql = `
+async function createImportedMembersTable() {
+  await runQuery(`
     CREATE TABLE IF NOT EXISTS imported_members (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       name TEXT NOT NULL,
       email TEXT NOT NULL UNIQUE,
       phone TEXT,
       joined TEXT,
+      gender TEXT,
+      cnic TEXT,
+      qualification TEXT,
+      degree_date TEXT,
+      province TEXT,
+      university TEXT,
+      department TEXT,
+      designation TEXT,
+      role TEXT DEFAULT 'member',
+      is_active INTEGER DEFAULT 1,
       imported_at TEXT NOT NULL DEFAULT (datetime('now'))
     )
-  `;
+  `);
 
-  return runQuery(sql);
+  // Migrate existing tables that predate this schema
+  const columnsToAdd = [
+    "gender TEXT",
+    "cnic TEXT",
+    "qualification TEXT",
+    "degree_date TEXT",
+    "province TEXT",
+    "university TEXT",
+    "department TEXT",
+    "designation TEXT",
+    "role TEXT DEFAULT 'member'",
+    "is_active INTEGER DEFAULT 1",
+  ];
+
+  for (const col of columnsToAdd) {
+    try {
+      await runQuery(`ALTER TABLE imported_members ADD COLUMN ${col}`);
+    } catch (_) {
+      // Column already exists — safe to ignore
+    }
+  }
 }
 
 function requireAdmin(req, res, next) {
@@ -132,10 +162,18 @@ function getFieldValue(row, possibleNames) {
 
 function normalizeRow(row) {
   return {
-    name: cleanText(getFieldValue(row, ["name", "full name", "member name"])),
-    email: cleanEmail(getFieldValue(row, ["email", "email address"])),
-    phone: cleanText(getFieldValue(row, ["phone", "phone number", "mobile"])),
-    joined: cleanText(getFieldValue(row, ["joined", "join date", "date joined"])),
+    name:          cleanText(getFieldValue(row, ["name", "full name", "member name"])),
+    email:         cleanEmail(getFieldValue(row, ["email", "email address"])),
+    phone:         cleanText(getFieldValue(row, ["phone", "phone number", "mobile", "mobile number"])),
+    joined:        cleanText(getFieldValue(row, ["joined", "join date", "date joined"])),
+    gender:        cleanText(getFieldValue(row, ["gender", "sex"])),
+    cnic:          cleanText(getFieldValue(row, ["cnic", "cnic no", "cnic number", "national id"])),
+    qualification: cleanText(getFieldValue(row, ["qualification", "education", "degree"])),
+    degree_date:   cleanText(getFieldValue(row, ["degree date", "degree_date", "graduation date"])),
+    province:      cleanText(getFieldValue(row, ["province", "state", "region"])),
+    university:    cleanText(getFieldValue(row, ["university", "institution", "college"])),
+    department:    cleanText(getFieldValue(row, ["department", "dept", "faculty"])),
+    designation:   cleanText(getFieldValue(row, ["designation", "position", "title", "job title"])),
   };
 }
 
@@ -253,19 +291,37 @@ async function buildPreview(rawRows) {
 
     emailsInsideFile.add(cleanedRow.email);
 
-    const existingMember = await getQuery(
+    const existingImported = await getQuery(
       "SELECT id FROM imported_members WHERE email = ?",
       [cleanedRow.email]
     );
 
-    if (existingMember) {
+    if (existingImported) {
       preview.duplicateRows++;
 
       preview.invalidRecords.push({
         row: rowNumber,
         name: cleanedRow.name,
         email: cleanedRow.email,
-        errors: ["Duplicate email already exists in database"],
+        errors: ["Email already exists in imported members"],
+      });
+
+      continue;
+    }
+
+    const existingUser = await getQuery(
+      "SELECT id FROM users WHERE email = ?",
+      [cleanedRow.email]
+    );
+
+    if (existingUser) {
+      preview.duplicateRows++;
+
+      preview.invalidRecords.push({
+        row: rowNumber,
+        name: cleanedRow.name,
+        email: cleanedRow.email,
+        errors: ["Email already belongs to a registered member"],
       });
 
       continue;
@@ -274,10 +330,18 @@ async function buildPreview(rawRows) {
     preview.validRows++;
 
     preview.validRecords.push({
-      name: cleanedRow.name,
-      email: cleanedRow.email,
-      phone: cleanedRow.phone,
-      joined: cleanedRow.joined,
+      name:          cleanedRow.name,
+      email:         cleanedRow.email,
+      phone:         cleanedRow.phone,
+      joined:        cleanedRow.joined,
+      gender:        cleanedRow.gender,
+      cnic:          cleanedRow.cnic,
+      qualification: cleanedRow.qualification,
+      degree_date:   cleanedRow.degree_date,
+      province:      cleanedRow.province,
+      university:    cleanedRow.university,
+      department:    cleanedRow.department,
+      designation:   cleanedRow.designation,
       _originalRow: rawRow,
     });
   }
@@ -356,10 +420,18 @@ router.post(
       for (let index = 0; index < validRecords.length; index++) {
         const rowNumber = index + 1;
         const cleanedRow = {
-          name: cleanText(validRecords[index].name),
-          email: cleanEmail(validRecords[index].email),
-          phone: cleanText(validRecords[index].phone),
-          joined: cleanText(validRecords[index].joined),
+          name:          cleanText(validRecords[index].name),
+          email:         cleanEmail(validRecords[index].email),
+          phone:         cleanText(validRecords[index].phone),
+          joined:        cleanText(validRecords[index].joined),
+          gender:        cleanText(validRecords[index].gender),
+          cnic:          cleanText(validRecords[index].cnic),
+          qualification: cleanText(validRecords[index].qualification),
+          degree_date:   cleanText(validRecords[index].degree_date),
+          province:      cleanText(validRecords[index].province),
+          university:    cleanText(validRecords[index].university),
+          department:    cleanText(validRecords[index].department),
+          designation:   cleanText(validRecords[index].designation),
         };
 
         const validationErrors = validateRow(cleanedRow);
@@ -392,44 +464,77 @@ router.post(
 
         emailsInsideRequest.add(cleanedRow.email);
 
-        const existingMember = await getQuery(
+        const existingImported = await getQuery(
           "SELECT id FROM imported_members WHERE email = ?",
           [cleanedRow.email]
         );
 
-        if (existingMember) {
+        if (existingImported) {
           summary.duplicateRows++;
 
           summary.failedRows.push({
             row: rowNumber,
             name: cleanedRow.name,
             email: cleanedRow.email,
-            errors: ["Duplicate email already exists in database"],
+            errors: ["Email already exists in imported members"],
+          });
+
+          continue;
+        }
+
+        const existingUser = await getQuery(
+          "SELECT id FROM users WHERE email = ?",
+          [cleanedRow.email]
+        );
+
+        if (existingUser) {
+          summary.duplicateRows++;
+
+          summary.failedRows.push({
+            row: rowNumber,
+            name: cleanedRow.name,
+            email: cleanedRow.email,
+            errors: ["Email already belongs to a registered member"],
           });
 
           continue;
         }
 
         await runQuery(
-          `
-          INSERT INTO imported_members (name, email, phone, joined)
-          VALUES (?, ?, ?, ?)
-          `,
+          `INSERT INTO imported_members
+             (name, email, phone, joined, gender, cnic, qualification, degree_date, province, university, department, designation)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
           [
             cleanedRow.name,
             cleanedRow.email,
             cleanedRow.phone,
             cleanedRow.joined,
+            cleanedRow.gender,
+            cleanedRow.cnic,
+            cleanedRow.qualification,
+            cleanedRow.degree_date,
+            cleanedRow.province,
+            cleanedRow.university,
+            cleanedRow.department,
+            cleanedRow.designation,
           ]
         );
 
         summary.importedRows++;
 
         summary.importedRecords.push({
-          name: cleanedRow.name,
-          email: cleanedRow.email,
-          phone: cleanedRow.phone,
-          joined: cleanedRow.joined,
+          name:          cleanedRow.name,
+          email:         cleanedRow.email,
+          phone:         cleanedRow.phone,
+          joined:        cleanedRow.joined,
+          gender:        cleanedRow.gender,
+          cnic:          cleanedRow.cnic,
+          qualification: cleanedRow.qualification,
+          degree_date:   cleanedRow.degree_date,
+          province:      cleanedRow.province,
+          university:    cleanedRow.university,
+          department:    cleanedRow.department,
+          designation:   cleanedRow.designation,
         });
       }
 
@@ -486,20 +591,31 @@ router.post(
 
       for (const record of preview.validRecords) {
         await runQuery(
-          `
-          INSERT INTO imported_members (name, email, phone, joined)
-          VALUES (?, ?, ?, ?)
-          `,
-          [record.name, record.email, record.phone, record.joined]
+          `INSERT INTO imported_members
+             (name, email, phone, joined, gender, cnic, qualification, degree_date, province, university, department, designation)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          [
+            record.name, record.email, record.phone, record.joined,
+            record.gender, record.cnic, record.qualification, record.degree_date,
+            record.province, record.university, record.department, record.designation,
+          ]
         );
 
         summary.importedRows++;
 
         summary.importedRecords.push({
-          name: record.name,
-          email: record.email,
-          phone: record.phone,
-          joined: record.joined,
+          name:          record.name,
+          email:         record.email,
+          phone:         record.phone,
+          joined:        record.joined,
+          gender:        record.gender,
+          cnic:          record.cnic,
+          qualification: record.qualification,
+          degree_date:   record.degree_date,
+          province:      record.province,
+          university:    record.university,
+          department:    record.department,
+          designation:   record.designation,
         });
       }
 

@@ -71,8 +71,8 @@ const User = {
                   is_active,
                   imported_at AS created_at,
                   phone,
-                  NULL AS gender, NULL AS qualification, NULL AS degree_date, NULL AS cnic,
-                  NULL AS province, NULL AS university, NULL AS department, NULL AS designation,
+                  gender, qualification, degree_date, cnic,
+                  province, university, department, designation,
                   'Imported' AS source
            FROM imported_members
          )

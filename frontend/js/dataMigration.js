@@ -140,7 +140,20 @@ confirmImportBtn.addEventListener("click", async function () {
         "x-user-role": loggedInUser.role,
       },
       body: JSON.stringify({
-        validRecords: previewValidRecords,
+        validRecords: previewValidRecords.map(r => ({
+          name:          r.name,
+          email:         r.email,
+          phone:         r.phone,
+          joined:        r.joined,
+          gender:        r.gender,
+          cnic:          r.cnic,
+          qualification: r.qualification,
+          degree_date:   r.degree_date,
+          province:      r.province,
+          university:    r.university,
+          department:    r.department,
+          designation:   r.designation,
+        })),
       }),
     });
 
@@ -157,7 +170,11 @@ confirmImportBtn.addEventListener("click", async function () {
     previewValidRecords = [];
     previewInvalidRecords = [];
 
-    alert("Import confirmed successfully.");
+    if (data.summary.importedRows > 0) {
+      alert(`Import confirmed. ${data.summary.importedRows} record(s) added successfully.`);
+    } else {
+      alert("Import processed, but no new records were added. All entries may already exist in the database.");
+    }
   } catch (error) {
     alert(error.message);
     setProgress(70);
