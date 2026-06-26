@@ -56,6 +56,36 @@ const User = {
     });
   },
 
+  getAllWithImported() {
+    return new Promise((resolve, reject) => {
+      db.all(
+        `SELECT * FROM (
+           SELECT id, name, email, role, is_active, created_at,
+                  phone, gender, qualification, degree_date, cnic,
+                  province, university, department, designation,
+                  'Registered' AS source
+           FROM users
+           UNION ALL
+           SELECT id, name, email,
+                  role,
+                  is_active,
+                  imported_at AS created_at,
+                  phone,
+                  gender, qualification, degree_date, cnic,
+                  province, university, department, designation,
+                  'Imported' AS source
+           FROM imported_members
+         )
+         ORDER BY CASE WHEN source = 'Registered' THEN 0 ELSE 1 END, id ASC`,
+        [],
+        (err, rows) => {
+          if (err) reject(err);
+          else resolve(rows);
+        }
+      );
+    });
+  },
+
   updateProfile(id, { name, phone, address, gender, qualification, degree_date, cnic, province, university, department, designation }) {
     return new Promise((resolve, reject) => {
       db.run(
@@ -96,6 +126,50 @@ const User = {
           else resolve();
         }
       );
+    });
+  },
+
+  delete(id) {
+    return new Promise((resolve, reject) => {
+      db.run('DELETE FROM users WHERE id = ?', [id], function (err) {
+        if (err) reject(err);
+        else resolve({ changes: this.changes });
+      });
+    });
+  },
+
+  setImportedRole(id, role) {
+    return new Promise((resolve, reject) => {
+      db.run(
+        'UPDATE imported_members SET role = ? WHERE id = ?',
+        [role, id],
+        function (err) {
+          if (err) reject(err);
+          else resolve({ changes: this.changes });
+        }
+      );
+    });
+  },
+
+  setImportedActive(id, isActive) {
+    return new Promise((resolve, reject) => {
+      db.run(
+        'UPDATE imported_members SET is_active = ? WHERE id = ?',
+        [isActive, id],
+        function (err) {
+          if (err) reject(err);
+          else resolve({ changes: this.changes });
+        }
+      );
+    });
+  },
+
+  deleteImported(id) {
+    return new Promise((resolve, reject) => {
+      db.run('DELETE FROM imported_members WHERE id = ?', [id], function (err) {
+        if (err) reject(err);
+        else resolve({ changes: this.changes });
+      });
     });
   },
 

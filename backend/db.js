@@ -239,6 +239,43 @@ db.all("PRAGMA table_info(users)", (err, columns) => {
   });
 });
 
+// S48 — Show imported members in member list
+db.run(`
+  CREATE TABLE IF NOT EXISTS imported_members (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    name        TEXT    NOT NULL,
+    email       TEXT    NOT NULL UNIQUE,
+    phone       TEXT,
+    joined      TEXT,
+    imported_at TEXT    NOT NULL DEFAULT (datetime('now'))
+  )
+`);
+
+// S48 — Add is_active, role, and member-attribute columns to imported_members
+db.all("PRAGMA table_info(imported_members)", (err, columns) => {
+  if (err) return;
+  const importedMembersCols = [
+    { name: 'is_active',      def: 'INTEGER NOT NULL DEFAULT 1' },
+    { name: 'role',           def: "TEXT NOT NULL DEFAULT 'member'" },
+    { name: 'gender',         def: 'TEXT' },
+    { name: 'cnic',           def: 'TEXT' },
+    { name: 'qualification',  def: 'TEXT' },
+    { name: 'degree_date',    def: 'TEXT' },
+    { name: 'province',       def: 'TEXT' },
+    { name: 'university',     def: 'TEXT' },
+    { name: 'department',     def: 'TEXT' },
+    { name: 'designation',    def: 'TEXT' },
+  ];
+  importedMembersCols.forEach(({ name, def }) => {
+    if (!columns.some(c => c.name === name)) {
+      db.run(`ALTER TABLE imported_members ADD COLUMN ${name} ${def}`, err2 => {
+        if (err2) console.error(`Error adding ${name} to imported_members:`, err2.message);
+        else console.log(`✅ ${name} column added to imported_members table`);
+      });
+    }
+  });
+});
+
 // S47 — Password Recovery
 db.run(`
   CREATE TABLE IF NOT EXISTS password_resets (
