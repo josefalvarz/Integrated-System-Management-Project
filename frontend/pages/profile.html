@@ -35,17 +35,9 @@
           <a href="./election.html" class="ims-nav-link admin-only">E-Voting Management</a>
           <a href="./vote.html" class="ims-nav-link member-only">E-Voting</a>
           <a href="./whatsapp.html" class="ims-nav-link admin-only">WhatsApp Analytics</a>
-          <a href="#" class="ims-nav-link">Smart Notifications</a>
-          <a href="#" class="ims-nav-link">Meetings</a>
+          <a href="./notifications.html" class="ims-nav-link">Smart Notifications</a>
+          <a href="./meetings.html" class="ims-nav-link">Meetings</a>
           <a href="./income.html" class="ims-nav-link admin-only">Finance</a>
-        </nav>
-      </div>
-
-      <div class="ims-nav-section admin-only">
-        <p class="ims-section-title">System</p>
-        <nav class="ims-nav">
-          <a href="#" class="ims-nav-link">Settings</a>
-          <a href="#" class="ims-nav-link">Audit Logs</a>
         </nav>
       </div>
 
@@ -94,8 +86,40 @@
               <span class="profile-value" id="viewEmail">—</span>
             </div>
             <div class="profile-field">
-              <span class="profile-label">Phone</span>
+              <span class="profile-label">Mobile Number</span>
               <span class="profile-value" id="viewPhone">—</span>
+            </div>
+            <div class="profile-field">
+              <span class="profile-label">Gender</span>
+              <span class="profile-value" id="viewGender">—</span>
+            </div>
+            <div class="profile-field">
+              <span class="profile-label">CNIC No</span>
+              <span class="profile-value" id="viewCnic">—</span>
+            </div>
+            <div class="profile-field">
+              <span class="profile-label">Qualification</span>
+              <span class="profile-value" id="viewQualification">—</span>
+            </div>
+            <div class="profile-field">
+              <span class="profile-label">Date of Last Degree Completion</span>
+              <span class="profile-value" id="viewDegreeDate">—</span>
+            </div>
+            <div class="profile-field">
+              <span class="profile-label">Province</span>
+              <span class="profile-value" id="viewProvince">—</span>
+            </div>
+            <div class="profile-field">
+              <span class="profile-label">University</span>
+              <span class="profile-value" id="viewUniversity">—</span>
+            </div>
+            <div class="profile-field">
+              <span class="profile-label">Department</span>
+              <span class="profile-value" id="viewDepartment">—</span>
+            </div>
+            <div class="profile-field">
+              <span class="profile-label">Designation</span>
+              <span class="profile-value" id="viewDesignation">—</span>
             </div>
             <div class="profile-field">
               <span class="profile-label">Address</span>
@@ -121,8 +145,46 @@
               <span class="profile-value muted" id="editEmail">—</span>
             </div>
             <div class="profile-field">
-              <span class="profile-label">Phone</span>
-              <input type="text" id="editPhone" placeholder="Phone number" class="profile-input" />
+              <span class="profile-label">Mobile Number</span>
+              <input type="text" id="editPhone" placeholder="Mobile number" class="profile-input" />
+            </div>
+            <div class="profile-field">
+              <span class="profile-label">Gender</span>
+              <select id="editGender" class="profile-input">
+                <option value="">Select gender</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="Other">Other</option>
+                <option value="Prefer not to say">Prefer not to say</option>
+              </select>
+            </div>
+            <div class="profile-field">
+              <span class="profile-label">CNIC No</span>
+              <input type="text" id="editCnic" placeholder="e.g. 12345-6789012-3" class="profile-input" />
+            </div>
+            <div class="profile-field">
+              <span class="profile-label">Qualification</span>
+              <input type="text" id="editQualification" placeholder="e.g. PhD, MS, BS" class="profile-input" />
+            </div>
+            <div class="profile-field">
+              <span class="profile-label">Date of Last Degree Completion</span>
+              <input type="date" id="editDegreeDate" class="profile-input" />
+            </div>
+            <div class="profile-field">
+              <span class="profile-label">Province</span>
+              <input type="text" id="editProvince" placeholder="Province" class="profile-input" />
+            </div>
+            <div class="profile-field">
+              <span class="profile-label">University</span>
+              <input type="text" id="editUniversity" placeholder="University" class="profile-input" />
+            </div>
+            <div class="profile-field">
+              <span class="profile-label">Department</span>
+              <input type="text" id="editDepartment" placeholder="Department" class="profile-input" />
+            </div>
+            <div class="profile-field">
+              <span class="profile-label">Designation</span>
+              <input type="text" id="editDesignation" placeholder="Designation / Job Title" class="profile-input" />
             </div>
             <div class="profile-field">
               <span class="profile-label">Address</span>

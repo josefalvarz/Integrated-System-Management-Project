@@ -9,6 +9,8 @@ const usersRoutes = require('./routes/users');
 const dataMigrationRoutes = require('./routes/dataMigration');
 const profileRoutes = require('./routes/profile');
 const electionRoutes = require('./routes/election');
+const notificationsRoutes = require('./routes/notifications');
+const meetingsRoutes = require('./routes/meetings');
 
 const app = express();
 const PORT = 5500;
@@ -34,6 +36,8 @@ app.use('/api/users', usersRoutes);
 app.use('/api/data-migration', dataMigrationRoutes);
 app.use('/api/profile', profileRoutes);
 app.use('/api/elections', electionRoutes);
+app.use('/api/notifications', notificationsRoutes);
+app.use('/api/meetings', meetingsRoutes);
 
 app.get('/me', (req, res) => {
   if (!req.session.user) {
@@ -47,7 +51,10 @@ app.get('/me', (req, res) => {
 });
 
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, '../frontend/pages/login.html'));
+  if (req.session.user) {
+    return res.redirect('/pages/dashboard.html');
+  }
+  res.redirect('/pages/register.html');
 });
 
 app.listen(PORT, () => {

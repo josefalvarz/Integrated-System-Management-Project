@@ -140,7 +140,20 @@ confirmImportBtn.addEventListener("click", async function () {
         "x-user-role": loggedInUser.role,
       },
       body: JSON.stringify({
-        validRecords: previewValidRecords,
+        validRecords: previewValidRecords.map(r => ({
+          name:          r.name,
+          email:         r.email,
+          phone:         r.phone,
+          joined:        r.joined,
+          gender:        r.gender,
+          cnic:          r.cnic,
+          qualification: r.qualification,
+          degree_date:   r.degree_date,
+          province:      r.province,
+          university:    r.university,
+          department:    r.department,
+          designation:   r.designation,
+        })),
       }),
     });
 
@@ -157,7 +170,11 @@ confirmImportBtn.addEventListener("click", async function () {
     previewValidRecords = [];
     previewInvalidRecords = [];
 
-    alert("Import confirmed successfully.");
+    if (data.summary.importedRows > 0) {
+      alert(`Import confirmed. ${data.summary.importedRows} record(s) added successfully.`);
+    } else {
+      alert("Import processed, but no new records were added. All entries may already exist in the database.");
+    }
   } catch (error) {
     alert(error.message);
     setProgress(70);
@@ -210,7 +227,7 @@ function updatePreview(preview) {
   duplicateRowsElement.textContent = preview.duplicateRows;
 
   renderIssues(preview.invalidRecords);
-  renderValidPreview(preview.validRecords);
+  renderValidPreview(preview.validRecords, preview.columns || []);
   renderInvalidPreview(preview.invalidRecords);
 
   previewSection.classList.remove("hidden");
@@ -252,13 +269,25 @@ function renderIssues(failedRows) {
   });
 }
 
-function renderValidPreview(validRecords) {
+function renderValidPreview(validRecords, columns) {
   validPreviewTableBody.innerHTML = "";
+
+  // Build headers dynamically from CSV columns
+  const thead = document.getElementById("validPreviewTableHead");
+  const effectiveCols = columns && columns.length > 0
+    ? columns
+    : ["name", "email", "phone", "joined"];
+
+  if (thead) {
+    thead.innerHTML = "<tr>" +
+      effectiveCols.map(col => `<th>${escapeHtml(col)}</th>`).join("") +
+      "</tr>";
+  }
 
   if (!validRecords || validRecords.length === 0) {
     validPreviewTableBody.innerHTML = `
       <tr>
-        <td colspan="4">No valid records found.</td>
+        <td colspan="${effectiveCols.length}">No valid records found.</td>
       </tr>
     `;
     validPreviewNote.textContent = "";
@@ -268,14 +297,14 @@ function renderValidPreview(validRecords) {
   const rowsHtml = validRecords
     .slice(0, 20)
     .map(function (record) {
-      return `
-        <tr>
-          <td>${escapeHtml(record.name)}</td>
-          <td>${escapeHtml(record.email)}</td>
-          <td>${escapeHtml(record.phone || "-")}</td>
-          <td>${escapeHtml(record.joined || "-")}</td>
-        </tr>
-      `;
+      const original = record._originalRow || {};
+      const cells = effectiveCols.map(function (col) {
+        const val = original[col] !== undefined && original[col] !== ""
+          ? original[col]
+          : (record[col.toLowerCase()] || "");
+        return `<td>${escapeHtml(val || "-")}</td>`;
+      }).join("");
+      return `<tr>${cells}</tr>`;
     })
     .join("");
 

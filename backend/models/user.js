@@ -43,7 +43,10 @@ const User = {
   getAll() {
     return new Promise((resolve, reject) => {
       db.all(
-        'SELECT id, name, email, role, is_active, created_at FROM users ORDER BY id ASC',
+        `SELECT id, name, email, role, is_active, created_at,
+                phone, gender, qualification, degree_date, cnic,
+                province, university, department, designation
+         FROM users ORDER BY id ASC`,
         [],
         (err, rows) => {
           if (err) reject(err);
@@ -53,11 +56,45 @@ const User = {
     });
   },
 
-  updateProfile(id, { name, phone, address }) {
+  getAllWithImported() {
+    return new Promise((resolve, reject) => {
+      db.all(
+        `SELECT * FROM (
+           SELECT id, name, email, role, is_active, created_at,
+                  phone, gender, qualification, degree_date, cnic,
+                  province, university, department, designation,
+                  'Registered' AS source
+           FROM users
+           UNION ALL
+           SELECT id, name, email,
+                  role,
+                  is_active,
+                  imported_at AS created_at,
+                  phone,
+                  gender, qualification, degree_date, cnic,
+                  province, university, department, designation,
+                  'Imported' AS source
+           FROM imported_members
+         )
+         ORDER BY CASE WHEN source = 'Registered' THEN 0 ELSE 1 END, id ASC`,
+        [],
+        (err, rows) => {
+          if (err) reject(err);
+          else resolve(rows);
+        }
+      );
+    });
+  },
+
+  updateProfile(id, { name, phone, address, gender, qualification, degree_date, cnic, province, university, department, designation }) {
     return new Promise((resolve, reject) => {
       db.run(
-        'UPDATE users SET name = ?, phone = ?, address = ? WHERE id = ?',
-        [name, phone, address, id],
+        `UPDATE users SET
+           name = ?, phone = ?, address = ?,
+           gender = ?, qualification = ?, degree_date = ?, cnic = ?,
+           province = ?, university = ?, department = ?, designation = ?
+         WHERE id = ?`,
+        [name, phone, address, gender, qualification, degree_date, cnic, province, university, department, designation, id],
         function (err) {
           if (err) reject(err);
           else resolve();
@@ -84,6 +121,63 @@ const User = {
       db.run(
         'UPDATE users SET is_active = ? WHERE id = ?',
         [isActive, id],
+        function (err) {
+          if (err) reject(err);
+          else resolve();
+        }
+      );
+    });
+  },
+
+  delete(id) {
+    return new Promise((resolve, reject) => {
+      db.run('DELETE FROM users WHERE id = ?', [id], function (err) {
+        if (err) reject(err);
+        else resolve({ changes: this.changes });
+      });
+    });
+  },
+
+  setImportedRole(id, role) {
+    return new Promise((resolve, reject) => {
+      db.run(
+        'UPDATE imported_members SET role = ? WHERE id = ?',
+        [role, id],
+        function (err) {
+          if (err) reject(err);
+          else resolve({ changes: this.changes });
+        }
+      );
+    });
+  },
+
+  setImportedActive(id, isActive) {
+    return new Promise((resolve, reject) => {
+      db.run(
+        'UPDATE imported_members SET is_active = ? WHERE id = ?',
+        [isActive, id],
+        function (err) {
+          if (err) reject(err);
+          else resolve({ changes: this.changes });
+        }
+      );
+    });
+  },
+
+  deleteImported(id) {
+    return new Promise((resolve, reject) => {
+      db.run('DELETE FROM imported_members WHERE id = ?', [id], function (err) {
+        if (err) reject(err);
+        else resolve({ changes: this.changes });
+      });
+    });
+  },
+
+  updatePassword(email, hashedPassword) {
+    return new Promise((resolve, reject) => {
+      db.run(
+        'UPDATE users SET password = ? WHERE email = ?',
+        [hashedPassword, email],
         function (err) {
           if (err) reject(err);
           else resolve();
